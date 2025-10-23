@@ -10,19 +10,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
-@EnableWebSecurity // Le dice a Spring que esta es nuestra configuración de seguridad
+@EnableWebSecurity
 public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        // Usa BCrypt, el estándar moderno para cifrado de contraseñas
         return new BCryptPasswordEncoder();
     }
 
-    /**
-     * ¡AQUÍ ESTÁ LA MAGIA!
-     * Este Bean configura las reglas de seguridad de HTTP.
-     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -33,16 +28,19 @@ public class SecurityConfig {
             .authorizeHttpRequests(authz -> authz
                 
                 // 3. Permitir acceso PÚBLICO a nuestra página de login y sus archivos
-                .requestMatchers("/", "/index.html", "/css/style.css", "/js/login.js",
-                    "/admin.html", "/cajero.html", "/mesero.html", "/cocinero.html"
+                .requestMatchers(
+                    "/", "/index.html", "/css/style.css", "/js/login.js",
+                    "/admin.html", "/cajero.html", "/mesero.html", "/cocinero.html",
+                    "/gestion-usuarios.html", "/js/gestion-usuarios.js" // <-- AÑADIDOS
                 ).permitAll()
                 
                 // 4. Permitir acceso PÚBLICO a nuestro endpoint de API de login
                 .requestMatchers("/api/auth/login").permitAll()
 
                 // 5. Permitir la creación de usuarios (POST) sin estar logueado
-                // (Esto permite usar Postman como en la Opción A)
-                .requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll()
+                // 5. Permitir TODAS las operaciones CRUD en /api/usuarios
+                // Esto permite GET (leer), POST (crear), PUT (editar) y DELETE (eliminar)
+                .requestMatchers("/api/usuarios/**").permitAll()
                 
                 // 6. Para CUALQUIER OTRA petición (ej. /admin.html), se debe estar autenticado
                 .anyRequest().authenticated()

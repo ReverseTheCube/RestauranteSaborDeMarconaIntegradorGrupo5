@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Usuarios</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <div class="gestion-container">
+        <div class="gestion-header">
+            <h2>Gestión de Usuarios</h2>
+            <a href="/admin.html" class="btn-back">⬅</a>
+        </div>
+
+        <div class="gestion-form-container">
+            <form id="form-crear-usuario">
+                <h3>Crear Usuario</h3>
+                <label for="crear-rol">Rol:</label>
+                <select id="crear-rol" required>
+                    <option value="ADMINISTRADOR">ADMINISTRADOR</option>
+                    <option value="CAJERO">CAJERO</option>
+                    <option value="MESERO">MESERO</option>
+                    <option value="COCINERO">COCINERO</option>
+                </select>
+
+                <label for="crear-usuario">Usuario:</label>
+                <input type="text" id="crear-usuario" required>
+
+                <label for="crear-contrasena">Contraseña:</label>
+                <input type="password" id="crear-contrasena" required>
+
+                <button type="submit" class="btn btn-form-crear">Ingresar usuario</button>
+            </form>
+        </div>
+
+        <div class="gestion-lista-container">
+            <h3>Usuarios existentes</h3>
+            <table id="tabla-usuarios">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>ROL</th>
+                        <th>USUARIO</th>
+                        <th>CONTRASEÑA</th>
+                        <th>ACCIONES</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="modal-editar" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" id="close-modal-editar">&times;</span>
+            <form id="form-editar-usuario">
+                <h3>Edición de Usuario</h3>
+                <input type="hidden" id="editar-id"> <label for="editar-rol">Rol:</label>
+                <select id="editar-rol" required>
+                    <option value="ADMINISTRADOR">ADMINISTRADOR</option>
+                    <option value="CAJERO">CAJERO</option>
+                    <option value="MESERO">MESERO</option>
+                    <option value="COCINERO">COCINERO</option>
+                </select>
+
+                <label for="editar-usuario">Usuario:</label>
+                <input type="text" id="editar-usuario" required>
+
+                <label for="editar-contrasena">Contraseña:</label>
+                <input type="password" id="editar-contrasena" placeholder="(Dejar en blanco para no cambiar)">
+
+                <div class="modal-botones">
+                    <button type="button" id="btn-descartar" class="btn btn-menu-admin-eliminar">Descartar cambios</button>
+                    <button type="submit" class="btn btn-form-crear">Confirmar cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-eliminar" class="modal">
+        <div class="modal-content">
+            <h3>¿Está seguro de eliminar al usuario?</h3>
+            <p id="eliminar-texto-usuario"></p>
+            <div class="modal-botones">
+                <button type="button" id="btn-eliminar-no" class="btn btn-form-crear">No</button>
+                <button type="button" id="btn-eliminar-si" class="btn btn-menu-admin-eliminar">Sí</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/gestion-usuarios.js"></script>
+</body>
+</html>

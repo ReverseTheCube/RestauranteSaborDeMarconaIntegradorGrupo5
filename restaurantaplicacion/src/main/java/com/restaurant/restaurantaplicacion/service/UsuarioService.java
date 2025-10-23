@@ -29,9 +29,7 @@ public class UsuarioService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    /**
-     * Lógica de Login
-     */
+    
     public LoginResponse login(LoginRequest loginRequest) {
         Optional<Usuario> optUsuario = usuarioRepository.findByUsuario(loginRequest.getUsuario());
 

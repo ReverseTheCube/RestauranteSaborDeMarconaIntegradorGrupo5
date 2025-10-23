@@ -194,3 +194,231 @@ body {
 .btn-menu-cocinero {
     background-color: var(--color-btn-cocinero);
 }
+
+/* --- (NUEVO) ESTILOS GESTIÓN DE USUARIOS --- */
+
+/* Contenedor principal de la página */
+.gestion-container {
+    background-color: var(--color-form);
+    padding: 2rem;
+    border-radius: 10px;
+    color: var(--color-texto);
+    width: 90%; /* Más ancho */
+    max-width: 1200px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    display: grid; /* Usamos Grid para las columnas */
+    grid-template-columns: 300px 1fr; /* Columna 1 fija, Columna 2 flexible */
+    grid-template-rows: auto 1fr; /* Fila 1 auto, Fila 2 flexible */
+    grid-template-areas:
+        "header header"
+        "form   lista";
+    gap: 2rem;
+}
+
+/* Encabezado (Título y botón volver) */
+.gestion-header {
+    grid-area: header;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid var(--color-fondo);
+    padding-bottom: 1rem;
+}
+
+.gestion-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.btn-back {
+    font-size: 2rem;
+    text-decoration: none;
+    color: white;
+    padding: 0 1rem;
+}
+
+/* Columna Izquierda (Formulario) */
+.gestion-form-container {
+    grid-area: form;
+    background-color: var(--color-btn-admin); /* Fondo morado como en figma */
+    padding: 1.5rem;
+    border-radius: 8px;
+}
+
+.gestion-form-container form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.gestion-form-container h3 {
+    margin-top: 0;
+    text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,0.5);
+    padding-bottom: 0.5rem;
+}
+
+.gestion-form-container label {
+    font-weight: bold;
+}
+
+.gestion-form-container input,
+.gestion-form-container select {
+    padding: 0.6rem;
+    border-radius: 5px;
+    border: none;
+    font-size: 1rem;
+}
+
+.btn-form-crear {
+    background-color: var(--color-btn-cajero); /* Verde */
+    color: white;
+    padding: 0.8rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    margin-top: 1rem;
+}
+
+/* Columna Derecha (Tabla) */
+.gestion-lista-container {
+    grid-area: lista;
+    background-color: #34495e; /* Un azul/gris oscuro */
+    padding: 1.5rem;
+    border-radius: 8px;
+    overflow-y: auto; /* Scroll si la tabla es muy larga */
+}
+
+.gestion-lista-container h3 {
+    margin-top: 0;
+    text-align: center;
+}
+
+#tabla-usuarios {
+    width: 100%;
+    border-collapse: collapse; /* Bordes unidos */
+}
+
+#tabla-usuarios th,
+#tabla-usuarios td {
+    padding: 0.8rem;
+    text-align: left;
+    border-bottom: 1px solid #7f8c8d;
+}
+
+#tabla-usuarios th {
+    background-color: var(--color-fondo);
+    color: var(--color-form);
+}
+
+.acciones {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-accion-editar,
+.btn-accion-eliminar {
+    padding: 0.4rem 0.8rem;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+}
+.btn-accion-editar {
+    background-color: var(--color-btn-mesero); /* Azul */
+}
+.btn-accion-eliminar {
+    background-color: var(--color-btn-logout); /* Rojo */
+}
+
+/* Estilos de botones (colores figma) */
+.btn-menu-admin-eliminar {
+    background-color: var(--color-btn-logout); /* Rojo */
+    color: white;
+    padding: 0.8rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+
+/* --- (NUEVO) ESTILOS MODALES (Pop-ups) --- */
+.modal {
+    display: none; /* Oculto por defecto */
+    position: fixed; /* Quedarse fijo en la pantalla */
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.6); /* Fondo negro semitransparente */
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.modal-content {
+    background-color: var(--color-btn-admin); /* Morado como el formulario */
+    color: white;
+    padding: 2rem;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 450px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+    position: relative;
+    border: 5px solid var(--color-box-yellow-border);
+}
+
+.close-modal {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+}
+
+.close-modal:hover,
+.close-modal:focus {
+    color: white;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.modal-content h3 {
+    margin-top: 0;
+    text-align: center;
+}
+
+.modal-content form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+.modal-content label {
+    font-weight: bold;
+}
+.modal-content input,
+.modal-content select {
+    padding: 0.8rem;
+    border-radius: 5px;
+    border: none;
+    font-size: 1rem;
+}
+
+.modal-botones {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 2rem;
+    gap: 1rem;
+}
+
+.modal-botones button {
+    width: 45%;
+    margin-top: 0;
+}
