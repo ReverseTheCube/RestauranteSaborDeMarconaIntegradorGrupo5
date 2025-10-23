@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Sabor de Marcona</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="login-container">
+        <form id="login-form">
+            <h2>"Bienvenido al Restaurant<br>El Sabor de Marcona"</h2>
+            
+            <label for="usuario">Usuario:</label>
+            <input type="text" id="usuario" name="usuario" required>
+            
+            <label for="contrasena">Contraseña:</label>
+            <input type="password" id="contrasena" name="contrasena" required>
+
+            <div id="error-message" class="error-text">Usuario o contraseña incorrecto</div>
+            
+            <button type="button" id="btn-problemas" class="btn-secondary">¿Problemas con iniciar sesión?</button>
+            <button type="submit" id="btn-login" class="btn-primary">Login</button>
+        </form>
+
+        <div id="problemas-box" class="info-box-yellow">
+            <h3>Comunicarse a este número:</h3>
+            <p>XXX-XXX-XXX</p>
+            <button type="button" id="btn-problemas-volver" class="btn-primary">Login</button>
+        </div>
+
+        <div id="bloqueado-box" class="info-box-red">
+            <p>Se detectaron demasiados intentos de acceso.<br>
+            Se ha bloqueado el acceso durante 5 minutos</p>
+        </div>
+    </div>
+
+    <script src="login.js"></script>
+</body>
+</html>

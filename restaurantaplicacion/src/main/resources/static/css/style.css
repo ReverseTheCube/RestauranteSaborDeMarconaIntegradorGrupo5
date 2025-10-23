@@ -1,0 +1,124 @@
+/* Paleta de colores basada en tu Figma */
+:root {
+    --color-fondo: #e89f41; /* Naranja/Ocre de fondo */
+    --color-form: #1a2a40;   /* Azul oscuro/Negro del formulario */
+    --color-texto: #ffffff;  /* Texto principal blanco */
+    --color-input: #ffffff;  /* Fondo de inputs */
+    --color-btn-primary: #8a4d1d; /* Marrón del botón Login */
+    --color-btn-secondary: #d4a770; /* Beige/Dorado botón "Problemas" */
+    --color-error: #ff0000;   /* Rojo para errores */
+    --color-box-red: #d9534f; /* Rojo del cuadro de bloqueo */
+    --color-box-yellow: #f0ad4e; /* Amarillo/Tan del cuadro "Problemas" */
+    --color-box-yellow-border: #eea236;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: var(--color-fondo);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.login-container {
+    background-color: var(--color-form);
+    padding: 2.5rem;
+    border-radius: 10px;
+    color: var(--color-texto);
+    width: 350px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    position: relative; /* Para posicionar los cuadros de error */
+    overflow: hidden; /* Para ocultar los cuadros */
+}
+
+h2 {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    line-height: 1.5;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    text-align: left;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+input[type="text"],
+input[type="password"] {
+    background-color: var(--color-input);
+    border: none;
+    border-radius: 5px;
+    padding: 0.8rem;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+}
+
+/* Mensajes de error (inicialmente ocultos) */
+.error-text {
+    color: var(--color-error);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    display: none; /* Oculto por defecto */
+}
+
+/* Cajas de info/error (como en figma) */
+.info-box-red,
+.info-box-yellow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 2rem;
+    display: none; /* Oculto por defecto */
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.info-box-red {
+    background-color: var(--color-box-red);
+    color: white;
+}
+
+.info-box-yellow {
+    background-color: var(--color-box-yellow);
+    color: var(--color-form);
+    border: 10px solid var(--color-box-yellow-border);
+}
+
+.info-box-yellow h3 {
+    margin-top: 0;
+}
+
+
+/* Botones */
+.btn-primary,
+.btn-secondary {
+    border: none;
+    border-radius: 5px;
+    padding: 0.8rem;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-top: 0.5rem;
+}
+
+.btn-primary {
+    background-color: var(--color-btn-primary);
+    color: white;
+    font-weight: bold;
+}
+
+.btn-secondary {
+    background-color: var(--color-btn-secondary);
+    color: var(--color-form);
+}
