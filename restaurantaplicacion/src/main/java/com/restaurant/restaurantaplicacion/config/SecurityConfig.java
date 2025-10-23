@@ -33,7 +33,9 @@ public class SecurityConfig {
             .authorizeHttpRequests(authz -> authz
                 
                 // 3. Permitir acceso PÚBLICO a nuestra página de login y sus archivos
-                .requestMatchers("/", "/index.html", "/css/style.css", "/js/login.js").permitAll()
+                .requestMatchers("/", "/index.html", "/css/style.css", "/js/login.js",
+                    "/admin.html", "/cajero.html", "/mesero.html", "/cocinero.html"
+                ).permitAll()
                 
                 // 4. Permitir acceso PÚBLICO a nuestro endpoint de API de login
                 .requestMatchers("/api/auth/login").permitAll()
