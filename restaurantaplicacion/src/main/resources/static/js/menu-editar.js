@@ -14,7 +14,7 @@ async function cargarPlatosEnSelect() {
     try {
         const response = await fetch(API_URL);
         if (!response.ok) throw new Error("Error al cargar platos");
-        
+
         const platos = await response.json();
         platosData = platos; // Guardar datos globalmente
 
@@ -38,7 +38,7 @@ async function cargarPlatosEnSelect() {
 function cargarProducto() {
     const select = document.getElementById('productSelect');
     const productoId = select.value;
-    
+
     // Limpiar formulario si no hay selección
     if (!productoId) {
         document.getElementById('editForm').reset();
@@ -47,7 +47,7 @@ function cargarProducto() {
 
     // Encontrar el plato en los datos guardados
     const producto = platosData.find(p => p.id == productoId);
-    
+
     if (producto) {
         // Llenar los campos con los datos del producto
         document.getElementById('nombre').value = producto.nombre;
@@ -60,7 +60,7 @@ function cargarProducto() {
 // 3. Enviar los cambios a la API (PUT)
 async function actualizarProducto() {
     const productoId = document.getElementById('productSelect').value;
-    
+
     if (!productoId) {
         alert('Por favor, seleccione un producto para editar.');
         return;

@@ -14,7 +14,7 @@ async function cargarPlatosEnSelect() {
     try {
         const response = await fetch(API_URL);
         if (!response.ok) throw new Error("Error al cargar platos");
-        
+
         const platos = await response.json();
         platosData = platos; // Guardar datos globalmente
 
@@ -39,11 +39,11 @@ function cargarProducto() {
     const select = document.getElementById('productSelect');
     const productoId = select.value;
     const productInfo = document.getElementById('productInfo');
-    
+
     // Resetear confirmación
     document.getElementById('confirmacion').checked = false;
     toggleEliminarButton();
-    
+
     if (!productoId) {
         productInfo.style.display = 'none'; // Ocultar cuadro
         return;
@@ -51,14 +51,14 @@ function cargarProducto() {
 
     // Encontrar el plato en los datos guardados
     const producto = platosData.find(p => p.id == productoId);
-    
+
     if (producto) {
         // Llenar información del producto
         document.getElementById('infoNombre').textContent = producto.nombre;
         document.getElementById('infoTipo').textContent = producto.tipo;
         document.getElementById('infoPrecio').textContent = producto.precio.toFixed(2);
         document.getElementById('infoDescripcion').textContent = producto.descripcion;
-        
+
         productInfo.style.display = 'block'; // Mostrar cuadro
     }
 }
@@ -68,30 +68,30 @@ function toggleEliminarButton() {
     const confirmacion = document.getElementById('confirmacion').checked;
     const productoSeleccionado = document.getElementById('productSelect').value;
     const btnEliminar = document.getElementById('btnEliminar');
-    
+
     btnEliminar.disabled = !(confirmacion && productoSeleccionado);
 }
 
 // 4. Enviar la petición de borrado a la API (DELETE)
 async function eliminarProducto() {
     const productoId = document.getElementById('productSelect').value;
-    
+
     if (!productoId) {
         alert('Por favor, seleccione un producto para eliminar.');
         return;
     }
-    
+
     if (!document.getElementById('confirmacion').checked) {
         alert('Debe confirmar la eliminación marcando la casilla.');
         return;
     }
-    
+
     // Encontrar el nombre para el mensaje de confirmación
     const producto = platosData.find(p => p.id == productoId);
-    
+
     // Confirmación final
-    if(confirm(`¿ESTÁ ABSOLUTAMENTE SEGURO de que desea eliminar "${producto.nombre}"?`)) {
-        
+    if(confirm(`¿ESTÁ ABSOLUTamente SEGURO de que desea eliminar "${producto.nombre}"?`)) {
+
         try {
             const response = await fetch(`${API_URL}/${productoId}`, {
                 method: "DELETE"
@@ -99,7 +99,7 @@ async function eliminarProducto() {
 
             if (response.ok) {
                 alert(`Producto "${producto.nombre}" ha sido marcado como INACTIVO exitosamente.`);
-                
+
                 // Limpiar formulario y recargar la lista
                 document.getElementById('deleteForm').reset();
                 productInfo.style.display = 'none';

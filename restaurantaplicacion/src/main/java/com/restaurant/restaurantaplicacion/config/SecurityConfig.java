@@ -30,23 +30,43 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/", "/index.html", "/css/style.css", "/js/login.js",
                     "/admin.html", "/cajero.html", "/mesero.html", "/cocinero.html",
-                    "/gestion-usuarios.html", "/js/gestion-usuarios.js" // <-- AÑADIDOS
+                    "/gestion-usuarios.html", "/js/gestion-usuarios.js",
+
+                    // --- INICIO DE LÍNEAS AÑADIDAS ---
+                    // Tus 4 nuevos HTML
+                    "/menu.html",
+                    "/menu - crear.html",
+                    "/menu - editar.html",
+                    "/menu - eliminar.html",
+                    
+                    // Tu nuevo CSS
+                    "/css/menu-style.css", 
+                    
+                    // Tus 4 nuevos JS
+                    "/js/menu-navegacion.js", 
+                    "/js/menu-crear.js",
+                    "/js/menu-editar.js",
+                    "/js/menu-eliminar.js"
+                    // --- FIN DE LÍNEAS AÑADIDAS ---
+
                 ).permitAll()
                 
                 // 4. Permitir acceso PÚBLICO a nuestro endpoint de API de login
                 .requestMatchers("/api/auth/login").permitAll()
 
-                // 5. Permitir la creación de usuarios (POST) sin estar logueado
                 // 5. Permitir TODAS las operaciones CRUD en /api/usuarios
-                // Esto permite GET (leer), POST (crear), PUT (editar) y DELETE (eliminar)
                 .requestMatchers("/api/usuarios/**").permitAll()
                 
-                // 6. Para CUALQUIER OTRA petición (ej. /admin.html), se debe estar autenticado
+                // --- LÍNEA AÑADIDA ---
+                // 6. Permitir TODAS las operaciones CRUD en /api/platos
+                .requestMatchers("/api/platos/**").permitAll()
+                // ---------------------
+
+                // 7. Para CUALQUIER OTRA petición, se debe estar autenticado
                 .anyRequest().authenticated()
             )
             
-            // 7. Deshabilitar el formulario de login POR DEFECTO de Spring
-            // (Porque ya tenemos el nuestro en index.html)
+            // 8. Deshabilitar el formulario de login POR DEFECTO de Spring
             .formLogin(form -> form.disable()) 
             .httpBasic(basic -> basic.disable());
 
