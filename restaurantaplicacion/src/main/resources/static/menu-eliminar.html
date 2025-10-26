@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eliminar Producto - El Sabor de Marcona</title>
+    <link rel="stylesheet" href="css/menu-style.css"> 
+</head>
+<body>
+    <div class="panel-wrap">
+        <div class="panel">
+            <div class="welcome-title">"Bienvenido al Restaurant</div>
+            <div class="restaurant-name">El Sabor de Marcona"</div>
+            
+            <form id="deleteForm">
+                <div class="form-group">
+                    <label class="form-label">Informacion del producto:</label>
+                    <select class="form-select" id="productSelect" onchange="cargarProducto()">
+                         <option value="">-- Seleccione un producto --</option>
+                        </select>
+                </div>
+                
+                <div class="product-info" id="productInfo" style="display: none;">
+                    <div class="product-detail"><strong>Nombre:</strong> <span id="infoNombre">-</span></div>
+                    <div class="product-detail"><strong>Tipo:</strong> <span id="infoTipo">-</span></div>
+                    <div class="product-detail"><strong>Precio:</strong> S/. <span id="infoPrecio">-</span></div>
+                    <div class="product-detail"><strong>Descripción:</strong> <span id="infoDescripcion">-</span></div>
+                </div>
+                
+                <div class="warning-section">
+                    <div class="warning-title">¿ESTÁ SEGURO DE ELIMINAR ESTE PRODUCTO?</div>
+                    <div class="warning-subtitle">SE PONDRÁ INACTIVO</div>
+                    <div class="warning-message">
+                        El producto no se eliminará permanentemente, sino que se marcará como inactivo.
+                    </div>
+                </div>
+                
+                <div class="confirmation-checkbox">
+                    <input type="checkbox" id="confirmacion" onchange="toggleEliminarButton()">
+                    <label class="checkbox-label" for="confirmacion">Confirmo la eliminación</label>
+                </div>
+                
+                <div class="buttons-container">
+                    <button type="button" class="action-button eliminar" id="btnEliminar" onclick="eliminarProducto()" disabled>
+                        Eliminar
+                    </button>
+                    <button type="button" class="action-button cancelar" onclick="cancelar()">
+                        Cancelar
+                    </button>
+                </div>
+                
+                <button type="button" class="back-button" onclick="volverAtras()">Atras</button>
+            </form>
+        </div>
+    </div>
+    <script src="js/menu-eliminar.js"></script>
+</body>
+</html>
