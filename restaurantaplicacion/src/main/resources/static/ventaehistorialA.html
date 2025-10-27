@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurar Reporte - El Sabor de Marcona</title>
+    <link rel="stylesheet" href="css/historial-style.css">
+</head>
+<body>
+    <div class="panel-wrap">
+        <div class="panel">
+            <div class="welcome-title">"Bienvenido al Restaurant</div>
+            <div class="restaurant-name">El Sabor de Marcona"</div>
+
+            <div class="main-title">CONFIGURAR REPORTE PERIÓDICO</div>
+
+            <div class="config-grid">
+                <div class="config-section">
+                    <div class="section-title">SELECCIONAR PERIODO:</div>
+                    <div class="periodo-options">
+                        <div class="checkbox-item">
+                            <input type="radio" name="periodo" id="diario">
+                            <label for="diario">Diario</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="radio" name="periodo" id="quincenal" checked>
+                            <label for="quincenal">Quincenal</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="radio" name="periodo" id="mensual">
+                            <label for="mensual">Mensual</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="radio" name="periodo" id="fechaReferencia">
+                            <label for="fechaReferencia">Fecha de Referencia:
+                                <input type="date" class="date-input" id="fechaInput">
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="config-section">
+                    <div class="section-title">CONFIGURAR FORMATO:</div>
+                    <div class="formato-options">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="graficos" checked>
+                            <label for="graficos">Incluir gráficos</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="resumen" checked>
+                            <label for="resumen">Incluir resumen</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="detallados">
+                            <label for="detallados">Datos detallados</label>
+                        </div>
+                    </div>
+
+                    <div class="sub-section">
+                        <div class="sub-section-title">Tipo de Archivo</div>
+                        <div class="tipo-archivo-options">
+                            <div class="checkbox-item">
+                                <input type="radio" name="tipoArchivo" id="tipoPdf">
+                                <label for="tipoPdf">PDF</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="radio" name="tipoArchivo" id="tipoExcel">
+                                <label for="tipoExcel">Excel</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="buttons-container">
+                <button class="action-button back" id="backButton">Atras</button>
+                <button class="action-button generate" id="generateButton">Generar Reporte</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/historial-ventaA.js"></script>
+</body>
+</html>

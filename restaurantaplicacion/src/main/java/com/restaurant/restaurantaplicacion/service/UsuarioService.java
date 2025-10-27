@@ -3,7 +3,6 @@ package com.restaurant.restaurantaplicacion.service;
 import com.restaurant.restaurantaplicacion.dto.CrearUsuarioRequest;
 import com.restaurant.restaurantaplicacion.dto.LoginRequest;
 import com.restaurant.restaurantaplicacion.dto.LoginResponse;
-import com.restaurant.restaurantaplicacion.model.Rol;
 import com.restaurant.restaurantaplicacion.model.Usuario;
 import com.restaurant.restaurantaplicacion.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Búsqueda con Filtros - El Sabor de Marcona</title>
+    <link rel="stylesheet" href="css/historial-style.css">
+</head>
+<body>
+    <div class="panel-wrap">
+        <div class="panel">
+            <div class="welcome-title">"Bienvenido al Restaurant</div>
+            <div class="restaurant-name">El Sabor de Marcona"</div>
+
+            <div class="main-title">BÚSQUEDA CON FILTROS</div>
+
+            <div class="config-section">
+                <div class="section-title">FILTROS PRINCIPALES:</div>
+                <div class="filters-grid">
+                    <div class="filter-group">
+                        <div class="filter-item">
+                            <label class="filter-label">EMPRESA:</label>
+                            <select id="empresa">
+                                <option value="">Seleccionar</option>
+                                <option value="marcona_delivery">Marcona Delivery S.A.</option>
+                                <option value="sabores_andinos">Sabores Andinos E.I.R.L.</option>
+                            </select>
+                        </div>
+                        <div class="filter-item">
+                            <label class="filter-label">CLIENTE:</label>
+                            <input type="text" id="cliente" placeholder="nombre del cliente" value="Jeanpier">
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <div class="filter-item">
+                            <label class="filter-label">FECHA:</label>
+                            <div class="date-range">
+                                <input type="date" id="fechaDesde">
+                                <span class="date-separator">-</span>
+                                <input type="date" id="fechaHasta">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="config-section">
+                <div class="section-title">FILTROS ADICIONALES:</div>
+                <div class="filters-grid">
+                    <div class="filter-group">
+                        <div class="filter-item">
+                            <label class="filter-label">LOCAL:</label>
+                            <select id="local">
+                                <option value="">Seleccionar</option>
+                                <option value="mesa1">Mesa 1</option>
+                                <option value="mesa2">Mesa 2</option>
+                                <option value="mesa3">Mesa 3</option>
+                                <option value="mesa4">Mesa 4</option>
+                                <option value="mesa5">Mesa 5</option>
+                                <option value="mesa6">Mesa 6</option>
+                                <option value="mesa7">Mesa 7</option>
+                                <option value="mesa8">Mesa 8</option>
+                                <option value="mesa9">Mesa 9</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <div class="filter-item">
+                            <label class="filter-label">DELIVERY:</label>
+                            <input type="text" id="delivery" placeholder="Código de pedido">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="config-section">
+                <div class="section-title">OPCIONES DE VISUALIZACIÓN:</div>
+                <div class="radio-group">
+                    <div class="radio-item">
+                        <input type="radio" name="visualizacion" id="tabla" checked>
+                        <label for="tabla">Ver en tabla</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="buttons-container">
+                <button class="action-button search" onclick="buscar()">Buscar</button>
+                <button class="action-button clear" onclick="limpiarFiltros()">Limpiar Filtro</button>
+            </div>
+
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="action-button back" onclick="volverAtras()">Atras</button>
+            </div>
+
+            <div class="results-section" id="resultadosSection">
+                <div class="main-title">RESULTADOS DE BÚSQUEDA</div>
+
+                <div class="results-info">
+                    <div>• <span id="numRegistros">0</span> registros encontrados</div>
+                    <div>• Consulta: <span id="rangoFechas"></span></div>
+                </div>
+
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            <th>EMPRESA</th>
+                            <th>CLIENTE</th>
+                            <th>FECHA</th>
+                            <th>MONTO</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaResultadosBody">
+                        </tbody>
+                </table>
+
+                <div class="pagination" id="paginacion">
+                    </div>
+
+                <div class="results-buttons">
+                    <button class="action-button search" onclick="mostrarOpcionesDescarga()">Descargar Resultado</button>
+                    <button class="action-button clear" onclick="nuevaBusqueda()">Nueva Busqueda</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="download-modal" id="downloadModal">
+        <div class="download-content">
+            <div class="section-title">FORMATO DE DESCARGA</div>
+
+            <div class="download-options">
+                <div class="download-option" onclick="seleccionarFormato('pdf')">
+                    <div class="option-title">📄 Formato PDF</div>
+                    <div class="option-desc">Documento listo para imprimir y compartir</div>
+                    <div class="watermark-option" id="watermarkOption" style="display: none;">
+                        <input type="checkbox" id="marcaAgua">
+                        <label for="marcaAgua">Incluir marca de agua "CONFIDENCIAL"</label>
+                    </div>
+                </div>
+
+                <div class="download-option" onclick="seleccionarFormato('excel')">
+                    <div class="option-title">📊 Formato Excel</div>
+                    <div class="option-desc">Archivo editable para análisis de datos</div>
+                </div>
+            </div>
+
+            <div class="buttons-container">
+                <button class="action-button search" onclick="descargarResultados()" id="btnDescargar" disabled>
+                    Descargar
+                </button>
+                <button class="action-button clear" onclick="cerrarModal()">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/historial-busqueda.js"></script>
+</body>
+</html>
