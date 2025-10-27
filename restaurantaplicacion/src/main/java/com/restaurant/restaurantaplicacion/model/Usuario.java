@@ -23,7 +23,7 @@ public class Usuario {
     @Column(nullable = false)
     private Rol rol;
 
-    // Campos para la lógica de bloqueo (visto en image_e1a1f6.png)
+    // Campos para la lógica de bloqueo 
     private int intentosFallidos = 0;
     private boolean cuentaBloqueada = false;
     private LocalDateTime tiempoBloqueo;
