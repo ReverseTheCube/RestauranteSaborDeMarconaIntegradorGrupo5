@@ -32,22 +32,20 @@ public class SecurityConfig {
                     "/admin.html", "/cajero.html", "/mesero.html", "/cocinero.html",
                     "/gestion-usuarios.html", "/js/gestion-usuarios.js",
 
-                    // --- INICIO DE LÍNEAS AÑADIDAS ---
+                    // --- MENU ---
                     // Tus 4 nuevos HTML
                     "/menu.html",
                     "/menu - crear.html",
                     "/menu - editar.html",
                     "/menu - eliminar.html",
-                    
                     // Tu nuevo CSS
                     "/css/menu-style.css", 
-                    
                     // Tus 4 nuevos JS
                     "/js/menu-navegacion.js", 
                     "/js/menu-crear.js",
                     "/js/menu-editar.js",
                     "/js/menu-eliminar.js"
-                    // --- FIN DE LÍNEAS AÑADIDAS ---
+                   
 
                 ).permitAll()
                 
@@ -61,7 +59,9 @@ public class SecurityConfig {
                 // 6. Permitir TODAS las operaciones CRUD en /api/platos
                 .requestMatchers("/api/platos/**").permitAll()
                 // ---------------------
-
+                // --- AÑADIR ESTA LÍNEA ---
+                .requestMatchers("/api/reportes/**").permitAll() 
+    // -------------------------
                 // 7. Para CUALQUIER OTRA petición, se debe estar autenticado
                 .anyRequest().authenticated()
             )

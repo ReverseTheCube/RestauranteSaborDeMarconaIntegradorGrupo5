@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultados - El Sabor de Marcona</title>
+    <link rel="stylesheet" href="css/historial-style.css">
+</head>
+<body>
+    <div class="panel-wrap">
+        <div class="panel">
+            <div class="welcome-title">"Bienvenido al Restaurant</div>
+            <div class="restaurant-name">El Sabor de Marcona"</div>
+
+            <div class="results-container">
+                <div class="result-item">
+                    <span class="result-label">Consulta ejecutada:</span>
+                    <span class="result-value" id="fechaConsulta"></span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Registros procesados:</span>
+                    <span class="result-value" id="registrosProcesados"></span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Archivo:</span>
+                    <span class="result-value">
+                        <div class="file-info">
+                            <span class="file-icon">📄</span>
+                            <span id="nombreArchivo"></span>
+                        </div>
+                    </span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Tamaño:</span>
+                    <span class="result-value" id="tamanoArchivo"></span>
+                </div>
+            </div>
+
+            <div class="action-section">
+                <div class="section-title">Guardar Reporte</div>
+                <div class="action-buttons">
+                    <button class="action-button save" onclick="guardarDispositivo()">
+                        💾 Guardar en dispositivo
+                    </button>
+                </div>
+            </div>
+
+            <div class="action-section">
+                <div class="section-title">Ver en Pantalla</div>
+                <div class="action-buttons">
+                    <button class="action-button view" onclick="visualizarNavegador()">
+                        👁️ Visualizar en navegador
+                    </button>
+                </div>
+            </div>
+
+            <div class="separator"></div>
+
+            <div style="text-align: center;">
+                <button class="action-button new" onclick="nuevoReporte()">
+                    🔄 Nuevo Reporte
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/historial-ventaB.js"></script>
+</body>
+</html>
