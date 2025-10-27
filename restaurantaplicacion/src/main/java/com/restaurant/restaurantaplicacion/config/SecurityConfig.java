@@ -20,54 +20,60 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            // 1. Deshabilitar CSRF (es común para APIs REST/formularios JS)
-            .csrf(csrf -> csrf.disable()) 
-            
-            // 2. Configurar las reglas de autorización de peticiones
-            .authorizeHttpRequests(authz -> authz
-                
-                // 3. Permitir acceso PÚBLICO a nuestra página de login y sus archivos
-                .requestMatchers(
-                    "/", "/index.html", "/css/style.css", "/js/login.js",
-                    "/admin.html", "/cajero.html", "/mesero.html", "/cocinero.html",
-                    "/gestion-usuarios.html", "/js/gestion-usuarios.js",
+            // 1. Deshabilitar CSRF
+            .csrf(csrf -> csrf.disable())
 
-                    // --- MENU ---
-                    // Tus 4 nuevos HTML
+            // 2. Configurar las reglas de autorización
+            .authorizeHttpRequests(authz -> authz
+
+                // 3. Permitir acceso PÚBLICO a páginas estáticas y sus recursos
+                .requestMatchers(
+                    // Login y Generales
+                    "/", "/index.html",
+                    "/css/style.css", "/js/login.js",
+                    // Menús de Rol
+                    "/admin.html", "/cajero.html", "/mesero.html", "/cocinero.html",
+                    // Gestión Usuarios
+                    "/gestion-usuarios.html", "/js/gestion-usuarios.js",
+                    // Gestión Menú (Platos)
                     "/menu.html",
                     "/menu - crear.html",
                     "/menu - editar.html",
                     "/menu - eliminar.html",
-                    // Tu nuevo CSS
-                    "/css/menu-style.css", 
-                    // Tus 4 nuevos JS
-                    "/js/menu-navegacion.js", 
+                    "/css/menu-style.css",
+                    "/js/menu-navegacion.js",
                     "/js/menu-crear.js",
                     "/js/menu-editar.js",
-                    "/js/menu-eliminar.js"
-                   
+                    "/js/menu-eliminar.js",
+                    // Historial/Reportes
+                    "/busquedafiltro.html",
+                    "/ventaehistorial.html",
+                    "/ventaehistorialA.html",
+                    "/ventaehistorialB.html",
+                    "/css/historial-style.css",
+                    "/js/historial-busqueda.js",
+                    "/js/historial-venta.js",
+                    "/js/historial-ventaA.js",
+                    "/js/historial-ventaB.js"
 
-                ).permitAll()
-                
-                // 4. Permitir acceso PÚBLICO a nuestro endpoint de API de login
-                .requestMatchers("/api/auth/login").permitAll()
+                ).permitAll() // Permite acceso a todo lo listado arriba
 
-                // 5. Permitir TODAS las operaciones CRUD en /api/usuarios
-                .requestMatchers("/api/usuarios/**").permitAll()
-                
-                // --- LÍNEA AÑADIDA ---
-                // 6. Permitir TODAS las operaciones CRUD en /api/platos
-                .requestMatchers("/api/platos/**").permitAll()
-                // ---------------------
-                // --- AÑADIR ESTA LÍNEA ---
-                .requestMatchers("/api/reportes/**").permitAll() 
-    // -------------------------
-                // 7. Para CUALQUIER OTRA petición, se debe estar autenticado
+                // 4. Permitir acceso PÚBLICO (o autenticado, si prefieres) a las APIs
+                .requestMatchers("/api/auth/login").permitAll()      // API Login
+                .requestMatchers("/api/usuarios/**").permitAll()   // API Usuarios
+                .requestMatchers("/api/platos/**").permitAll()     // API Platos
+                .requestMatchers("/api/pedidos/**").permitAll()    // API Pedidos
+                .requestMatchers("/api/reportes/**").permitAll()   // API Reportes
+
+                // 5. Para CUALQUIER OTRA petición, se debe estar autenticado
+                // (Si quieres que las APIs requieran login, comenta las líneas .permitAll() de arriba
+                // y descomenta la siguiente línea si es necesario, aunque anyRequest() ya lo cubre)
+                // .requestMatchers("/api/**").authenticated() // Ejemplo si quisieras proteger todas las APIs
                 .anyRequest().authenticated()
             )
-            
-            // 8. Deshabilitar el formulario de login POR DEFECTO de Spring
-            .formLogin(form -> form.disable()) 
+
+            // 6. Deshabilitar formulario de login por defecto
+            .formLogin(form -> form.disable())
             .httpBasic(basic -> basic.disable());
 
         return http.build();
