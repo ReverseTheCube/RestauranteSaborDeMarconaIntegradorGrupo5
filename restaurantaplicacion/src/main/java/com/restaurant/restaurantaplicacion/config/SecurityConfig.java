@@ -37,9 +37,9 @@ public class SecurityConfig {
                     "/gestion-usuarios.html", "/js/gestion-usuarios.js",
                     // Gestión Menú (Platos)
                     "/menu.html",
-                    "/menu - crear.html",
-                    "/menu - editar.html",
-                    "/menu - eliminar.html",
+                    "/menu-crear.html",
+                    "/menu-editar.html",
+                    "/menu-eliminar.html",
                     "/css/menu-style.css",
                     "/js/menu-navegacion.js",
                     "/js/menu-crear.js",
