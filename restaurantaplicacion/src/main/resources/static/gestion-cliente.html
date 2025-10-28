@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestión de Clientes y Empresas</title>
+  <link rel="stylesheet" href="css/style-cliente.css">
+</head>
+<body>
+
+  <div class="panel">
+    <div class="tabs">
+      <div id="tabClientes" class="tab active" onclick="mostrarSeccion('clientes')">CLIENTES</div>
+      <div id="tabEmpresas" class="tab" onclick="mostrarSeccion('empresas')">EMPRESAS</div>
+    </div>
+
+    <!-- CLIENTES -->
+    <div id="clientes" class="container">
+      <h3>REGISTRO:</h3>
+      <label>• Tipo documento:</label>
+      <select id="tipoDocumento">
+        <option value="">Seleccionar</option>
+        <option value="DNI">DNI</option>
+        <option value="PASAPORTE">PASAPORTE</option>
+      </select>
+
+      <label>• Número Documento:</label>
+      <input type="text" id="numeroDocumento" maxlength="15">
+
+      <label>• Nombres y Apellidos:</label>
+      <input type="text" id="nombresApellidos">
+
+      <button onclick="registrarCliente()">REGISTRAR</button>
+
+      <h3>BUSQUEDA DE CLIENTES:</h3>
+      <label>Número de Documento:</label>
+      <input type="text" id="buscarCliente">
+      <button onclick="buscarCliente()">BUSCAR</button>
+
+      <table id="tablaClientes">
+        <thead>
+          <tr>
+            <th>Tipo Documento</th>
+            <th>Número Documento</th>
+            <th>Nombres y Apellidos</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <div class="actions">
+        <button onclick="retroceder()">ANTERIOR</button>
+      </div>
+    </div>
+
+    <!-- EMPRESAS -->
+    <div id="empresas" class="container hidden">
+      <h3>REGISTRO:</h3>
+      <label>• RUC:</label>
+      <input type="text" id="ruc" maxlength="11">
+
+      <label>• Razón Social:</label>
+      <input type="text" id="razonSocial">
+
+      <button onclick="registrarEmpresa()">REGISTRAR</button>
+
+      <h3>BUSQUEDA:</h3>
+      <label>RUC:</label>
+      <input type="text" id="buscarEmpresa">
+      <button onclick="buscarEmpresa()">BUSCAR</button>
+
+      <table id="tablaEmpresas">
+        <thead>
+          <tr>
+            <th>RUC</th>
+            <th>Razón Social</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <div class="actions">
+        <button onclick="retroceder()">ANTERIOR</button>
+        <button>ASIGNAR TRABAJADOR</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/gestion-clientes.js"></script>
+</body>
+</html>
