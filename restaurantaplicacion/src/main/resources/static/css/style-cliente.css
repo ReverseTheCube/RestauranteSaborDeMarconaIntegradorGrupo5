@@ -1,0 +1,115 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #0f1f33;
+  color: white;
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.panel {
+  width: 40%;
+  min-width: 400px;
+  background-color: #13294b;
+  border-radius: 15px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+}
+
+.tabs {
+  display: flex;
+  background-color: #808080;
+  border-bottom: 3px solid black;
+}
+
+.tab {
+  flex: 1;
+  text-align: center;
+  padding: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  border: 2px solid black;
+  font-size: 16px;
+}
+
+.tab.active {
+  background-color: #0f1f33;
+  color: #ffa94d;
+  border-bottom: none;
+}
+
+.container {
+  padding: 20px;
+}
+
+h3 {
+  color: #ffa94d;
+  margin-top: 15px;
+  text-align: left;
+}
+
+label {
+  font-weight: bold;
+  color: #ffa94d;
+}
+
+input, select {
+  padding: 6px;
+  border-radius: 6px;
+  border: none;
+  background-color: #7a7a7a;
+  color: white;
+  width: 95%;
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+select option {
+  color: black;
+}
+
+button {
+  background-color: #ffa94d;
+  border: none;
+  padding: 8px 15px;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+button:hover {
+  background-color: #ffb957;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  color: black;
+  margin-top: 10px;
+  font-size: 13px;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 6px;
+  text-align: center;
+}
+
+th {
+  background-color: #f0f0f0;
+}
+
+.hidden {
+  display: none;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
