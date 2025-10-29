@@ -30,11 +30,11 @@ public class SecurityConfig {
                 .requestMatchers(
                     // Login y Generales
                     "/", "/index.html",
-                    "/css/style.css", "/js/login.js",
+                    "/css/style.css","/css/style-cliente.css", "/css/style-asignar.css", "/js/login.js",
                     // Menús de Rol
-                    "/admin.html", "/cajero.html", "/mesero.html", "/cocinero.html",
+                    "/admin.html", "/cajero.html", "/gestion-cliente.html", "/gestion-asignar-empresa.html", "/mesero.html", "/cocinero.html",
                     // Gestión Usuarios
-                    "/gestion-usuarios.html", "/js/gestion-usuarios.js",
+                    "/gestion-usuarios.html", "/js/gestion-usuarios.js", "/js/gestion-clientes.js", "/js/gestion-asignar.js",
                     // Gestión Menú (Platos)
                     "/menu.html",
                     "/menu-crear.html",
