@@ -30,11 +30,13 @@ public class SecurityConfig {
                 .requestMatchers(
                     // Login y Generales
                     "/", "/index.html",
-                    "/css/style.css","/css/style-cliente.css", "/css/style-asignar.css", "/js/login.js",
+                    "/css/style.css", "/js/login.js",
                     // Menús de Rol
-                    "/admin.html", "/cajero.html", "/gestion-cliente.html", "/gestion-asignar-empresa.html", "/mesero.html", "/cocinero.html",
+                    "/admin.html", "/cajero.html", "/mesero.html", "/cocinero.html",
                     // Gestión Usuarios
-                    "/gestion-usuarios.html", "/js/gestion-usuarios.js", "/js/gestion-clientes.js", "/js/gestion-asignar.js",
+                    "/gestion-usuarios.html", "/js/gestion-usuarios.js",
+                    // Gestión Clientes
+                    "/gestion-cliente.html", "/css/style-cliente.css", "/js/gestion-clientes.js",
                     // Gestión Menú (Platos)
                     "/menu.html",
                     "/menu-crear.html",
@@ -64,11 +66,10 @@ public class SecurityConfig {
                 .requestMatchers("/api/platos/**").permitAll()     // API Platos
                 .requestMatchers("/api/pedidos/**").permitAll()    // API Pedidos
                 .requestMatchers("/api/reportes/**").permitAll()   // API Reportes
+                .requestMatchers("/api/clientes/**").permitAll()   // API Clientes
+                .requestMatchers("/api/empresas/**").permitAll()   // API Empresas
 
                 // 5. Para CUALQUIER OTRA petición, se debe estar autenticado
-                // (Si quieres que las APIs requieran login, comenta las líneas .permitAll() de arriba
-                // y descomenta la siguiente línea si es necesario, aunque anyRequest() ya lo cubre)
-                // .requestMatchers("/api/**").authenticated() // Ejemplo si quisieras proteger todas las APIs
                 .anyRequest().authenticated()
             )
 
