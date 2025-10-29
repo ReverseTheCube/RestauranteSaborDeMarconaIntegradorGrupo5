@@ -56,7 +56,15 @@ public class SecurityConfig {
                     "/js/historial-busqueda.js",
                     "/js/historial-venta.js",
                     "/js/historial-ventaA.js",
-                    "/js/historial-ventaB.js"
+                    "/js/historial-ventaB.js",
+
+                    //Registrar_Pedidos
+                    "/registrarpedido.html", "/mesa.html","/pedidos.html",
+
+                    // Rutas para los recursos estáticos (CSS, JS, Imágenes)
+                    "/css/**", 
+                    "/js/**", 
+                    "/complementos/imagenes/**"
 
                 ).permitAll() // Permite acceso a todo lo listado arriba
 
