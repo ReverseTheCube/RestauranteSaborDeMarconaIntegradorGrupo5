@@ -112,5 +112,4 @@ function limpiarCamposEmpresas() {
 
 function retroceder() {
   window.location.href = 'admin.html';
-  alert("Error");
 }
