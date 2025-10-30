@@ -7,15 +7,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  
-  <!-- CSS Externo -->
   <link rel="stylesheet" href="/css/pedidos.css"> 
 </head>
 <body>
-  <!-- 
-    Usamos 'stage-center' para esta pantalla, 
-    definido en el style-base.css 
-  -->
   <main class="stage stage-center" role="main">
     <button class="back back-top-right" aria-label="Volver" onclick="window.location.href = 'index.html';">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
@@ -25,21 +19,15 @@
       <h1 class="title">Bienvenido a Sabor de Marcona “MARCO”</h1>
 
       <div class="options">
-        <!-- 
-          Botón "Registrar Pedido" corregido para ir a 'registrarpedido.html' 
-        -->
         <button class="btn" id="btnRegistrarPedido" onclick="window.location.href = 'registrarpedido.html';">Registrar Pedido</button>
         <button class="btn secondary" onclick="alert('Pedidos recientes')">Pedidos recientes</button>
       </div>
 
       <div class="logo" aria-label="Logo del restaurante">
-        <!-- Ruta de imagen corregida (absoluta) -->
         <img src="/complementos/imagenes/marcona.png" alt="El Sabor de Marcona - Restaurante"> 
       </div>
 
     </div>
   </main>
-  
-  <!-- No hay JS necesario para esta pantalla -->
 </body>
 </html>

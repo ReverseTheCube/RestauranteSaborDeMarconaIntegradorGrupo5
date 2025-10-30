@@ -4,18 +4,15 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Pantalla · Selección de servicio</title>
-    <!-- Fuentes y Preconexión -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    
-    <!-- ENLACE AL ARCHIVO CSS EXTERNO: Usa la ruta absoluta (/) -->
     <link rel="stylesheet" href="/css/pedidos.css"> 
     
 </head>
 <body>
-    <main class="stage" role="main">
-        <button class="back" aria-label="Volver" onclick="window.location.href = 'pedidos.html';">
+    <main class="stage stage-center" role="main">
+        <button class="back back-top-right" aria-label="Volver" onclick="window.location.href = 'gestionpedidos.html';">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
         </button>
 
@@ -23,15 +20,12 @@
             <h1 class="title">Selecciona el servicio:</h1>
 
             <div class="options">
-                <!-- Botón Local: Redirige a la página de mesas -->
-                <button class="btn" onclick="window.location.href = 'mesa.html';">Local</button>
-
+                <button class="btn" onclick="window.location.href = 'Local_mesa.html';">Local</button>
                 <!-- Botón Delivery: Llama a la función JS para iniciar el pedido en la API -->
                 <button id="btnDelivery" class="btn secondary" onclick="iniciarPedido('DELIVERY')">Delivery</button>
             </div>
 
             <div class="logo" aria-label="Logo del restaurante">
-                <!-- RUTA ABSOLUTA CORREGIDA: Asume que la imagen está en /static/complementos/imagenes/ -->
                 <img src="/complementos/imagenes/marcona.png" alt="El Sabor de Marcona - Restaurante">
             </div>
         </div>

@@ -44,11 +44,10 @@ async function selectMesa(button) {
         // 5. Éxito
         alert(`¡Pedido LOCAL iniciado! Mesa N° ${mesaNumero}. ID Real: ${pedidoCreado.id}`);
 
-        // Redireccionar a la pantalla de selección de platos
-        // (Asegúrate que se llame seleccionar_menu.html)
-        window.location.href = `/seleccionar_menu.html?pedidoId=${pedidoCreado.id}&mesa=${mesaNumero}`;
-
-    } catch (error) {
+        // Redireccionar a la pantalla de selección de platos, pasando el ID del pedido
+        window.location.href = `/menu.html?pedidoId=${pedidoDTO.id}&mesa=${mesaNumero}`;
+    })
+    .catch(error => {
         console.error('Error al iniciar el pedido:', error);
         alert('Error al iniciar el pedido. Inténtelo de nuevo.');
         // Re-habilitar botones

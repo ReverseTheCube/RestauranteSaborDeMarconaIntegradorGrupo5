@@ -47,6 +47,9 @@ public class SecurityConfig {
                     "/js/menu-crear.js",
                     "/js/menu-editar.js",
                     "/js/menu-eliminar.js",
+                    //GestionClientes
+                    "/gestion-clientes.html",
+                    "/js/gestion-clientes.js",
                     // Historial/Reportes
                     "/busquedafiltro.html",
                     "/ventaehistorial.html",
@@ -58,8 +61,8 @@ public class SecurityConfig {
                     "/js/historial-ventaA.js",
                     "/js/historial-ventaB.js",
 
-                    //Registrar_Pedidos
-                    "/registrarpedido.html", "/mesa.html","/pedidos.html",
+                    //Gestión Pedidos
+                    "/registrarpedido.html", "/Local_mesa.html","/gestionpedidos.html","/seleccionar_menu.html",
 
                     // Rutas para los recursos estáticos (CSS, JS, Imágenes)
                     "/css/**", 

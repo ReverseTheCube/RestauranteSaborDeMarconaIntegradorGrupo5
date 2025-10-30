@@ -1,17 +1,12 @@
-package com.restaurant.restaurantaplicacion.dto;
+    package com.restaurant.restaurantaplicacion.dto;
 
-import lombok.Data;
-import java.util.List;
+    import lombok.Data;
+    import java.util.List;
 
+// Este DTO representa el formulario completo para crear un pedido:
+// ej. { "usuarioId": 3, "detallePlatos": [ { "platoId": 1, "cantidad": 2 }, { "platoId": 5, "cantidad": 1 } ] }
 @Data
 public class CrearPedidoRequest {
     private Long usuarioId; // ID del Cajero o Mesero
-    private List<PedidoPlatoRequest> detallePlatos; // La lista de platos (puede estar vacía)
-
-    // --- CAMPOS NUEVOS AÑADIDOS ---
-    private String tipoServicio; // "LOCAL" o "DELIVERY"
-    private String infoServicio; // N° de Mesa o Cód. Delivery
-    
-    private Long clienteId; // ID del cliente (opcional)
-    private String rucEmpresa; // RUC de la empresa (opcional)
+    private List<PedidoPlatoRequest> detallePlatos; // La lista de platos y cantidades
 }

@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pantalla · Selección de Pedido</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/pedidos.css">
+
+</head>
+<body>
+  <main class="stage stage-flex" role="main">
+    <div class="topbar">
+      <h1 class="title-mesa" id="mesa-titulo">Selecciona el pedido</h1> 
+      <button class="back back-mesa" onclick="window.location.href = 'registrarpedido.html';" aria-label="Volver">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+    </div>
+    <h2 class="title-mesa" style="font-size: 18px; opacity: 0.9;">Platos</h2>
+    <!-- Contenedor para los platos con scroll -->
+    <div class="scroll-container" id="menu">
+      <!-- Los platos se cargarán aquí dinámicamente desde el JS -->
+    </div>
+
+    <button class="confirm-btn" onclick="confirmarPedido()">Confirmar</button>
+  </main>
+
+  <!-- JavaScript Externo -->
+  <script src="/js/seleccionar-menu.js"></script>
+</body>
+</html>
