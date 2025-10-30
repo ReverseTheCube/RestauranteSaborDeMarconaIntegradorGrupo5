@@ -58,9 +58,13 @@ public class ClienteController {
         }
     }
 
-    // TODO: Implementar el endpoint para buscar por RUC
+    // Nota: Se deja como anotación únicamente — no implementar por ahora.
+    // TODO: Implementar el endpoint para buscar por RUC en el futuro.
+    // Ejemplo de plantilla:
     // @GetMapping("/buscar-ruc/{ruc}")
     // public ResponseEntity<?> buscarEmpresaPorRuc(@PathVariable String ruc) {
-    //     // ... lógica para buscar empresa ...
+    //     // Lógica para buscar empresa por RUC (por ejemplo, clienteService.buscarPorRuc(ruc))
+    //     // return ResponseEntity.ok(empresa);
+    //     // o return ResponseEntity.notFound().build();
     // }
 }
