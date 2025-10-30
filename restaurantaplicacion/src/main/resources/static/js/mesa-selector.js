@@ -41,7 +41,7 @@ function selectMesa(button) {
         
         // Mostrar confirmación
         // NOTA: Aquí deberías usar una ventana modal, no un alert en un proyecto real
-        alert(`¡Pedido LOCAL iniciado! Mesa N° ${mesaNumero}. ID de Pedido: ${pedidoDTO.id}`);
+        alert(`¡Pedido LOCAL iniciado! Mesa N° ${mesaNumero} `);
 
         // Redireccionar a la pantalla de selección de platos, pasando el ID del pedido
         window.location.href = `/seleccionar_menu.html?pedidoId=${pedidoDTO.id}&mesa=${mesaNumero}`;

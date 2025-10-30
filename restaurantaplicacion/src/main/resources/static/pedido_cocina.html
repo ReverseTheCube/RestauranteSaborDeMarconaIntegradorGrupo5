@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ordenes de Pedidos</title>
+  <link rel="stylesheet" href="/css/pedidos.css"> 
+
+</head>
+<body>
+  <main class="stage stage-flex" role="main">
+    <div class="topbar">
+      <h1 class="title-mesa">Ordenes de Pedidos:</h1>
+        <button class="back back-top-right" onclick="window.location.href = 'cocinero.html';" aria-label="Volver">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+    </div>
+    <div class="scroll-container">
+            <table class="ordenes-tabla">
+        <thead>
+          <tr>
+            <th>Descripcion</th>
+            <th>Tipo</th>
+            <th>Cantidad</th>
+            <th>N° de Mesa</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody id="ordenes-tbody">
+          <tr>
+            <td>Arroz con Pollo</td>
+            <td>Plato</td>
+            <td>2</td>
+            <td>2</td>
+            <td><button class="btn-pedido-listo" onclick="pedidoListo(this)">Pedido Listo</button></td>
+          </tr>
+          <tr>
+            <td>Lomo Saltado</td>
+            <td>Plato</td>
+            <td>1</td>
+            <td>1</td>
+            <td><button class="btn-pedido-listo" onclick="pedidoListo(this)">Pedido Listo</button></td>
+          </tr>
+          <tr>
+            <td>Limonada</td>
+            <td>Bebida</td>
+            <td>3</td>
+            <td>7</td>
+            <td><button class="btn-pedido-listo" onclick="pedidoListo(this)">Pedido Listo</button></td>
+          </tr>
+          <tr>
+            <td>Ceviche</td>
+            <td>Entrada</td>
+            <td>2</td>
+            <td>9</td>
+            <td><button class="btn-pedido-listo" onclick="pedidoListo(this)">Pedido Listo</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </main>
+  <script src="/js/ordenes-pedidos.js"></script>
+</body>
+</html>
+

@@ -1,70 +1,63 @@
 package com.restaurant.restaurantaplicacion.controller;
 
+// --- IMPORTS AÑADIDOS ---
+import com.restaurant.restaurantaplicacion.model.Pedido; // Importamos el modelo real
 import com.restaurant.restaurantaplicacion.service.PedidoService;
+import com.restaurant.restaurantaplicacion.dto.PedidoInicioResponseDTO; // Importamos el DTO real
+// --- FIN IMPORTS ---
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-// Simulación de un DTO de respuesta (debes crear este archivo en la carpeta dto/)
-class PedidoInicioResponseDTO {
-    private Long id;
-    private String tipoServicio;
-    private String estado;
-
-    public PedidoInicioResponseDTO(Long id, String tipoServicio, String estado) {
-        this.id = id;
-        this.tipoServicio = tipoServicio;
-        this.estado = estado;
-    }
-
-    // Getters y Setters para que Spring pueda serializar a JSON
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public String getTipoServicio() { return tipoServicio; }
-    public void setTipoServicio(String tipoServicio) { this.tipoServicio = tipoServicio; }
-    public String getEstado() { return estado; }
-    public void setEstado(String estado) { this.estado = estado; }
-}
+/*
+ * Ya no simulamos la clase DTO aquí.
+ * Se importa desde el paquete /dto.
+ */
 
 @RestController
 @RequestMapping("/api/pedidos")
-public class RegistrarPedidoController { // CLASE RENOMBRADA
+public class RegistrarPedidoController { 
 
-    // Se asume que PedidoService ya está implementado en tu proyecto.
     @Autowired
-    private PedidoService pedidoService;
+    private PedidoService pedidoService; // Inyectamos el servicio real
 
     /**
-     * Endpoint para iniciar el registro de un nuevo pedido, usado por el botón "Delivery".
-     * Recibe la petición POST del Front-end (registro-pedido.js).
-     * @param tipoServicio El tipo de servicio seleccionado ("DELIVERY").
+     * Endpoint para iniciar el registro de un nuevo pedido (Delivery o Local).
+     * Recibe la petición POST del Front-end (registro-pedido.js o mesa-selector.js).
+     *
+     * @param tipoServicio El tipo de servicio ("DELIVERY" o "LOCAL").
+     * @param numeroMesa (Opcional) El número de mesa si el tipo es "LOCAL".
      * @return PedidoInicioResponseDTO con los datos del pedido creado.
      */
     @PostMapping("/registrar-inicio")
-    public ResponseEntity<?> iniciarRegistroPedido(@RequestParam String tipoServicio) {
+    public ResponseEntity<?> iniciarRegistroPedido(
+            // --- CAMBIO CLAVE AÑADIDO ---
+            @RequestParam String tipoServicio,
+            @RequestParam(required = false) Integer numeroMesa 
+    ) {
         try {
-            // NOTA: Una vez que tengas el service real, borra la línea de simulación
-            // y descomenta la línea de abajo.
+            
+            // 1. LLAMADA AL SERVICIO REAL (YA NO ES SIMULACIÓN)
+            // Llama al método que creamos en PedidoService.java
+            Pedido nuevoPedido = pedidoService.iniciarPedido(tipoServicio, numeroMesa);
 
-            // Pedido nuevoPedido = pedidoService.crearPedido(tipoServicio); 
-
-            // SIMULACIÓN DE CREACIÓN Y CONVERSIÓN A DTO
-            Long nuevoPedidoId = 123L; 
-            String estadoInicial = "PENDIENTE"; 
-
-            // Creamos y devolvemos el DTO
+            // 2. CREAR EL DTO DE RESPUESTA
+            // Usamos los datos del Pedido real que se guardó en la BD (con el ID real).
             PedidoInicioResponseDTO responseDTO = new PedidoInicioResponseDTO(
-                nuevoPedidoId, 
-                tipoServicio, 
-                estadoInicial
+                    nuevoPedido.getId(), // <-- ESTE ES EL ID REAL (ej. 1, 2, 3...)
+                    tipoServicio,
+                    nuevoPedido.getEstado().toString() // Convertimos el Enum a String
             );
 
-            // Devuelve el DTO al Front-end como un JSON (ResponseEntity.ok se encarga de la conversión).
-            return ResponseEntity.ok(responseDTO); 
+            // 3. Devolver el DTO al Front-end (JavaScript)
+            return ResponseEntity.ok(responseDTO);
+
         } catch (Exception e) {
             // Manejo de errores
             System.err.println("Error al iniciar el registro del pedido: " + e.getMessage());
-            return ResponseEntity.internalServerError().body("Error al iniciar el registro del pedido.");
+            // Devolvemos un error 500 (Internal Server Error) al front-end
+            return ResponseEntity.internalServerError().body("Error al iniciar el registro del pedido: " + e.getMessage());
         }
     }
 }

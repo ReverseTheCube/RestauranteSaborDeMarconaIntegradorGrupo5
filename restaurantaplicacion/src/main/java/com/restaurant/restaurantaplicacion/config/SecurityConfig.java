@@ -62,7 +62,9 @@ public class SecurityConfig {
                     "/js/historial-ventaB.js",
 
                     //Gestión Pedidos
-                    "/registrarpedido.html", "/Local_mesa.html","/gestionpedidos.html","/seleccionar_menu.html",
+                    "/registrarpedido.html", "/Local_mesa.html","/gestionpedidos.html","/seleccionar_menu.html","/resumen_pedido.html",
+                    //Pedido_Cocina"
+                    "/pedido_cocina.html",
 
                     // Rutas para los recursos estáticos (CSS, JS, Imágenes)
                     "/css/**", 

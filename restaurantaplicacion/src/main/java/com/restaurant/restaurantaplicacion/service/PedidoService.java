@@ -7,17 +7,19 @@ import com.restaurant.restaurantaplicacion.repository.PedidoRepository;
 import com.restaurant.restaurantaplicacion.repository.PlatoRepository;
 import com.restaurant.restaurantaplicacion.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PedidoService {
 
-    // Necesitamos todos estos repositorios para crear un pedido
     @Autowired
     private PedidoRepository pedidoRepository;
 
@@ -27,23 +29,66 @@ public class PedidoService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-    // No necesitamos PedidoPlatoRepository para crear, 
-    // se guarda automáticamente con el "cascade = CascadeType.ALL" del Modelo Pedido.
-
     /**
      * Lógica para el Historial de Pedidos
      */
-
-    // OBTENER TODOS LOS PEDIDOS (Para el historial)
     public List<Pedido> obtenerTodosLosPedidos() {
-        // Esto traerá todos los pedidos con sus detalles
         return pedidoRepository.findAll();
     }
 
-    // CREAR UN NUEVO PEDIDO
-    // @Transactional asegura que si algo falla, no se guarda nada (todo o nada)
+    /**
+     * Lógica para el INICIO del Pedido (Delivery o Local).
+     * Este es el método que llama RegistrarPedidoController.
+     */
     @Transactional
-    public Pedido crearPedido(CrearPedidoRequest request) {
+    public Pedido iniciarPedido(String tipoServicio, Integer numeroMesa) {
+        
+        // --- INICIO DE LA CORRECCIÓN (Simulación de Usuario) ---
+        // El código original fallaba aquí porque buscaba "anonymousUser"
+        // String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        // Usuario usuario = usuarioRepository.findByUsuario(username)
+        //         .orElseThrow(() -> new UsernameNotFoundException("Usuario (Empleado) no encontrado: " + username));
+
+        // SIMULACIÓN TEMPORAL:
+        // Asumimos que el empleado "Jorgito" (ID 1) está logueado.
+        // CAMBIA 1L por un ID de usuario que SÍ exista en tu BD.
+        Long usuarioIdSimulado = 1L; // <--- CAMBIO REALIZADO (de 3L a 1L)
+        Usuario usuario = usuarioRepository.findById(usuarioIdSimulado)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario (Empleado) SIMULADO con ID: " + usuarioIdSimulado + " no encontrado."));
+        // --- FIN DE LA CORRECCIÓN ---
+
+
+        // 2. Crear el objeto Pedido principal (vacío)
+        Pedido nuevoPedido = new Pedido();
+        nuevoPedido.setUsuario(usuario);
+        nuevoPedido.setFechaHora(LocalDateTime.now());
+        nuevoPedido.setTotal(0.0); // El total se calcula al final
+
+        // 3. Asignar estado y mesa
+        // --- CORRECCIÓN DE ESTADO ---
+        // Usamos "PENDIENTE" que es el valor que sí existe en el Enum
+        nuevoPedido.setEstado(EstadoPedido.PENDIENTE);
+
+        if ("LOCAL".equals(tipoServicio) && numeroMesa != null) {
+            // (Opcional: si tu Modelo Pedido tiene un campo para el N° de mesa)
+            // nuevoPedido.setNumeroMesa(numeroMesa); 
+        } else {
+            // (Opcional: si tu Modelo Pedido tiene un campo para "tipo")
+            // nuevoPedido.setTipo("DELIVERY");
+        }
+        // --- FIN DE CORRECCIÓN DE ESTADO ---
+
+        // 4. Guardar el pedido inicial (aún sin platos)
+        return pedidoRepository.save(nuevoPedido);
+    }
+
+
+    /**
+     * Lógica para CREAR/FINALIZAR el Pedido Completo (con platos).
+     * Este método se llamará desde la pantalla de Resumen.
+     */
+    @Transactional
+    public Pedido crearPedidoCompleto(CrearPedidoRequest request) {
 
         // 1. Buscar al Usuario (Cajero/Mesero) que crea el pedido
         Usuario usuario = usuarioRepository.findById(request.getUsuarioId())
@@ -82,10 +127,8 @@ public class PedidoService {
         nuevoPedido.setDetallePlatos(detallePlatos);
 
         // 8. Guardar el pedido principal en la BD
-        // Gracias a (cascade = CascadeType.ALL), esto también guarda
-        // automáticamente todas las líneas de "detallePlatos".
         return pedidoRepository.save(nuevoPedido);
     }
     
-    // Aquí se podrían agregar más métodos (actualizar estado a PAGADO, CANCELADO, etc.)
+    // (Aquí irían los otros métodos que tenías, como el de actualizar, etc.)
 }
