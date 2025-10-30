@@ -10,7 +10,7 @@ El proyecto es un sistema de gestión integral basado en web desarrollado en **J
 El restaurante "El Sabor de Marcona" gestiona actualmente sus procesos de forma manual, utilizando cuadernos para registrar ventas y gastos. Esto genera desorden en el control de ventas, pérdidas económicas y limita la capacidad de tomar decisiones informadas.
 
 ### Objetivo General
-Desarrollar un sistema de gestión integral basado en web que automatice y optimice los procesos administrativos y financieros del restaurante [cite: 291][cite_start], reemplazando los métodos manuales por una solución digital que garantice precisión, accesibilidad y apoyo a la toma de decisiones.
+Desarrollar un sistema de gestión integral basado en web que automatice y optimice los procesos administrativos y financieros del restaurante , reemplazando los métodos manuales por una solución digital que garantice precisión, accesibilidad y apoyo a la toma de decisiones.
 
 ## 🚀 Módulos del Sistema
 
@@ -109,15 +109,10 @@ Sigue estos pasos para ejecutar el proyecto en tu máquina local:
     * Puedes crear el usuario administrador usando la API (con Postman) o insertándolo directamente en tu MySQL.
     * **Usuario:** `admin`
     * **Contraseña:** `admin123`
-    * **SQL (Si lo haces manual):**
-        ```sql
-        INSERT INTO usuarios (usuario, contrasena, rol, intentos_fallidos, cuenta_bloqueada) 
-        VALUES ('admin', '$2a$10$A.A.0t/1Mv..yV.U2.lV7u.k/e.d.w.c.s.S.n.G.i.O.u.A.i.G', 'ADMINISTRADOR', 0, 0);
-        ```
 
 ## 👨‍💻 Integrantes del Equipo
 
 * **Chirinos Mercado, Edgard Rafael** (U21206012)
 * **Choque Alfaro, Jhonatan Jeanpierre** (U23256844) 
 * **Sanchez Prieto, Victor Salvador** (U1627485) 
-* **Quicaña Taboada, Andre Sebastian** (U222330322) 
+* **Quicaña Taboada, Andre Sebastian** (U22330322) 
