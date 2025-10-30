@@ -2,7 +2,7 @@
 
 Este repositorio contiene el proyecto final "El Sabor de Marcona" para el curso **Curso Integrador I: Sistemas Software** (Sección: 43118).
 
-El proyecto es un sistema de gestión integral basado en web [cite: 291] desarrollado en **Java (Spring Boot)** para el backend y **HTML/CSS/JavaScript** para el frontend.
+El proyecto es un sistema de gestión integral basado en web desarrollado en **Java (Spring Boot)** para el backend y **HTML/CSS/JavaScript** para el frontend.
 
 ## 🎯 Problema y Objetivo
 
