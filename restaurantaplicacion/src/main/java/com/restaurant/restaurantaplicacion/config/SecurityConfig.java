@@ -45,6 +45,9 @@ public class SecurityConfig {
                     "/js/menu-crear.js",
                     "/js/menu-editar.js",
                     "/js/menu-eliminar.js",
+                    //GestionClientes
+                    "/gestion-clientes.html",
+                    "/js/gestion-clientes.js",
                     // Historial/Reportes
                     "/busquedafiltro.html",
                     "/ventaehistorial.html",
