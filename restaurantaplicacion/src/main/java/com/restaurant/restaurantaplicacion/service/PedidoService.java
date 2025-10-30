@@ -3,6 +3,8 @@ package com.restaurant.restaurantaplicacion.service;
 import com.restaurant.restaurantaplicacion.dto.CrearPedidoRequest;
 import com.restaurant.restaurantaplicacion.dto.PedidoPlatoRequest;
 import com.restaurant.restaurantaplicacion.model.*;
+import com.restaurant.restaurantaplicacion.repository.ClienteRepository; // <-- IMPORTAR
+import com.restaurant.restaurantaplicacion.repository.EmpresaRepository; // <-- IMPORTAR
 import com.restaurant.restaurantaplicacion.repository.PedidoRepository;
 import com.restaurant.restaurantaplicacion.repository.PlatoRepository;
 import com.restaurant.restaurantaplicacion.repository.UsuarioRepository;
@@ -22,24 +24,38 @@ public class PedidoService {
 
     @Autowired
     private PedidoRepository pedidoRepository;
-
     @Autowired
     private PlatoRepository platoRepository;
-
     @Autowired
     private UsuarioRepository usuarioRepository;
 
+<<<<<<< HEAD
     /**
      * Lógica para el Historial de Pedidos
      */
+=======
+    // --- AÑADIR ESTOS REPOSITORIOS ---
+    @Autowired
+    private ClienteRepository clienteRepository;
+    @Autowired
+    private EmpresaRepository empresaRepository;
+    // ------------------------------------
+
+    // OBTENER TODOS LOS PEDIDOS (Para el historial)
+    // (Este método se queda igual por ahora)
+>>>>>>> 6f0277f4f98acad18a1d9090a0667b34563672e5
     public List<Pedido> obtenerTodosLosPedidos() {
         return pedidoRepository.findAll();
     }
 
+<<<<<<< HEAD
     /**
      * Lógica para el INICIO del Pedido (Delivery o Local).
      * Este es el método que llama RegistrarPedidoController.
      */
+=======
+    // CREAR UN NUEVO PEDIDO (ACTUALIZADO)
+>>>>>>> 6f0277f4f98acad18a1d9090a0667b34563672e5
     @Transactional
     public Pedido iniciarPedido(String tipoServicio, Integer numeroMesa) {
         
@@ -90,45 +106,73 @@ public class PedidoService {
     @Transactional
     public Pedido crearPedidoCompleto(CrearPedidoRequest request) {
 
-        // 1. Buscar al Usuario (Cajero/Mesero) que crea el pedido
+        // 1. Buscar al Usuario (Cajero/Mesero)
         Usuario usuario = usuarioRepository.findById(request.getUsuarioId())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        // 2. Crear el objeto Pedido principal (la "boleta")
+        // 2. Buscar Cliente (si se proporcionó ID)
+        Cliente cliente = null;
+        if (request.getClienteId() != null) {
+            cliente = clienteRepository.findById(request.getClienteId()).orElse(null);
+        }
+
+        // 3. Buscar Empresa (si se proporcionó RUC)
+        Empresa empresa = null;
+        if (request.getRucEmpresa() != null && !request.getRucEmpresa().isEmpty()) {
+            empresa = empresaRepository.findByRuc(request.getRucEmpresa()).orElse(null);
+        }
+
+        // 4. Crear el Pedido principal
         Pedido nuevoPedido = new Pedido();
         nuevoPedido.setUsuario(usuario);
         nuevoPedido.setFechaHora(LocalDateTime.now());
-        nuevoPedido.setEstado(EstadoPedido.PENDIENTE); // Todos los pedidos nacen PENDIENTES
+        nuevoPedido.setEstado(EstadoPedido.PENDIENTE);
+        
+        // --- GUARDAR LOS NUEVOS CAMPOS ---
+        nuevoPedido.setCliente(cliente);
+        nuevoPedido.setEmpresa(empresa);
+        nuevoPedido.setTipoServicio(request.getTipoServicio());
+        nuevoPedido.setInfoServicio(request.getInfoServicio());
+        // ---------------------------------
         
         double totalPedido = 0.0;
         List<PedidoPlato> detallePlatos = new ArrayList<>();
 
-        // 3. Recorrer cada línea del pedido (los platos y cantidades)
-        for (PedidoPlatoRequest itemRequest : request.getDetallePlatos()) {
-            
-            // 4. Buscar el Plato en la BD para saber su precio
-            Plato plato = platoRepository.findById(itemRequest.getPlatoId())
-                    .orElseThrow(() -> new RuntimeException("Plato no encontrado: ID " + itemRequest.getPlatoId()));
+        // 5. Procesar platos SOLO SI la lista no está vacía
+        if (request.getDetallePlatos() != null && !request.getDetallePlatos().isEmpty()) {
+            for (PedidoPlatoRequest itemRequest : request.getDetallePlatos()) {
+                
+                Plato plato = platoRepository.findById(itemRequest.getPlatoId())
+                        .orElseThrow(() -> new RuntimeException("Plato no encontrado: ID " + itemRequest.getPlatoId()));
 
-            // 5. Crear el objeto de detalle (la línea de la boleta)
-            PedidoPlato detalle = new PedidoPlato();
-            detalle.setPlato(plato);
-            detalle.setCantidad(itemRequest.getCantidad());
-            detalle.setPrecioUnitario(plato.getPrecio()); // Guardamos el precio actual
-            detalle.setPedido(nuevoPedido); // Lo asociamos al pedido principal
+                PedidoPlato detalle = new PedidoPlato();
+                detalle.setPlato(plato);
+                detalle.setCantidad(itemRequest.getCantidad());
+                detalle.setPrecioUnitario(plato.getPrecio());
+                detalle.setPedido(nuevoPedido); 
 
-            // 6. Añadir al detalle y sumar al total
-            detallePlatos.add(detalle);
-            totalPedido += (plato.getPrecio() * itemRequest.getCantidad());
+                detallePlatos.add(detalle);
+                totalPedido += (plato.getPrecio() * itemRequest.getCantidad());
+            }
         }
+        // Si la lista está vacía, el total simplemente se queda en 0.0
 
-        // 7. Guardar el total y la lista de detalles en el pedido principal
+        // 6. Guardar total y detalles
         nuevoPedido.setTotal(totalPedido);
         nuevoPedido.setDetallePlatos(detallePlatos);
 
+<<<<<<< HEAD
         // 8. Guardar el pedido principal en la BD
         return pedidoRepository.save(nuevoPedido);
     }
     
     // (Aquí irían los otros métodos que tenías, como el de actualizar, etc.)
 }
+=======
+        // 7. Guardar todo en la BD
+        return pedidoRepository.save(nuevoPedido);
+    }
+    
+    // (Aquí iría la lógica de filtros que hicimos antes)
+}
+>>>>>>> 6f0277f4f98acad18a1d9090a0667b34563672e5
