@@ -1,43 +1,95 @@
 let formatoSeleccionado = null;
 let incluirMarcaAgua = false;
 
-// Establecer fechas por defecto (última semana)
-const hoy = new Date();
-const hace7Dias = new Date();
-hace7Dias.setDate(hoy.getDate() - 7);
+// --- URLs DE LAS APIS ---
+const API_PEDIDOS = "http://localhost:8080/api/pedidos";
+const API_EMPRESAS = "http://localhost:8080/api/empresas";
+const API_CLIENTES = "http://localhost:8080/api/clientes";
 
-document.getElementById('fechaDesde').value = hace7Dias.toISOString().split('T')[0];
-document.getElementById('fechaHasta').value = hoy.toISOString().split('T')[0];
 
-async function buscar() { // Añadimos async para usar await
+// --- INICIO: CÓDIGO NUEVO PARA CARGAR FILTROS ---
+
+// Se ejecuta cuando el HTML termina de cargar
+document.addEventListener('DOMContentLoaded', () => {
+    establecerFechasPorDefecto();
+    cargarFiltrosDinamicos();
+});
+
+// Función para poner las fechas de la última semana
+function establecerFechasPorDefecto() {
+    const hoy = new Date();
+    const hace7Dias = new Date();
+    hace7Dias.setDate(hoy.getDate() - 7);
+
+    document.getElementById('fechaDesde').value = hace7Dias.toISOString().split('T')[0];
+    document.getElementById('fechaHasta').value = hoy.toISOString().split('T')[0];
+}
+
+// Función para llamar a las APIs y llenar los <select>
+async function cargarFiltrosDinamicos() {
+    try {
+        // Cargar Empresas
+        const responseEmpresas = await fetch(API_EMPRESAS);
+        if (!responseEmpresas.ok) throw new Error('Error al cargar empresas');
+        const empresas = await responseEmpresas.json();
+        
+        const selectEmpresa = document.getElementById('empresa');
+        empresas.forEach(empresa => {
+            const option = document.createElement('option');
+            option.value = empresa.ruc; // Usamos RUC como valor
+            option.textContent = empresa.razonSocial; // Mostramos la Razón Social
+            selectEmpresa.appendChild(option);
+        });
+
+        // Cargar Clientes
+        const responseClientes = await fetch(API_CLIENTES);
+        if (!responseClientes.ok) throw new Error('Error al cargar clientes');
+        const clientes = await responseClientes.json();
+        
+        const selectCliente = document.getElementById('cliente');
+        clientes.forEach(cliente => {
+            const option = document.createElement('option');
+            option.value = cliente.id; // Usamos el ID como valor
+            option.textContent = cliente.nombresApellidos; // Mostramos el Nombre
+            selectCliente.appendChild(option);
+        });
+
+    } catch (error) {
+        console.error("Error cargando filtros dinámicos:", error);
+        alert("No se pudieron cargar los filtros (Empresas/Clientes). " + error.message);
+    }
+}
+
+// --- FIN: CÓDIGO NUEVO PARA CARGAR FILTROS ---
+
+
+async function buscar() { // Añadimos async
     // Obtener valores de los filtros
-    const empresa = document.getElementById('empresa').value;
-    const cliente = document.getElementById('cliente').value;
+    const empresaRuc = document.getElementById('empresa').value;
+    const clienteId = document.getElementById('cliente').value; // Ahora es un ID de cliente
     const fechaDesde = document.getElementById('fechaDesde').value;
     const fechaHasta = document.getElementById('fechaHasta').value;
     const local = document.getElementById('local').value;
     const delivery = document.getElementById('delivery').value;
 
-    console.log('Buscando con filtros:', { empresa, cliente, fechaDesde, fechaHasta, local, delivery });
+    console.log('Buscando con filtros:', { empresaRuc, clienteId, fechaDesde, fechaHasta, local, delivery });
 
-    // --- CONEXIÓN REAL CON LA API ---
     try {
-        // Construir la URL con parámetros de consulta (solo si tienen valor)
-        // NOTA: Tu API /api/pedidos aún no soporta estos filtros. Necesitarás añadirlos en PedidoController/PedidoService.
+        // Construir la URL con parámetros de consulta
         const params = new URLSearchParams();
-        if (cliente) params.append('cliente', cliente); // Ejemplo, necesitas implementar esto en backend
+        if (clienteId) params.append('clienteId', clienteId); // Enviamos el ID del cliente
         if (fechaDesde) params.append('fechaDesde', fechaDesde);
         if (fechaHasta) params.append('fechaHasta', fechaHasta);
-        // Añadir más parámetros si implementas los otros filtros en el backend (empresa, local, delivery)
+        if (empresaRuc) params.append('ruc', empresaRuc); // Enviamos el RUC de la empresa
+        // (Necesitarás implementar la lógica para estos filtros en tu PedidoController/Service)
 
-        // Llama a la API para obtener los pedidos
-        const response = await fetch(`http://localhost:8080/api/pedidos?${params.toString()}`);
+        const response = await fetch(`${API_PEDIDOS}?${params.toString()}`);
 
         if (!response.ok) {
             throw new Error(`Error ${response.status}: No se pudo obtener el historial.`);
         }
 
-        const pedidos = await response.json(); // Obtiene la lista de pedidos del backend
+        const pedidos = await response.json(); 
 
         // --- LLENAR LA TABLA CON DATOS REALES ---
         const tablaBody = document.getElementById('tablaResultadosBody');
@@ -46,21 +98,24 @@ async function buscar() { // Añadimos async para usar await
         const paginacionDiv = document.getElementById('paginacion');
         const resultadosSection = document.getElementById('resultadosSection');
 
-        tablaBody.innerHTML = ''; // Limpiar tabla antes de llenarla
+        tablaBody.innerHTML = ''; 
 
         if (pedidos.length === 0) {
             numRegistrosSpan.textContent = '0';
             tablaBody.innerHTML = '<tr><td colspan="4" style="text-align: center;">No se encontraron pedidos con esos criterios.</td></tr>';
-            paginacionDiv.innerHTML = ''; // Limpiar paginación
+            paginacionDiv.innerHTML = ''; 
         } else {
-            numRegistrosSpan.textContent = pedidos.length; // Mostrar número total (sin paginación real por ahora)
+            numRegistrosSpan.textContent = pedidos.length; 
 
             pedidos.forEach(pedido => {
-                // Asegúrate que el backend envíe el usuario anidado o ajusta esto
                 const nombreCliente = pedido.usuario ? pedido.usuario.usuario : 'Desconocido';
+                // En el futuro, la API debería devolver el nombre de la empresa e info del cliente
+                const nombreEmpresa = "Empresa (Dato Real)"; 
+                
                 const fila = `
                     <tr>
-                        <td>Marcona Delivery S.A.</td> <td>${nombreCliente}</td>
+                        <td>${nombreEmpresa}</td>
+                        <td>${nombreCliente}</td>
                         <td>${formatearFechaSimple(pedido.fechaHora)}</td>
                         <td>${formatoMoneda(pedido.total)}</td>
                     </tr>
@@ -68,48 +123,35 @@ async function buscar() { // Añadimos async para usar await
                 tablaBody.innerHTML += fila;
             });
 
-            // Paginación simple (solo muestra página 1 por ahora)
-            // Necesitarías lógica adicional aquí y en el backend para paginación real
             paginacionDiv.innerHTML = `
                 <span style="color: #e0e6ea; margin-right: 15px;">Mostrando ${pedidos.length} registros</span>
                 <button class="page-button active">1</button>
             `;
         }
 
-        // Actualizar rango de fechas en resultados y mostrar sección
         const desdeFormateada = formatDate(fechaDesde);
         const hastaFormateada = formatDate(fechaHasta);
         rangoFechasSpan.textContent = `${desdeFormateada} - ${hastaFormateada}`;
-        resultadosSection.style.display = 'block'; // Muestra la tabla de resultados
+        resultadosSection.style.display = 'block';
 
     } catch (error) {
         console.error("Error al buscar pedidos:", error);
         alert(`Error al buscar los pedidos: ${error.message}`);
-        document.getElementById('resultadosSection').style.display = 'none'; // Ocultar si hay error
+        resultadosSection.style.display = 'none';
     }
 }
 
 function limpiarFiltros() {
     document.getElementById('empresa').value = '';
-    document.getElementById('cliente').value = ''; // Limpiar también cliente
+    document.getElementById('cliente').value = ''; 
     document.getElementById('local').value = '';
     document.getElementById('delivery').value = '';
-
-    // Restablecer fechas a última semana
-    const hoy = new Date();
-    const hace7Dias = new Date();
-    hace7Dias.setDate(hoy.getDate() - 7);
-
-    document.getElementById('fechaDesde').value = hace7Dias.toISOString().split('T')[0];
-    document.getElementById('fechaHasta').value = hoy.toISOString().split('T')[0];
-
-    // Ocultar resultados
+    establecerFechasPorDefecto(); // Restablecer fechas
     document.getElementById('resultadosSection').style.display = 'none';
 }
 
 function volverAtras() {
-    // Vuelve a la pantalla principal del admin
-    window.location.href = 'admin.html';
+    window.location.href = 'ventaehistorial.html'; // Corregido para volver al menú de historial
 }
 
 function mostrarOpcionesDescarga() {
@@ -118,8 +160,6 @@ function mostrarOpcionesDescarga() {
     document.getElementById('downloadModal').style.display = 'flex';
     document.getElementById('btnDescargar').disabled = true;
     document.getElementById('watermarkOption').style.display = 'none';
-
-    // Limpiar selecciones anteriores
     document.querySelectorAll('.download-option').forEach(option => {
         option.classList.remove('selected');
     });
@@ -127,58 +167,26 @@ function mostrarOpcionesDescarga() {
 
 function seleccionarFormato(formato) {
     formatoSeleccionado = formato;
-
-    // Actualizar UI para resaltar la opción seleccionada
     document.querySelectorAll('.download-option').forEach(option => {
         option.classList.remove('selected');
     });
-     // Encuentra el elemento clickeado (necesita el 'event' implícito)
-    const clickedOption = event.currentTarget; // 'event' es global en onclick
+    const clickedOption = event.currentTarget;
     if(clickedOption){
         clickedOption.classList.add('selected');
     }
-
-
-    // Mostrar opción de marca de agua solo para PDF
-    if (formato === 'pdf') {
-        document.getElementById('watermarkOption').style.display = 'flex';
-    } else {
-        document.getElementById('watermarkOption').style.display = 'none';
-    }
-
-    // Habilitar botón de descarga
+    document.getElementById('watermarkOption').style.display = (formato === 'pdf') ? 'flex' : 'none';
     document.getElementById('btnDescargar').disabled = false;
 }
-
 
 function descargarResultados() {
     if (!formatoSeleccionado) {
         alert('Por favor selecciona un formato de descarga.');
         return;
     }
-
-    incluirMarcaAgua = document.getElementById('marcaAgua').checked;
-
-    let mensaje = `Descargando resultados en formato ${formatoSeleccionado.toUpperCase()}`;
-    if (formatoSeleccionado === 'pdf' && incluirMarcaAgua) {
-        mensaje += ' con marca de agua "CONFIDENCIAL"';
-    }
-
-    alert(mensaje);
+    
+    // (Lógica de descarga real usando la API de Reportes - necesita implementación en backend)
+    alert(`Simulando descarga en ${formatoSeleccionado}... (requiere API de Reportes)`);
     cerrarModal();
-
-    // --- LÓGICA DE DESCARGA REAL ---
-    // Aquí podrías llamar a /api/reportes/descargar pasando los filtros actuales
-    // para generar y descargar un reporte basado en la búsqueda actual,
-    // o descargar un reporte pre-generado si la lógica fuera diferente.
-    // Ejemplo (necesita implementación en backend):
-    const params = new URLSearchParams({
-        // ... (añadir los filtros actuales como en buscar()) ...
-        formato: formatoSeleccionado,
-        marcaAgua: (formatoSeleccionado === 'pdf' && incluirMarcaAgua)
-    });
-    // window.location.href = `http://localhost:8080/api/reportes/descargarBusqueda?${params.toString()}`;
-    console.log("Simulando descarga con filtros...");
 }
 
 function cerrarModal() {
@@ -187,24 +195,17 @@ function cerrarModal() {
 
 function nuevaBusqueda() {
     document.getElementById('resultadosSection').style.display = 'none';
-    // Opcional: limpiar filtros si se prefiere
-    // limpiarFiltros();
 }
 
-// Función auxiliar para formato DD/MM
 function formatDate(dateString) {
     if (!dateString) return '';
     try {
-        // Asegura que la fecha se interprete en la zona horaria local
-        const dateParts = dateString.split('-'); // yyyy-mm-dd
+        const dateParts = dateString.split('-'); 
         const date = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
         return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}`;
-    } catch (e) {
-        return ''; // Devuelve vacío si la fecha es inválida
-    }
+    } catch (e) { return ''; }
 }
 
-// Función auxiliar para formato DD/MM simple (usado en la tabla)
 function formatearFechaSimple(fechaISO) {
     if (!fechaISO) return '-';
     try {
@@ -213,7 +214,6 @@ function formatearFechaSimple(fechaISO) {
     } catch(e) { return fechaISO; }
 }
 
-// Función auxiliar para formato de moneda S/
 function formatoMoneda(valor) {
     if (valor === null || valor === undefined) return '-';
     try {
@@ -221,22 +221,16 @@ function formatoMoneda(valor) {
     } catch(e) { return '-'; }
 }
 
-
-// Paginación (Simulado - necesita lógica real en backend y frontend)
+// Paginación (Simulado)
 document.querySelectorAll('.page-button').forEach(button => {
     button.addEventListener('click', function() {
-        document.querySelectorAll('.page-button').forEach(btn => {
-            btn.classList.remove('active');
-        });
-        this.classList.add('active');
-        // Aquí iría la lógica para cargar la página seleccionada (llamar a buscar() con parámetros de paginación)
+        // ... (lógica de paginación real iría aquí) ...
         alert(`Simulando carga de página ${this.textContent}... (No implementado)`);
     });
 });
 
-// Cerrar modal al hacer clic fuera
+// Cerrar modal
 document.getElementById('downloadModal').addEventListener('click', function(e) {
-    // Cierra solo si se hace clic en el fondo oscuro (el propio modal)
     if (e.target === this) {
         cerrarModal();
     }

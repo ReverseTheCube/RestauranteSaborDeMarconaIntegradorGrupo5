@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Asignación</title>
+  <link rel="stylesheet" href="css/style-asignar.css">
+</head>
+<body>
+  <div class="container">
+    <h2>ASIGNACIÓN:</h2>
+
+    <div class="field">
+      <label>• RUC:</label>
+      <select id="ruc">
+        <option value="">Seleccione</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>• Trabajador:</label>
+      <select id="trabajador">
+        <option value="">Seleccione</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>• Saldo:</label>
+      <input type="number" id="saldo" placeholder="Ingrese saldo">
+    </div>
+
+    <div class="buttons">
+      <button class="cerrar" onclick="cerrarVentana()">CERRAR</button>
+      <button class="guardar" onclick="guardarDatos()">GUARDAR</button>
+    </div>
+  </div>
+
+  <script src="gestion-asignar.js"></script>
+</body>
+</html>

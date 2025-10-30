@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gestión de Clientes y Empresas</title>
-  <link rel="stylesheet" href="css/style-cliente.css">
+  <link rel="stylesheet" href="/css/style-cliente.css">
 </head>
 <body>
 
@@ -35,7 +35,7 @@
       <h3>BUSQUEDA DE CLIENTES:</h3>
       <label>Número de Documento:</label>
       <input type="text" id="buscarCliente">
-      <button onclick="buscarCliente()">BUSCAR</button>
+      <button>BUSCAR</button>
 
       <table id="tablaClientes">
         <thead>
@@ -67,7 +67,7 @@
       <h3>BUSQUEDA:</h3>
       <label>RUC:</label>
       <input type="text" id="buscarEmpresa">
-      <button onclick="buscarEmpresa()">BUSCAR</button>
+      <button>BUSCAR</button>
 
       <table id="tablaEmpresas">
         <thead>
@@ -82,10 +82,11 @@
       <div class="actions">
         <button onclick="retroceder()">ANTERIOR</button>
         <button>ASIGNAR TRABAJADOR</button>
+        </a>
       </div>
     </div>
   </div>
 
-  <script src="js/gestion-clientes.js"></script>
+  <script src="/js/gestion-clientes.js"></script>
 </body>
 </html>

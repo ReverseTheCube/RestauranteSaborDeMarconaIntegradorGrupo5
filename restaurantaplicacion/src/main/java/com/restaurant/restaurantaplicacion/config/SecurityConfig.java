@@ -35,6 +35,8 @@ public class SecurityConfig {
                     "/admin.html", "/cajero.html", "/mesero.html", "/cocinero.html",
                     // Gestión Usuarios
                     "/gestion-usuarios.html", "/js/gestion-usuarios.js",
+                    // Gestión Clientes
+                    "/gestion-cliente.html", "/css/style-cliente.css", "/js/gestion-clientes.js",
                     // Gestión Menú (Platos)
                     "/menu.html",
                     "/menu-crear.html",
@@ -57,7 +59,15 @@ public class SecurityConfig {
                     "/js/historial-busqueda.js",
                     "/js/historial-venta.js",
                     "/js/historial-ventaA.js",
-                    "/js/historial-ventaB.js"
+                    "/js/historial-ventaB.js",
+
+                    //Registrar_Pedidos
+                    "/registrarpedido.html", "/mesa.html","/pedidos.html",
+
+                    // Rutas para los recursos estáticos (CSS, JS, Imágenes)
+                    "/css/**", 
+                    "/js/**", 
+                    "/complementos/imagenes/**"
 
                 ).permitAll() // Permite acceso a todo lo listado arriba
 
@@ -67,11 +77,10 @@ public class SecurityConfig {
                 .requestMatchers("/api/platos/**").permitAll()     // API Platos
                 .requestMatchers("/api/pedidos/**").permitAll()    // API Pedidos
                 .requestMatchers("/api/reportes/**").permitAll()   // API Reportes
+                .requestMatchers("/api/clientes/**").permitAll()   // API Clientes
+                .requestMatchers("/api/empresas/**").permitAll()   // API Empresas
 
                 // 5. Para CUALQUIER OTRA petición, se debe estar autenticado
-                // (Si quieres que las APIs requieran login, comenta las líneas .permitAll() de arriba
-                // y descomenta la siguiente línea si es necesario, aunque anyRequest() ya lo cubre)
-                // .requestMatchers("/api/**").authenticated() // Ejemplo si quisieras proteger todas las APIs
                 .anyRequest().authenticated()
             )
 
