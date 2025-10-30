@@ -44,7 +44,7 @@ function selectMesa(button) {
         alert(`¡Pedido LOCAL iniciado! Mesa N° ${mesaNumero}. ID de Pedido: ${pedidoDTO.id}`);
 
         // Redireccionar a la pantalla de selección de platos, pasando el ID del pedido
-        window.location.href = `/menu.html?pedidoId=${pedidoDTO.id}&mesa=${mesaNumero}`;
+        window.location.href = `/seleccionar_menu.html?pedidoId=${pedidoDTO.id}&mesa=${mesaNumero}`;
     })
     .catch(error => {
         console.error('Error al iniciar el pedido:', error);
