@@ -46,7 +46,7 @@ async function selectMesa(button) {
 
         // Redireccionar a la pantalla de selección de platos, pasando el ID del pedido
         // **** CORRECCIÓN DE VARIABLE AQUÍ (era pedidoDTO.id) ****
-        window.location.href = `/menu.html?pedidoId=${pedidoCreado.id}&mesa=${mesaNumero}`;
+        window.location.href = `/seleccionar_menu.html?pedidoId=${pedidoDTO.id}&mesa=${mesaNumero}`;
     
     // **** CORRECCIÓN DE SINTAXIS AQUÍ (se quitó el ')' y se cambió '.catch' por 'catch') ****
     } catch (error) { 
