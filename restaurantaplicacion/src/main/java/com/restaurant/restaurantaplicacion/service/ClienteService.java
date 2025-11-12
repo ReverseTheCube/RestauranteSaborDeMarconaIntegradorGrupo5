@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional; // Asegúrate de importar Optional
+import java.util.Optional; 
 
 @Service
 public class ClienteService {
@@ -15,12 +15,20 @@ public class ClienteService {
  @Autowired
  private ClienteRepository clienteRepository;
 
-// --- (Este es tu método existente para OBTENER TODOS) ---
-public List<Cliente> obtenerTodosLosClientes() {
- return clienteRepository.findAll();
+// --- MÉTODO MODIFICADO/UNIFICADO PARA LISTAR Y BUSCAR ---
+// Reemplaza al anterior obtenerTodosLosClientes()
+public List<Cliente> buscarClientesPorFiltro(String filtro) {
+     // Si el filtro es nulo o vacío, devuelve TODOS los clientes (comportamiento sin filtro)
+     if (filtro == null || filtro.trim().isEmpty()) {
+         return clienteRepository.findAll();
+     }
+     
+     // Si hay filtro, busca por número de documento o nombre/apellido (parcial)
+     String busqueda = filtro.trim();
+     return clienteRepository.findByNumeroDocumentoContainingOrNombresApellidosContainingIgnoreCase(busqueda, busqueda);
   }
 
- // --- (Este es tu método existente para REGISTRAR) ---
+ // --- (Este es tu método existente para REGISTRAR, sin cambios) ---
 public Cliente registrarCliente(ClienteRequest request) {
 // Validación de existencia
  if (clienteRepository.findByNumeroDocumento(request.getNumeroDocumento()).isPresent()) {
@@ -35,16 +43,8 @@ public Cliente registrarCliente(ClienteRequest request) {
  return clienteRepository.save(cliente);
  }
 
- // --- (ESTE ES EL MÉTODO QUE FALTABA para el ClienteController) ---
- /**
-      * Busca un cliente por su DNI (usando el número de documento).
-      * Es llamado por el ClienteController.
-      *
-      * @param dni El DNI del cliente a buscar.
-      * @return Un Optional<Cliente>
-      */
+ // --- (Este es tu método existente para buscar por DNI, sin cambios) ---
  public Optional<Cliente> buscarPorDni(String dni) {
- // Reutiliza el método que ya tenías en tu ClienteRepository
  return clienteRepository.findByNumeroDocumento(dni);
  }
 }

@@ -14,7 +14,6 @@
       <div id="tabEmpresas" class="tab" onclick="mostrarSeccion('empresas')">EMPRESAS</div>
     </div>
 
-    <!-- CLIENTES -->
     <div id="clientes" class="container">
       <h3>REGISTRO:</h3>
       <label>• Tipo documento:</label>
@@ -33,9 +32,9 @@
       <button onclick="registrarCliente()">REGISTRAR</button>
 
       <h3>BUSQUEDA DE CLIENTES:</h3>
-      <label>Número de Documento:</label>
-      <input type="text" id="buscarCliente">
-      <button>BUSCAR</button>
+      <label>Número de Documento o Nombre:</label>
+      <input type="text" id="buscarCliente" oninput="buscarCliente(this.value)">
+      <button onclick="buscarCliente(document.getElementById('buscarCliente').value)">BUSCAR</button>
 
       <table id="tablaClientes">
         <thead>
@@ -45,7 +44,9 @@
             <th>Nombres y Apellidos</th>
           </tr>
         </thead>
-        <tbody></tbody>
+        <tbody>
+            <tr><td colspan="3" style="text-align: center;">Pulse BUSCAR o escriba un filtro para cargar datos.</td></tr>
+        </tbody>
       </table>
 
       <div class="actions">
@@ -53,7 +54,6 @@
       </div>
     </div>
 
-    <!-- EMPRESAS -->
     <div id="empresas" class="container hidden">
       <h3>REGISTRO:</h3>
       <label>• RUC:</label>
@@ -65,9 +65,9 @@
       <button onclick="registrarEmpresa()">REGISTRAR</button>
 
       <h3>BUSQUEDA:</h3>
-      <label>RUC:</label>
-      <input type="text" id="buscarEmpresa">
-      <button>BUSCAR</button>
+      <label>RUC o Razón Social:</label>
+      <input type="text" id="buscarEmpresa" oninput="buscarEmpresa(this.value)">
+      <button onclick="buscarEmpresa(document.getElementById('buscarEmpresa').value)">BUSCAR</button>
 
       <table id="tablaEmpresas">
         <thead>
@@ -76,13 +76,14 @@
             <th>Razón Social</th>
           </tr>
         </thead>
-        <tbody></tbody>
+        <tbody>
+            <tr><td colspan="2" style="text-align: center;">Pulse BUSCAR o escriba un filtro para cargar datos.</td></tr>
+        </tbody>
       </table>
 
       <div class="actions">
         <button onclick="retroceder()">ANTERIOR</button>
-        <button>ASIGNAR TRABAJADOR</button>
-        </a>
+        <button onclick="window.location.href = '/gestion-asignar-empresa.html'">ASIGNAR TRABAJADOR</button>
       </div>
     </div>
   </div>

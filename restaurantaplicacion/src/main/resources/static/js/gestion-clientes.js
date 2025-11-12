@@ -4,8 +4,8 @@ const API_URL_EMPRESAS = "http://localhost:8080/api/empresas";
 
 // --- EVENTO PRINCIPAL: Cargar todo al iniciar ---
 document.addEventListener("DOMContentLoaded", () => {
-    cargarClientes();
-    // No cargamos empresas por defecto para no hacer 2 llamadas, se cargan al cambiar de pestaña.
+    // MODIFICACIÓN: Eliminamos la llamada inicial a cargarClientes()
+    // La carga se realizará solo al buscar.
 });
 
 // --- FUNCIONALIDAD BÁSICA DEL PANEL ---
@@ -15,31 +15,59 @@ function mostrarSeccion(seccion) {
   document.getElementById("tabClientes").classList.remove("active");
   document.getElementById("tabEmpresas").classList.remove("active");
 
+  const mensajeInicialClientes = '<tr><td colspan="3" style="text-align: center;">Pulse BUSCAR o escriba un filtro para cargar datos.</td></tr>';
+  const mensajeInicialEmpresas = '<tr><td colspan="2" style="text-align: center;">Pulse BUSCAR o escriba un filtro para cargar datos.</td></tr>';
+
+
   if (seccion === "clientes") {
     document.getElementById("clientes").classList.remove("hidden");
     document.getElementById("tabClientes").classList.add("active");
-    cargarClientes(); // Recargar al mostrar la sección
+    // Al cambiar de pestaña, reinicia el contenido a la frase inicial
+    const tbody = document.querySelector("#tablaClientes tbody");
+    if (tbody.children.length === 0 || tbody.children.length === 1 && tbody.children[0].textContent.includes('No hay clientes')) {
+        tbody.innerHTML = mensajeInicialClientes;
+    }
   } else {
     document.getElementById("empresas").classList.remove("hidden");
     document.getElementById("tabEmpresas").classList.add("active");
-    cargarEmpresas(); // Recargar al mostrar la sección
+    // Al cambiar de pestaña, reinicia el contenido a la frase inicial
+    const tbody = document.querySelector("#tablaEmpresas tbody");
+    if (tbody.children.length === 0 || tbody.children.length === 1 && tbody.children[0].textContent.includes('No hay empresas')) {
+        tbody.innerHTML = mensajeInicialEmpresas;
+    }
   }
 }
 
 // --- CLIENTES (API IMPLEMENTATION) ---
 
-// CARGAR CLIENTES DESDE LA API
-async function cargarClientes() {
+/**
+ * Función central para cargar/filtrar clientes.
+ * @param {string} filtro - El texto de búsqueda (DNI, Nombre o vacío).
+ */
+async function cargarClientes(filtro = '') {
+    // Si el filtro es vacío y la llamada NO es para recargar tras un registro, no hace nada.
+    if (!filtro && (event.type === 'input' || event.type === 'change')) {
+        actualizarTablaClientes([]); // Vacía la tabla si el input está vacío
+        return;
+    }
+    
+    // Si no hay filtro, la URL es la base (que devolverá todos). Si hay, añade el filtro.
+    const url = filtro ? `${API_URL_CLIENTES}?filtro=${encodeURIComponent(filtro)}` : API_URL_CLIENTES;
+    
     try {
-        const response = await fetch(API_URL_CLIENTES);
+        const response = await fetch(url);
         if (!response.ok) throw new Error("Error al cargar clientes");
         const clientes = await response.json();
         actualizarTablaClientes(clientes);
     } catch (error) {
         console.error("Error en cargarClientes:", error);
-        // Si no hay datos, muestra la tabla vacía
         actualizarTablaClientes([]); 
     }
+}
+
+// MODIFICACIÓN: Se unifica la función de búsqueda para botón y oninput
+function buscarCliente(filtro) {
+  cargarClientes(filtro);
 }
 
 // REGISTRAR CLIENTE (POST)
@@ -74,7 +102,8 @@ async function registrarCliente() {
       if (response.ok) {
           alert("Cliente registrado exitosamente!");
           limpiarCamposClientes();
-          cargarClientes(); // Recargar tabla
+          const filtroActual = document.getElementById('buscarCliente').value;
+          cargarClientes(filtroActual); // Recargar tabla con el filtro actual
       } else {
           const errorTexto = await response.text();
           alert(`Error al registrar cliente: ${errorTexto}`);
@@ -90,7 +119,8 @@ function actualizarTablaClientes(lista) {
   const tbody = document.querySelector("#tablaClientes tbody");
   tbody.innerHTML = ""; // Limpiar tabla
   if (lista.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="3" style="text-align: center;">No hay clientes registrados.</td></tr>';
+      // MODIFICACIÓN: Mensaje cuando no hay coincidencias
+      tbody.innerHTML = '<tr><td colspan="3" style="text-align: center;">No se encontraron coincidencias.</td></tr>';
       return;
   }
   lista.forEach(c => {
@@ -103,32 +133,36 @@ function actualizarTablaClientes(lista) {
   });
 }
 
-function buscarCliente() {
-  // Nota: La funcionalidad de búsqueda real requiere un endpoint en el backend.
-  alert('La búsqueda con filtros no está conectada aún a la base de datos.');
-  // El código original ha sido comentado o modificado ya que no funcionaba con el nuevo modelo.
-}
-
-function limpiarCamposClientes() {
-  document.getElementById("tipoDocumento").value = "";
-  document.getElementById("numeroDocumento").value = "";
-  document.getElementById("nombresApellidos").value = "";
-}
+// ... (limpiarCamposClientes sin cambios) ...
 
 // --- EMPRESAS (API IMPLEMENTATION) ---
 
-// CARGAR EMPRESAS DESDE LA API
-async function cargarEmpresas() {
+/**
+ * Función central para cargar/filtrar empresas.
+ * @param {string} filtro - El texto de búsqueda (RUC, Razón Social o vacío).
+ */
+async function cargarEmpresas(filtro = '') {
+    if (!filtro && (event.type === 'input' || event.type === 'change')) {
+        actualizarTablaEmpresas([]); 
+        return;
+    }
+    
+    const url = filtro ? `${API_URL_EMPRESAS}?filtro=${encodeURIComponent(filtro)}` : API_URL_EMPRESAS;
+
     try {
-        const response = await fetch(API_URL_EMPRESAS);
+        const response = await fetch(url);
         if (!response.ok) throw new Error("Error al cargar empresas");
         const empresas = await response.json();
         actualizarTablaEmpresas(empresas);
     } catch (error) {
         console.error("Error en cargarEmpresas:", error);
-        // Si no hay datos, muestra la tabla vacía
         actualizarTablaEmpresas([]); 
     }
+}
+
+// MODIFICACIÓN: Se unifica la función de búsqueda para botón y oninput
+function buscarEmpresa(filtro) {
+  cargarEmpresas(filtro);
 }
 
 // REGISTRAR EMPRESA (POST)
@@ -161,7 +195,8 @@ async function registrarEmpresa() {
       if (response.ok) {
           alert("Empresa registrada exitosamente!");
           limpiarCamposEmpresas();
-          cargarEmpresas(); // Recargar tabla
+          const filtroActual = document.getElementById('buscarEmpresa').value;
+          cargarEmpresas(filtroActual); // Recargar tabla con el filtro actual
       } else {
           const errorTexto = await response.text();
           alert(`Error al registrar empresa: ${errorTexto}`);
@@ -177,7 +212,8 @@ function actualizarTablaEmpresas(lista) {
   const tbody = document.querySelector("#tablaEmpresas tbody");
   tbody.innerHTML = ""; // Limpiar tabla
   if (lista.length === 0) {
-       tbody.innerHTML = '<tr><td colspan="2" style="text-align: center;">No hay empresas registradas.</td></tr>';
+       // MODIFICACIÓN: Mensaje cuando no hay coincidencias
+       tbody.innerHTML = '<tr><td colspan="2" style="text-align: center;">No se encontraron coincidencias.</td></tr>';
        return;
   }
   lista.forEach(e => {
@@ -187,12 +223,6 @@ function actualizarTablaEmpresas(lista) {
     </tr>`;
     tbody.innerHTML += fila;
   });
-}
-
-function buscarEmpresa() {
-  // Nota: La funcionalidad de búsqueda real requiere un endpoint en el backend.
-  alert('La búsqueda con filtros no está conectada aún a la base de datos.');
-  // El código original ha sido comentado o modificado ya que no funcionaba con el nuevo modelo.
 }
 
 function limpiarCamposEmpresas() {

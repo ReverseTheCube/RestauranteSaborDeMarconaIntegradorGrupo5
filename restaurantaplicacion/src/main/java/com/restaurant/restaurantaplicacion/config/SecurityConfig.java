@@ -37,6 +37,9 @@ public class SecurityConfig {
                     "/gestion-usuarios.html", "/js/gestion-usuarios.js",
                     // Gestión Clientes
                     "/gestion-cliente.html", "/css/style-cliente.css", "/js/gestion-clientes.js",
+                    // IMPORTANTE: Se añade la ruta de la nueva página y su JS
+                    "/gestion-asignar-empresa.html",
+                    "/js/gestion-asignar.js",
                     // Gestión Menú (Platos)
                     "/menu.html",
                     "/menu-crear.html",
@@ -47,9 +50,6 @@ public class SecurityConfig {
                     "/js/menu-crear.js",
                     "/js/menu-editar.js",
                     "/js/menu-eliminar.js",
-                    //GestionClientes
-                    "/gestion-clientes.html",
-                    "/js/gestion-clientes.js",
                     // Historial/Reportes
                     "/busquedafiltro.html",
                     "/ventaehistorial.html",
