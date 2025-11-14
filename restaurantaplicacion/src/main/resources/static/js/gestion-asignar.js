@@ -1,6 +1,6 @@
 // --- URLs DE LAS APIS ---
 const API_EMPRESAS = "http://localhost:8080/api/empresas";
-const API_CLIENTES = "http://localhost:8080/api/clientes"; // MODIFICADO: Apunta a la API de Clientes
+const API_CLIENTES = "http://localhost:8080/api/clientes"; 
 
 // --- Se ejecuta cuando el HTML termina de cargar ---
 document.addEventListener('DOMContentLoaded', () => {
@@ -18,21 +18,24 @@ async function cargarDatosSelects() {
         const selectRuc = document.getElementById('ruc');
         empresas.forEach(empresa => {
             const option = document.createElement('option');
-            option.value = empresa.ruc; // El valor será el RUC
-            option.textContent = `${empresa.razonSocial} (${empresa.ruc})`; // Muestra Razón Social y RUC
+            option.value = empresa.ruc; 
+            option.textContent = `${empresa.razonSocial} (${empresa.ruc})`; 
             selectRuc.appendChild(option);
         });
 
-        // 2. Cargar CLIENTES (para Trabajador/Pensionista) - BLOQUE MODIFICADO
-        const responseClientes = await fetch(API_CLIENTES); // Llama a la API de clientes
+        // 2. Cargar CLIENTES (Pensionistas)
+        const responseClientes = await fetch(API_CLIENTES);
         if (!responseClientes.ok) throw new Error('Error al cargar clientes');
         const clientes = await responseClientes.json();
         
         const selectTrabajador = document.getElementById('trabajador');
         clientes.forEach(cliente => {
             const option = document.createElement('option');
-            option.value = cliente.id; // El valor será el ID del cliente
-            option.textContent = cliente.nombresApellidos; // Muestra solo nombres y apellidos
+            option.value = cliente.id; 
+            
+            // Muestra Nombres y Apellidos (Número de Documento)
+            option.textContent = `${cliente.nombresApellidos} (${cliente.numeroDocumento})`; 
+            
             selectTrabajador.appendChild(option);
         });
 
@@ -42,17 +45,15 @@ async function cargarDatosSelects() {
     }
 }
 
-// --- Funciones existentes ---
-
+// --- FUNCIÓN MODIFICADA: Redirige a gestion-cliente.html ---
 function cerrarVentana() {
-  if (confirm("¿Desea cerrar la ventana?")) {
-    window.close(); // Cierra la ventana emergente
-  }
+    // MODIFICACIÓN CLAVE: Redirige a la página principal de gestión
+    window.location.href = 'gestion-cliente.html'; 
 }
 
 function guardarDatos() {
   const ruc = document.getElementById("ruc").value;
-  // Ahora es un ID de cliente (pensionista)
+  // clienteId ahora representa el ID del cliente (pensionista)
   const clienteId = document.getElementById("trabajador").value; 
   const saldo = document.getElementById("saldo").value;
 
@@ -61,6 +62,6 @@ function guardarDatos() {
     return;
   }
 
-  // Aquí iría la lógica para guardar los datos, por ejemplo, una llamada a una API.  
+  // Lógica de guardado simulada
   alert(`Datos guardados (simulado):\n\nRUC: ${ruc}\nCliente ID: ${clienteId}\nSaldo: ${saldo}`);
 }
