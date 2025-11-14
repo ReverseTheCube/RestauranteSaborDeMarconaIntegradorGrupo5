@@ -1,6 +1,7 @@
 // --- URLs DE LAS APIS ---
 const API_EMPRESAS = "http://localhost:8080/api/empresas";
 const API_CLIENTES = "http://localhost:8080/api/clientes"; 
+const API_ASIGNACIONES = "http://localhost:8080/api/asignaciones"; // NUEVO ENDPOINT
 
 // --- Se ejecuta cuando el HTML termina de cargar ---
 document.addEventListener('DOMContentLoaded', () => {
@@ -45,15 +46,16 @@ async function cargarDatosSelects() {
     }
 }
 
-// --- FUNCIÓN MODIFICADA: Redirige a gestion-cliente.html ---
+// --- FUNCIÓN CERRAR (Regresa a gestión-cliente.html) ---
 function cerrarVentana() {
-    // MODIFICACIÓN CLAVE: Redirige a la página principal de gestión
+  if (confirm("¿Desea regresar a la gestión de clientes y empresas?")) {
     window.location.href = 'gestion-cliente.html'; 
+  }
 }
 
-function guardarDatos() {
+// --- FUNCIÓN GUARDAR (Almacena en la BD) ---
+async function guardarDatos() {
   const ruc = document.getElementById("ruc").value;
-  // clienteId ahora representa el ID del cliente (pensionista)
   const clienteId = document.getElementById("trabajador").value; 
   const saldo = document.getElementById("saldo").value;
 
@@ -61,7 +63,34 @@ function guardarDatos() {
     alert("Por favor complete todos los campos.");
     return;
   }
+  
+  // 1. Crear el DTO (AsignacionRequest)
+  const asignacionRequest = {
+    rucEmpresa: ruc,
+    clienteId: parseInt(clienteId), 
+    saldo: parseFloat(saldo)
+  };
+  
+  // 2. Llamada POST a la nueva API
+  try {
+    const response = await fetch(API_ASIGNACIONES, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(asignacionRequest),
+    });
 
-  // Lógica de guardado simulada
-  alert(`Datos guardados (simulado):\n\nRUC: ${ruc}\nCliente ID: ${clienteId}\nSaldo: ${saldo}`);
+    if (response.ok) {
+      alert("¡Asignación de pensión guardada exitosamente!");
+      // Redirigir a la página principal después de guardar
+      window.location.href = 'gestion-cliente.html';
+    } else {
+      const errorText = await response.text();
+      alert(`Error al guardar la asignación: ${errorText}`);
+    }
+  } catch (error) {
+    console.error("Error de red al guardar asignación:", error);
+    alert("No se pudo conectar con el servidor para guardar los datos.");
+  }
 }

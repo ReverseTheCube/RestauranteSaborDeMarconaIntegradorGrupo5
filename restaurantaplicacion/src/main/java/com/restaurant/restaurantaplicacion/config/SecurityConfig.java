@@ -37,7 +37,6 @@ public class SecurityConfig {
                     "/gestion-usuarios.html", "/js/gestion-usuarios.js",
                     // Gestión Clientes
                     "/gestion-cliente.html", "/css/style-cliente.css", "/js/gestion-clientes.js",
-                    // IMPORTANTE: Se añade la ruta de la nueva página y su JS
                     "/gestion-asignar-empresa.html",
                     "/js/gestion-asignar.js",
                     // Gestión Menú (Platos)
@@ -81,6 +80,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/reportes/**").permitAll()   // API Reportes
                 .requestMatchers("/api/clientes/**").permitAll()   // API Clientes
                 .requestMatchers("/api/empresas/**").permitAll()   // API Empresas
+                .requestMatchers("/api/asignaciones/**").permitAll() // NUEVA LÍNEA: API Asignaciones
 
                 // 5. Para CUALQUIER OTRA petición, se debe estar autenticado
                 .anyRequest().authenticated()
