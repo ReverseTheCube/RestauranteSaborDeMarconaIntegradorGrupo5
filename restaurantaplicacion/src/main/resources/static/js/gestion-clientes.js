@@ -4,7 +4,6 @@ const API_URL_EMPRESAS = "http://localhost:8080/api/empresas";
 
 // --- EVENTO PRINCIPAL: Cargar todo al iniciar ---
 document.addEventListener("DOMContentLoaded", () => {
-    // MODIFICACIÓN: Eliminamos la llamada inicial a cargarClientes()
     // La carga se realizará solo al buscar.
 });
 
@@ -24,7 +23,7 @@ function mostrarSeccion(seccion) {
     document.getElementById("tabClientes").classList.add("active");
     // Al cambiar de pestaña, reinicia el contenido a la frase inicial
     const tbody = document.querySelector("#tablaClientes tbody");
-    if (tbody.children.length === 0 || tbody.children.length === 1 && tbody.children[0].textContent.includes('No hay clientes')) {
+    if (tbody.children.length === 0 || tbody.children[0].textContent.includes('No hay clientes') || tbody.children[0].textContent.includes('encontraron coincidencias')) {
         tbody.innerHTML = mensajeInicialClientes;
     }
   } else {
@@ -32,7 +31,7 @@ function mostrarSeccion(seccion) {
     document.getElementById("tabEmpresas").classList.add("active");
     // Al cambiar de pestaña, reinicia el contenido a la frase inicial
     const tbody = document.querySelector("#tablaEmpresas tbody");
-    if (tbody.children.length === 0 || tbody.children.length === 1 && tbody.children[0].textContent.includes('No hay empresas')) {
+    if (tbody.children.length === 0 || tbody.children[0].textContent.includes('No hay empresas') || tbody.children[0].textContent.includes('encontraron coincidencias')) {
         tbody.innerHTML = mensajeInicialEmpresas;
     }
   }
@@ -62,6 +61,8 @@ async function cargarClientes(filtro = '') {
     } catch (error) {
         console.error("Error en cargarClientes:", error);
         actualizarTablaClientes([]); 
+        // Es crucial PROPAGAR el error para que la función llamadora (registrarCliente) pueda atraparlo
+        throw error; 
     }
 }
 
@@ -102,8 +103,19 @@ async function registrarCliente() {
       if (response.ok) {
           alert("Cliente registrado exitosamente!");
           limpiarCamposClientes();
-          const filtroActual = document.getElementById('buscarCliente').value;
-          cargarClientes(filtroActual); // Recargar tabla con el filtro actual
+          
+          // *** CAMBIO CLAVE SOLICITADO: ELIMINAR RECARGA AUTOMÁTICA ***
+          /*
+          try {
+              const filtroActual = document.getElementById('buscarCliente').value;
+              await cargarClientes(filtroActual); 
+          } catch (refreshError) {
+               console.warn("ADVERTENCIA: Fallo al recargar la tabla después del registro. El cliente fue guardado correctamente.", refreshError);
+               alert("ADVERTENCIA: El cliente se registró, pero no se pudo recargar la tabla.");
+          }
+          */
+          // *** FIN CAMBIO CLAVE ***
+          
       } else {
           const errorTexto = await response.text();
           alert(`Error al registrar cliente: ${errorTexto}`);
@@ -133,7 +145,11 @@ function actualizarTablaClientes(lista) {
   });
 }
 
-// ... (limpiarCamposClientes sin cambios) ...
+function limpiarCamposClientes() {
+  document.getElementById("tipoDocumento").value = "";
+  document.getElementById("numeroDocumento").value = "";
+  document.getElementById("nombresApellidos").value = "";
+}
 
 // --- EMPRESAS (API IMPLEMENTATION) ---
 
@@ -157,6 +173,7 @@ async function cargarEmpresas(filtro = '') {
     } catch (error) {
         console.error("Error en cargarEmpresas:", error);
         actualizarTablaEmpresas([]); 
+        throw error; // Propagamos el error de la recarga
     }
 }
 
@@ -195,8 +212,19 @@ async function registrarEmpresa() {
       if (response.ok) {
           alert("Empresa registrada exitosamente!");
           limpiarCamposEmpresas();
-          const filtroActual = document.getElementById('buscarEmpresa').value;
-          cargarEmpresas(filtroActual); // Recargar tabla con el filtro actual
+          
+          // *** CAMBIO CLAVE SOLICITADO: ELIMINAR RECARGA AUTOMÁTICA ***
+          /*
+          try {
+              const filtroActual = document.getElementById('buscarEmpresa').value;
+              await cargarEmpresas(filtroActual); 
+          } catch (refreshError) {
+               console.warn("ADVERTENCIA: Fallo al recargar la tabla después del registro. La empresa fue guardada correctamente.", refreshError);
+              alert("ADVERTENCIA: La empresa se registró, pero no se pudo recargar la tabla.");
+          }
+          */
+          // *** FIN CAMBIO CLAVE ***
+          
       } else {
           const errorTexto = await response.text();
           alert(`Error al registrar empresa: ${errorTexto}`);
