@@ -36,19 +36,20 @@
       <input type="text" id="buscarCliente" oninput="buscarCliente(this.value)">
       <button onclick="buscarCliente('')">MOSTRAR TODO</button>
 
-      <table id="tablaClientes">
-        <thead>
-          <tr>
-            <th>Tipo Documento</th>
-            <th>Número Documento</th>
-            <th>Nombres y Apellidos</th>
-          </tr>
-        </thead>
-        <tbody>
-            <tr><td colspan="3" style="text-align: center;">Pulse BUSCAR o escriba un filtro para cargar datos.</td></tr>
-        </tbody>
-      </table>
-
+      <div class="table-scroll-wrapper">
+        <table id="tablaClientes">
+          <thead>
+            <tr>
+              <th>Tipo Documento</th>
+              <th>Número Documento</th>
+              <th>Nombres y Apellidos</th>
+            </tr>
+          </thead>
+          <tbody>
+              <tr><td colspan="3" style="text-align: center;">Pulse BUSCAR o escriba un filtro para cargar datos.</td></tr>
+          </tbody>
+        </table>
+      </div>
       <div class="actions">
         <button onclick="retroceder()">ANTERIOR</button>
       </div>
@@ -69,18 +70,19 @@
       <input type="text" id="buscarEmpresa" oninput="buscarEmpresa(this.value)">
       <button onclick="buscarEmpresa('')">MOSTRAR TODO</button>
 
-      <table id="tablaEmpresas">
-        <thead>
-          <tr>
-            <th>RUC</th>
-            <th>Razón Social</th>
-          </tr>
-        </thead>
-        <tbody>
-            <tr><td colspan="2" style="text-align: center;">Pulse BUSCAR o escriba un filtro para cargar datos.</td></tr>
-        </tbody>
-      </table>
-
+      <div class="table-scroll-wrapper">
+        <table id="tablaEmpresas">
+          <thead>
+            <tr>
+              <th>RUC</th>
+              <th>Razón Social</th>
+            </tr>
+          </thead>
+          <tbody>
+              <tr><td colspan="2" style="text-align: center;">Pulse BUSCAR o escriba un filtro para cargar datos.</td></tr>
+          </tbody>
+        </table>
+      </div>
       <div class="actions">
         <button onclick="retroceder()">ANTERIOR</button>
         <button onclick="window.location.href = '/gestion-asignar-empresa.html'">ASIGNAR TRABAJADOR</button>
