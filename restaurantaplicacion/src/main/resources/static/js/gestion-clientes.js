@@ -9,30 +9,50 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // --- FUNCIONALIDAD BÁSICA DEL PANEL ---
 function mostrarSeccion(seccion) {
+  // Oculta todas las secciones
   document.getElementById("clientes").classList.add("hidden");
   document.getElementById("empresas").classList.add("hidden");
+  
+  // NUEVO: Ocultar Pensionados
+  const pensionadosEl = document.getElementById("pensionados");
+  if (pensionadosEl) pensionadosEl.classList.add("hidden");
+  
+  // Desactiva todas las pestañas
   document.getElementById("tabClientes").classList.remove("active");
   document.getElementById("tabEmpresas").classList.remove("active");
+  
+  // NUEVO: Desactivar PENSIONADOS
+  const tabPensionadosEl = document.getElementById("tabPensionados");
+  if (tabPensionadosEl) tabPensionadosEl.classList.remove("active");
+  
 
   const mensajeInicialClientes = '<tr><td colspan="3" style="text-align: center;">Pulse BUSCAR o escriba un filtro para cargar datos.</td></tr>';
   const mensajeInicialEmpresas = '<tr><td colspan="2" style="text-align: center;">Pulse BUSCAR o escriba un filtro para cargar datos.</td></tr>';
+  const mensajeInicialPensionados = '<tr><td colspan="5" style="text-align: center;">Presione BUSCAR para ver el listado.</td></tr>'; // 5 columnas
 
-
+  // Muestra la sección seleccionada
   if (seccion === "clientes") {
     document.getElementById("clientes").classList.remove("hidden");
     document.getElementById("tabClientes").classList.add("active");
-    // Al cambiar de pestaña, reinicia el contenido a la frase inicial
     const tbody = document.querySelector("#tablaClientes tbody");
     if (tbody.children.length === 0 || tbody.children[0].textContent.includes('No hay clientes') || tbody.children[0].textContent.includes('encontraron coincidencias')) {
         tbody.innerHTML = mensajeInicialClientes;
     }
-  } else {
+  } else if (seccion === "empresas") {
     document.getElementById("empresas").classList.remove("hidden");
     document.getElementById("tabEmpresas").classList.add("active");
-    // Al cambiar de pestaña, reinicia el contenido a la frase inicial
     const tbody = document.querySelector("#tablaEmpresas tbody");
     if (tbody.children.length === 0 || tbody.children[0].textContent.includes('No hay empresas') || tbody.children[0].textContent.includes('encontraron coincidencias')) {
         tbody.innerHTML = mensajeInicialEmpresas;
+    }
+  } else if (seccion === "pensionados") { // NUEVO: Lógica para Pensionados
+    document.getElementById("pensionados").classList.remove("hidden");
+    if (tabPensionadosEl) tabPensionadosEl.classList.add("active");
+    
+    // Inicializa la tabla de pensionados
+    const tbody = document.querySelector("#tablaPensionados tbody");
+    if (tbody.children.length === 0 || tbody.children[0].textContent.includes('No hay') || tbody.children[0].textContent.includes('encontraron coincidencias')) {
+        tbody.innerHTML = mensajeInicialPensionados;
     }
   }
 }
@@ -61,7 +81,6 @@ async function cargarClientes(filtro = '') {
     } catch (error) {
         console.error("Error en cargarClientes:", error);
         actualizarTablaClientes([]); 
-        // Es crucial PROPAGAR el error para que la función llamadora (registrarCliente) pueda atraparlo
         throw error; 
     }
 }
@@ -104,17 +123,7 @@ async function registrarCliente() {
           alert("Cliente registrado exitosamente!");
           limpiarCamposClientes();
           
-          // *** CAMBIO CLAVE SOLICITADO: ELIMINAR RECARGA AUTOMÁTICA ***
-          /*
-          try {
-              const filtroActual = document.getElementById('buscarCliente').value;
-              await cargarClientes(filtroActual); 
-          } catch (refreshError) {
-               console.warn("ADVERTENCIA: Fallo al recargar la tabla después del registro. El cliente fue guardado correctamente.", refreshError);
-               alert("ADVERTENCIA: El cliente se registró, pero no se pudo recargar la tabla.");
-          }
-          */
-          // *** FIN CAMBIO CLAVE ***
+          // La tabla no se recarga automáticamente.
           
       } else {
           const errorTexto = await response.text();
@@ -213,17 +222,7 @@ async function registrarEmpresa() {
           alert("Empresa registrada exitosamente!");
           limpiarCamposEmpresas();
           
-          // *** CAMBIO CLAVE SOLICITADO: ELIMINAR RECARGA AUTOMÁTICA ***
-          /*
-          try {
-              const filtroActual = document.getElementById('buscarEmpresa').value;
-              await cargarEmpresas(filtroActual); 
-          } catch (refreshError) {
-               console.warn("ADVERTENCIA: Fallo al recargar la tabla después del registro. La empresa fue guardada correctamente.", refreshError);
-              alert("ADVERTENCIA: La empresa se registró, pero no se pudo recargar la tabla.");
-          }
-          */
-          // *** FIN CAMBIO CLAVE ***
+          // La tabla no se recarga automáticamente.
           
       } else {
           const errorTexto = await response.text();
@@ -258,6 +257,14 @@ function limpiarCamposEmpresas() {
   document.getElementById("razonSocial").value = "";
 }
 
+// --- NUEVO: FUNCIONALIDAD PENSIONADOS (Placeholder) ---
+
+function buscarPensionado() {
+    alert("Funcionalidad de búsqueda de pensionados (Módulo PENSIONADOS) pendiente de implementar la lógica de la API.");
+    // Aquí iría la lógica para llamar al endpoint /api/asignaciones con un filtro
+}
+
+// --- FUNCIÓN ATRÁS ---
 function retroceder() {
   window.location.href = 'admin.html';
 }
