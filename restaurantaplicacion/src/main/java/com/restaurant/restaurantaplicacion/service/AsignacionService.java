@@ -1,6 +1,7 @@
 package com.restaurant.restaurantaplicacion.service;
 
 import com.restaurant.restaurantaplicacion.dto.AsignacionRequest;
+import com.restaurant.restaurantaplicacion.dto.AjusteSaldoRequest; // NUEVO
 import com.restaurant.restaurantaplicacion.model.AsignacionPension;
 import com.restaurant.restaurantaplicacion.model.Cliente;
 import com.restaurant.restaurantaplicacion.model.Empresa;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -25,6 +27,7 @@ public class AsignacionService {
     @Autowired
     private ClienteRepository clienteRepository;
 
+    // --- Lógica de Asignación Inicial (sin cambios) ---
     @Transactional
     public AsignacionPension crearAsignacion(AsignacionRequest request) {
         
@@ -53,6 +56,37 @@ public class AsignacionService {
         asignacion.setCliente(cliente);
         asignacion.setSaldo(request.getSaldo());
 
+        return asignacionPensionRepository.save(asignacion);
+    }
+    
+    // --- Lógica de Búsqueda por RUC (sin cambios) ---
+    public List<AsignacionPension> buscarAsignacionesPorRuc(String ruc) {
+        return asignacionPensionRepository.findByEmpresaRuc(ruc);
+    }
+
+    // --- NUEVO MÉTODO: Ajustar Saldo de la Pensión ---
+    @Transactional
+    public AsignacionPension ajustarSaldo(Long asignacionId, AjusteSaldoRequest request) {
+        
+        // 1. Buscar la asignación
+        AsignacionPension asignacion = asignacionPensionRepository.findById(asignacionId)
+                .orElseThrow(() -> new RuntimeException("Asignación de pensión no encontrada con ID: " + asignacionId));
+        
+        // 2. Validar que el monto de ajuste no sea nulo
+        if (request.getMontoAjuste() == null) {
+            throw new RuntimeException("El monto de ajuste no puede ser nulo.");
+        }
+        
+        // 3. Aplicar el ajuste al saldo actual
+        Double nuevoSaldo = asignacion.getSaldo() + request.getMontoAjuste();
+        
+        // 4. Validación de saldo negativo (opcional, pero buena práctica)
+        if (nuevoSaldo < 0) {
+            throw new RuntimeException("La operación resultaría en un saldo negativo. Saldo actual: S/ " + asignacion.getSaldo());
+        }
+        
+        // 5. Actualizar y guardar
+        asignacion.setSaldo(nuevoSaldo);
         return asignacionPensionRepository.save(asignacion);
     }
 }

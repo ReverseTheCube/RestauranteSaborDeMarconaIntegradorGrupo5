@@ -1,6 +1,7 @@
 // --- CONSTANTES DE LA API ---
 const API_URL_CLIENTES = "http://localhost:8080/api/clientes";
 const API_URL_EMPRESAS = "http://localhost:8080/api/empresas";
+const API_ASIGNACIONES = "http://localhost:8080/api/asignaciones";
 
 // --- EVENTO PRINCIPAL: Cargar todo al iniciar ---
 document.addEventListener("DOMContentLoaded", () => {
@@ -13,7 +14,6 @@ function mostrarSeccion(seccion) {
   document.getElementById("clientes").classList.add("hidden");
   document.getElementById("empresas").classList.add("hidden");
   
-  // NUEVO: Ocultar Pensionados
   const pensionadosEl = document.getElementById("pensionados");
   if (pensionadosEl) pensionadosEl.classList.add("hidden");
   
@@ -21,7 +21,6 @@ function mostrarSeccion(seccion) {
   document.getElementById("tabClientes").classList.remove("active");
   document.getElementById("tabEmpresas").classList.remove("active");
   
-  // NUEVO: Desactivar PENSIONADOS
   const tabPensionadosEl = document.getElementById("tabPensionados");
   if (tabPensionadosEl) tabPensionadosEl.classList.remove("active");
   
@@ -45,7 +44,7 @@ function mostrarSeccion(seccion) {
     if (tbody.children.length === 0 || tbody.children[0].textContent.includes('No hay empresas') || tbody.children[0].textContent.includes('encontraron coincidencias')) {
         tbody.innerHTML = mensajeInicialEmpresas;
     }
-  } else if (seccion === "pensionados") { // NUEVO: Lógica para Pensionados
+  } else if (seccion === "pensionados") { // Lógica para Pensionados
     document.getElementById("pensionados").classList.remove("hidden");
     if (tabPensionadosEl) tabPensionadosEl.classList.add("active");
     
@@ -58,19 +57,12 @@ function mostrarSeccion(seccion) {
 }
 
 // --- CLIENTES (API IMPLEMENTATION) ---
-
-/**
- * Función central para cargar/filtrar clientes.
- * @param {string} filtro - El texto de búsqueda (DNI, Nombre o vacío).
- */
 async function cargarClientes(filtro = '') {
-    // Si el filtro es vacío y la llamada NO es para recargar tras un registro, no hace nada.
     if (!filtro && (event.type === 'input' || event.type === 'change')) {
-        actualizarTablaClientes([]); // Vacía la tabla si el input está vacío
+        actualizarTablaClientes([]); 
         return;
     }
     
-    // Si no hay filtro, la URL es la base (que devolverá todos). Si hay, añade el filtro.
     const url = filtro ? `${API_URL_CLIENTES}?filtro=${encodeURIComponent(filtro)}` : API_URL_CLIENTES;
     
     try {
@@ -84,13 +76,9 @@ async function cargarClientes(filtro = '') {
         throw error; 
     }
 }
-
-// MODIFICACIÓN: Se unifica la función de búsqueda para botón y oninput
 function buscarCliente(filtro) {
   cargarClientes(filtro);
 }
-
-// REGISTRAR CLIENTE (POST)
 async function registrarCliente() {
   const tipo = document.getElementById("tipoDocumento").value;
   const numero = document.getElementById("numeroDocumento").value.trim();
@@ -100,7 +88,6 @@ async function registrarCliente() {
     alert("Por favor, Completar todos los campos.");
     return;
   }
-
   if (!/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(nombre)) {
     alert("Error, solo se acepta letras en Nombres y Apellidos.");
     return;
@@ -122,9 +109,6 @@ async function registrarCliente() {
       if (response.ok) {
           alert("Cliente registrado exitosamente!");
           limpiarCamposClientes();
-          
-          // La tabla no se recarga automáticamente.
-          
       } else {
           const errorTexto = await response.text();
           alert(`Error al registrar cliente: ${errorTexto}`);
@@ -134,13 +118,10 @@ async function registrarCliente() {
       alert("No se pudo conectar con el servidor.");
   }
 }
-
-// ACTUALIZAR TABLA CLIENTES (A partir de la lista recibida de la API)
 function actualizarTablaClientes(lista) {
   const tbody = document.querySelector("#tablaClientes tbody");
-  tbody.innerHTML = ""; // Limpiar tabla
+  tbody.innerHTML = ""; 
   if (lista.length === 0) {
-      // MODIFICACIÓN: Mensaje cuando no hay coincidencias
       tbody.innerHTML = '<tr><td colspan="3" style="text-align: center;">No se encontraron coincidencias.</td></tr>';
       return;
   }
@@ -153,7 +134,6 @@ function actualizarTablaClientes(lista) {
     tbody.innerHTML += fila;
   });
 }
-
 function limpiarCamposClientes() {
   document.getElementById("tipoDocumento").value = "";
   document.getElementById("numeroDocumento").value = "";
@@ -161,11 +141,6 @@ function limpiarCamposClientes() {
 }
 
 // --- EMPRESAS (API IMPLEMENTATION) ---
-
-/**
- * Función central para cargar/filtrar empresas.
- * @param {string} filtro - El texto de búsqueda (RUC, Razón Social o vacío).
- */
 async function cargarEmpresas(filtro = '') {
     if (!filtro && (event.type === 'input' || event.type === 'change')) {
         actualizarTablaEmpresas([]); 
@@ -182,16 +157,12 @@ async function cargarEmpresas(filtro = '') {
     } catch (error) {
         console.error("Error en cargarEmpresas:", error);
         actualizarTablaEmpresas([]); 
-        throw error; // Propagamos el error de la recarga
+        throw error;
     }
 }
-
-// MODIFICACIÓN: Se unifica la función de búsqueda para botón y oninput
 function buscarEmpresa(filtro) {
   cargarEmpresas(filtro);
 }
-
-// REGISTRAR EMPRESA (POST)
 async function registrarEmpresa() {
   const ruc = document.getElementById("ruc").value.trim();
   const razon = document.getElementById("razonSocial").value.trim();
@@ -221,9 +192,6 @@ async function registrarEmpresa() {
       if (response.ok) {
           alert("Empresa registrada exitosamente!");
           limpiarCamposEmpresas();
-          
-          // La tabla no se recarga automáticamente.
-          
       } else {
           const errorTexto = await response.text();
           alert(`Error al registrar empresa: ${errorTexto}`);
@@ -233,13 +201,10 @@ async function registrarEmpresa() {
       alert("No se pudo conectar con el servidor.");
   }
 }
-
-// ACTUALIZAR TABLA EMPRESAS (A partir de la lista recibida de la API)
 function actualizarTablaEmpresas(lista) {
   const tbody = document.querySelector("#tablaEmpresas tbody");
-  tbody.innerHTML = ""; // Limpiar tabla
+  tbody.innerHTML = ""; 
   if (lista.length === 0) {
-       // MODIFICACIÓN: Mensaje cuando no hay coincidencias
        tbody.innerHTML = '<tr><td colspan="2" style="text-align: center;">No se encontraron coincidencias.</td></tr>';
        return;
   }
@@ -251,18 +216,137 @@ function actualizarTablaEmpresas(lista) {
     tbody.innerHTML += fila;
   });
 }
-
 function limpiarCamposEmpresas() {
   document.getElementById("ruc").value = "";
   document.getElementById("razonSocial").value = "";
 }
 
-// --- NUEVO: FUNCIONALIDAD PENSIONADOS (Placeholder) ---
+// --- NUEVO: FUNCIONALIDAD PENSIONADOS ---
 
-function buscarPensionado() {
-    alert("Funcionalidad de búsqueda de pensionados (Módulo PENSIONADOS) pendiente de implementar la lógica de la API.");
-    // Aquí iría la lógica para llamar al endpoint /api/asignaciones con un filtro
+// Función auxiliar para dibujar la tabla de asignaciones
+function actualizarTablaPensionados(lista) {
+    const tbody = document.querySelector("#tablaPensionados tbody");
+    tbody.innerHTML = "";
+    
+    if (!lista || lista.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No se encontraron asignaciones para este RUC.</td></tr>';
+        return;
+    }
+    
+    lista.forEach(asignacion => {
+        // Asume que la respuesta del backend incluye los objetos Empresa y Cliente completos
+        const clienteInfo = `${asignacion.cliente.nombresApellidos} (${asignacion.cliente.numeroDocumento})`;
+        const saldoFormateado = `S/. ${asignacion.saldo.toFixed(2)}`;
+        
+        const fila = `
+            <tr>
+                <td>${asignacion.id}</td>
+                <td>${asignacion.empresa.ruc}</td>
+                <td>${clienteInfo}</td>
+                <td>${saldoFormateado}</td>
+                <td>
+                    <button class="icon-button" style="background-color: #2ecc71; color: white; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; margin-right: 5px; font-weight: bold;" onclick="ajustarSaldo(${asignacion.id}, 1)">+</button>
+                    <button class="icon-button" style="background-color: #e74c3c; color: white; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-weight: bold;" onclick="ajustarSaldo(${asignacion.id}, -1)">-</button>
+                </td>
+            </tr>
+        `;
+        tbody.innerHTML += fila;
+    });
 }
+
+// Lógica para los iconos (ahora envía el PUT al backend)
+async function ajustarSaldo(asignacionId, tipo) {
+    const accion = tipo === 1 ? 'agregar' : 'quitar';
+    
+    // Pedir el monto al usuario
+    let montoString = prompt(`Ingrese el monto a ${accion} al saldo de la Asignación ID ${asignacionId}:`);
+    
+    if (montoString === null || montoString.trim() === '') {
+        return; // Cancelado por el usuario
+    }
+    
+    const monto = parseFloat(montoString);
+    
+    if (isNaN(monto) || monto <= 0) {
+        alert("Monto inválido. Debe ser un número positivo.");
+        return;
+    }
+    
+    // Si es una resta (tipo -1), el montoAjuste debe ser negativo
+    const montoAjuste = tipo === -1 ? -monto : monto;
+    
+    const requestData = {
+        montoAjuste: montoAjuste
+    };
+
+    try {
+        const response = await fetch(`${API_ASIGNACIONES}/${asignacionId}/saldo`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(requestData),
+        });
+
+        if (response.ok) {
+            alert(`Saldo actualizado exitosamente. Monto: S/ ${montoAjuste.toFixed(2)}`);
+            
+            // Re-ejecutar la búsqueda para actualizar la tabla con el nuevo saldo
+            const rucActual = document.getElementById('buscarPensionado').value;
+            await buscarPensionado();
+            
+        } else {
+            const errorText = await response.text();
+            alert(`Error al ajustar saldo: ${errorText}`);
+        }
+        
+    } catch (error) {
+        console.error("Error de red o servidor al ajustar saldo:", error);
+        alert("No se pudo conectar con el servidor para actualizar el saldo.");
+    }
+}
+
+
+// Función principal de búsqueda de pensionados
+async function buscarPensionado() {
+    const input = document.getElementById('buscarPensionado');
+    const ruc = input.value.trim();
+
+    // 1. Validación (11 dígitos numéricos)
+    const rucRegex = /^\d{11}$/;
+    if (!rucRegex.test(ruc)) {
+        alert("Datos incorrectos. Debe ingresar exactamente 11 dígitos numéricos (RUC).");
+        actualizarTablaPensionados([]);
+        return;
+    }
+
+    try {
+        // 2. Búsqueda por RUC (Endpoint: /api/asignaciones/buscar?ruc={ruc})
+        const urlBusqueda = `${API_ASIGNACIONES}/buscar?ruc=${ruc}`; 
+        
+        const response = await fetch(urlBusqueda);
+        const asignaciones = await response.json(); 
+
+        if (!response.ok) {
+            // Manejo de errores 400, 500, etc.
+            throw new Error(`Error en el servidor: ${response.status}`);
+        }
+        
+        if (asignaciones.length === 0) {
+            // 3. RUC no registrada o sin asignaciones
+             alert("RUC no registrada o no tiene pensionados asignados.");
+             actualizarTablaPensionados([]);
+             return;
+        }
+
+        // 4. Mostrar datos en la tabla
+        actualizarTablaPensionados(asignaciones);
+
+    } catch (error) {
+        console.error("Error buscando asignaciones:", error);
+        alert(`Error de red o servidor al buscar asignaciones: ${error.message}`);
+        actualizarTablaPensionados([]);
+    }
+}
+
 
 // --- FUNCIÓN ATRÁS ---
 function retroceder() {
