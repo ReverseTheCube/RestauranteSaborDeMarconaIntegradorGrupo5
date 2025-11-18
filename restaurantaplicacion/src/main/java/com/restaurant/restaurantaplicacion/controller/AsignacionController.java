@@ -1,7 +1,7 @@
 package com.restaurant.restaurantaplicacion.controller;
 
 import com.restaurant.restaurantaplicacion.dto.AsignacionRequest;
-import com.restaurant.restaurantaplicacion.dto.AjusteSaldoRequest; // NUEVO
+import com.restaurant.restaurantaplicacion.dto.AjusteSaldoRequest; 
 import com.restaurant.restaurantaplicacion.model.AsignacionPension;
 import com.restaurant.restaurantaplicacion.service.AsignacionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,11 +37,7 @@ public class AsignacionController {
         return ResponseEntity.ok(asignaciones);
     }
     
-    // --- NUEVO ENDPOINT: Ajustar Saldo (PUT) ---
-    /**
-     * PUT http://localhost:8080/api/asignaciones/{id}/saldo
-     * Ajusta el saldo de una asignación específica.
-     */
+    // --- ENDPOINT PUT (Ajustar Saldo) ---
     @PutMapping("/{id}/saldo")
     public ResponseEntity<AsignacionPension> actualizarSaldo(@PathVariable Long id, @RequestBody AjusteSaldoRequest request) {
         try {
@@ -49,6 +45,22 @@ public class AsignacionController {
             return ResponseEntity.ok(asignacionActualizada);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
+    
+    // --- NUEVO ENDPOINT: Eliminar Asignación (DELETE) ---
+    /**
+     * DELETE http://localhost:8080/api/asignaciones/{id}
+     * Elimina una asignación específica.
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminarAsignacion(@PathVariable Long id) {
+        try {
+            asignacionService.eliminarAsignacion(id);
+            return ResponseEntity.noContent().build(); // 204 No Content (Éxito)
+        } catch (RuntimeException e) {
+            // Error si el ID no existe
+            return ResponseEntity.notFound().build(); 
         }
     }
 }

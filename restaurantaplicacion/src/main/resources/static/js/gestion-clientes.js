@@ -1,7 +1,7 @@
 // --- CONSTANTES DE LA API ---
 const API_URL_CLIENTES = "http://localhost:8080/api/clientes";
 const API_URL_EMPRESAS = "http://localhost:8080/api/empresas";
-const API_ASIGNACIONES = "http://localhost:8080/api/asignaciones";
+const API_ASIGNACIONES = "http://localhost:8080/api/asignaciones"; // API de Asignaciones
 
 // --- EVENTO PRINCIPAL: Cargar todo al iniciar ---
 document.addEventListener("DOMContentLoaded", () => {
@@ -223,6 +223,37 @@ function limpiarCamposEmpresas() {
 
 // --- NUEVO: FUNCIONALIDAD PENSIONADOS ---
 
+// Función para confirmar y ejecutar el DELETE
+async function confirmarEliminarAsignacion(asignacionId) {
+    if (!confirm(`¿Está seguro de que desea ELIMINAR la Asignación?`)) {
+        return;
+    }
+    
+    try {
+        // Enviar la petición DELETE
+        const response = await fetch(`${API_ASIGNACIONES}/${asignacionId}`, {
+            method: "DELETE", 
+        });
+
+        if (response.status === 204) { // 204 No Content es el código de éxito de DELETE
+            alert(`Asignación eliminada exitosamente.`);
+            
+            // Re-ejecutar la búsqueda para actualizar la tabla
+            await buscarPensionado();
+            
+        } else if (response.status === 404) {
+            alert("Error: La asignación no fue encontrada en el servidor.");
+        } else {
+            const errorText = await response.text();
+            alert(`Error al eliminar: ${response.status} - ${errorText}`);
+        }
+        
+    } catch (error) {
+        console.error("Error de red o servidor al eliminar asignación:", error);
+        alert("No se pudo conectar con el servidor para eliminar la asignación.");
+    }
+}
+
 // Función auxiliar para dibujar la tabla de asignaciones
 function actualizarTablaPensionados(lista) {
     const tbody = document.querySelector("#tablaPensionados tbody");
@@ -234,7 +265,6 @@ function actualizarTablaPensionados(lista) {
     }
     
     lista.forEach(asignacion => {
-        // Asume que la respuesta del backend incluye los objetos Empresa y Cliente completos
         const clienteInfo = `${asignacion.cliente.nombresApellidos} (${asignacion.cliente.numeroDocumento})`;
         const saldoFormateado = `S/. ${asignacion.saldo.toFixed(2)}`;
         
@@ -246,7 +276,8 @@ function actualizarTablaPensionados(lista) {
                 <td>${saldoFormateado}</td>
                 <td>
                     <button class="icon-button" style="background-color: #2ecc71; color: white; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; margin-right: 5px; font-weight: bold;" onclick="ajustarSaldo(${asignacion.id}, 1)">+</button>
-                    <button class="icon-button" style="background-color: #e74c3c; color: white; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-weight: bold;" onclick="ajustarSaldo(${asignacion.id}, -1)">-</button>
+                    
+                    <button class="icon-button" style="background-color: #e74c3c; color: white; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-weight: bold;" onclick="confirmarEliminarAsignacion(${asignacion.id})">-</button>
                 </td>
             </tr>
         `;
@@ -254,11 +285,10 @@ function actualizarTablaPensionados(lista) {
     });
 }
 
-// Lógica para los iconos (ahora envía el PUT al backend)
+// Lógica para los iconos (Suma/Ajuste)
 async function ajustarSaldo(asignacionId, tipo) {
     const accion = tipo === 1 ? 'agregar' : 'quitar';
     
-    // Pedir el monto al usuario
     let montoString = prompt(`Ingrese el monto a ${accion} al saldo de la Asignación ID ${asignacionId}:`);
     
     if (montoString === null || montoString.trim() === '') {
@@ -290,7 +320,6 @@ async function ajustarSaldo(asignacionId, tipo) {
             alert(`Saldo actualizado exitosamente. Monto: S/ ${montoAjuste.toFixed(2)}`);
             
             // Re-ejecutar la búsqueda para actualizar la tabla con el nuevo saldo
-            const rucActual = document.getElementById('buscarPensionado').value;
             await buscarPensionado();
             
         } else {
@@ -331,7 +360,7 @@ async function buscarPensionado() {
         }
         
         if (asignaciones.length === 0) {
-            // 3. RUC no registrada o sin asignaciones
+            // 3. Si la lista está vacía
              alert("RUC no registrada o no tiene pensionados asignados.");
              actualizarTablaPensionados([]);
              return;

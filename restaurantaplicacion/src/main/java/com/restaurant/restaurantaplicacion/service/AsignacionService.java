@@ -1,7 +1,7 @@
 package com.restaurant.restaurantaplicacion.service;
 
 import com.restaurant.restaurantaplicacion.dto.AsignacionRequest;
-import com.restaurant.restaurantaplicacion.dto.AjusteSaldoRequest; // NUEVO
+import com.restaurant.restaurantaplicacion.dto.AjusteSaldoRequest; // <-- ESTA LÍNEA ES CLAVE
 import com.restaurant.restaurantaplicacion.model.AsignacionPension;
 import com.restaurant.restaurantaplicacion.model.Cliente;
 import com.restaurant.restaurantaplicacion.model.Empresa;
@@ -27,7 +27,7 @@ public class AsignacionService {
     @Autowired
     private ClienteRepository clienteRepository;
 
-    // --- Lógica de Asignación Inicial (sin cambios) ---
+    // --- Lógica de Asignación Inicial (crearAsignacion) ---
     @Transactional
     public AsignacionPension crearAsignacion(AsignacionRequest request) {
         
@@ -59,12 +59,12 @@ public class AsignacionService {
         return asignacionPensionRepository.save(asignacion);
     }
     
-    // --- Lógica de Búsqueda por RUC (sin cambios) ---
+    // --- Lógica de Búsqueda por RUC (buscarAsignacionesPorRuc) ---
     public List<AsignacionPension> buscarAsignacionesPorRuc(String ruc) {
         return asignacionPensionRepository.findByEmpresaRuc(ruc);
     }
 
-    // --- NUEVO MÉTODO: Ajustar Saldo de la Pensión ---
+    // --- LÓGICA DE ACTUALIZACIÓN DE SALDO (ajustarSaldo) ---
     @Transactional
     public AsignacionPension ajustarSaldo(Long asignacionId, AjusteSaldoRequest request) {
         
@@ -88,5 +88,14 @@ public class AsignacionService {
         // 5. Actualizar y guardar
         asignacion.setSaldo(nuevoSaldo);
         return asignacionPensionRepository.save(asignacion);
+    }
+
+    // --- LÓGICA DE ELIMINACIÓN (eliminarAsignacion) ---
+    @Transactional
+    public void eliminarAsignacion(Long asignacionId) {
+        if (!asignacionPensionRepository.existsById(asignacionId)) {
+            throw new RuntimeException("Asignación de pensión no encontrada con ID: " + asignacionId);
+        }
+        asignacionPensionRepository.deleteById(asignacionId);
     }
 }
