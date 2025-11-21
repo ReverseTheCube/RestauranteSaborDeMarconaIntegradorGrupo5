@@ -37,7 +37,8 @@ public class AsignacionController {
         return ResponseEntity.ok(asignaciones);
     }
     
-    // --- ENDPOINT PUT (Ajustar Saldo) ---
+    // --- ENDPOINT PUT (Ajustar Saldo: Suma/Resta de Delta) ---
+    // Usado por el botón (-)
     @PutMapping("/{id}/saldo")
     public ResponseEntity<AsignacionPension> actualizarSaldo(@PathVariable Long id, @RequestBody AjusteSaldoRequest request) {
         try {
@@ -47,19 +48,27 @@ public class AsignacionController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
+
+    // --- NUEVO ENDPOINT: ESTABLECER SALDO TOTAL (EDICIÓN DIRECTA) ---
+    // Usado por el botón (+)
+    @PutMapping("/{id}/saldo-total")
+    public ResponseEntity<AsignacionPension> establecerSaldoTotal(@PathVariable Long id, @RequestBody AjusteSaldoRequest request) {
+        try {
+            // El DTO (AjusteSaldoRequest) se reutiliza para pasar el valor del saldo total en 'montoAjuste'
+            AsignacionPension asignacionActualizada = asignacionService.establecerNuevoSaldo(id, request.getMontoAjuste());
+            return ResponseEntity.ok(asignacionActualizada);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
     
-    // --- NUEVO ENDPOINT: Eliminar Asignación (DELETE) ---
-    /**
-     * DELETE http://localhost:8080/api/asignaciones/{id}
-     * Elimina una asignación específica.
-     */
+    // --- ENDPOINT DELETE (Eliminar Asignación) ---
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminarAsignacion(@PathVariable Long id) {
         try {
             asignacionService.eliminarAsignacion(id);
             return ResponseEntity.noContent().build(); // 204 No Content (Éxito)
         } catch (RuntimeException e) {
-            // Error si el ID no existe
             return ResponseEntity.notFound().build(); 
         }
     }

@@ -1,7 +1,7 @@
 package com.restaurant.restaurantaplicacion.service;
 
 import com.restaurant.restaurantaplicacion.dto.AsignacionRequest;
-import com.restaurant.restaurantaplicacion.dto.AjusteSaldoRequest; // <-- ESTA LÍNEA ES CLAVE
+import com.restaurant.restaurantaplicacion.dto.AjusteSaldoRequest; 
 import com.restaurant.restaurantaplicacion.model.AsignacionPension;
 import com.restaurant.restaurantaplicacion.model.Cliente;
 import com.restaurant.restaurantaplicacion.model.Empresa;
@@ -64,7 +64,25 @@ public class AsignacionService {
         return asignacionPensionRepository.findByEmpresaRuc(ruc);
     }
 
-    // --- LÓGICA DE ACTUALIZACIÓN DE SALDO (ajustarSaldo) ---
+    // --- NUEVO MÉTODO: ESTABLECER EL SALDO TOTAL (EDICIÓN DIRECTA) ---
+    @Transactional
+    public AsignacionPension establecerNuevoSaldo(Long asignacionId, Double nuevoSaldoTotal) {
+        
+        // 1. Buscar la asignación
+        AsignacionPension asignacion = asignacionPensionRepository.findById(asignacionId)
+                .orElseThrow(() -> new RuntimeException("Asignación de pensión no encontrada con ID: " + asignacionId));
+        
+        // 2. Validación de saldo
+        if (nuevoSaldoTotal == null || nuevoSaldoTotal < 0) {
+            throw new RuntimeException("El saldo total no puede ser nulo o negativo.");
+        }
+        
+        // 3. Establecer el nuevo saldo directamente (reemplazando el valor anterior)
+        asignacion.setSaldo(nuevoSaldoTotal);
+        return asignacionPensionRepository.save(asignacion);
+    }
+    
+    // --- LÓGICA ORIGINAL: AJUSTE DE SALDO (Se mantiene para el botón de resta) ---
     @Transactional
     public AsignacionPension ajustarSaldo(Long asignacionId, AjusteSaldoRequest request) {
         
@@ -77,10 +95,10 @@ public class AsignacionService {
             throw new RuntimeException("El monto de ajuste no puede ser nulo.");
         }
         
-        // 3. Aplicar el ajuste al saldo actual
+        // 3. Aplicar el ajuste al saldo actual (suma o resta si es negativo)
         Double nuevoSaldo = asignacion.getSaldo() + request.getMontoAjuste();
         
-        // 4. Validación de saldo negativo (opcional, pero buena práctica)
+        // 4. Validación de saldo negativo 
         if (nuevoSaldo < 0) {
             throw new RuntimeException("La operación resultaría en un saldo negativo. Saldo actual: S/ " + asignacion.getSaldo());
         }

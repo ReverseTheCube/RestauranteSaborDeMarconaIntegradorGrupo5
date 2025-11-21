@@ -5,7 +5,11 @@ const API_ASIGNACIONES = "http://localhost:8080/api/asignaciones"; // API de Asi
 
 // --- EVENTO PRINCIPAL: Cargar todo al iniciar ---
 document.addEventListener("DOMContentLoaded", () => {
-    // La carga se realizará solo al buscar.
+    // 1. INICIALIZACIÓN: La tabla de CLIENTES comienza vacía.
+    actualizarTablaClientes([]); 
+    
+    // 2. INICIALIZACIÓN: Muestra la sección Clientes al cargar la página
+    mostrarSeccion('clientes'); 
 });
 
 // --- FUNCIONALIDAD BÁSICA DEL PANEL ---
@@ -57,37 +61,55 @@ function mostrarSeccion(seccion) {
 }
 
 // --- CLIENTES (API IMPLEMENTATION) ---
-async function cargarClientes(filtro = '') {
-    if (!filtro && (event.type === 'input' || event.type === 'change')) {
-        actualizarTablaClientes([]); 
-        return;
+async function cargarClientes(numeroDocumentoBusqueda) {
+    if (!numeroDocumentoBusqueda || numeroDocumentoBusqueda.trim() === '') {
+         actualizarTablaClientes([]);
+         return;
     }
     
-    const url = filtro ? `${API_URL_CLIENTES}?filtro=${encodeURIComponent(filtro)}` : API_URL_CLIENTES;
-    
     try {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error("Error al cargar clientes");
+        const params = new URLSearchParams();
+        params.append('filtro', numeroDocumentoBusqueda.trim());
+        
+        const response = await fetch(`${API_URL_CLIENTES}?${params.toString()}`);
+        if (!response.ok) throw new Error(`Error ${response.status} al cargar clientes`);
         const clientes = await response.json();
+        
+        if (clientes.length === 0) {
+             alert(`No se encontró ningún cliente con documento: ${numeroDocumentoBusqueda.trim()}`);
+        }
+        
         actualizarTablaClientes(clientes);
     } catch (error) {
         console.error("Error en cargarClientes:", error);
+        alert(`Error al cargar clientes: ${error.message}`);
         actualizarTablaClientes([]); 
-        throw error; 
     }
 }
-function buscarCliente(filtro) {
-  cargarClientes(filtro);
+
+function buscarCliente() {
+  const numBusqueda = document.getElementById("buscarCliente").value.trim();
+  
+  if (numBusqueda.length === 0) {
+      alert("Por favor, ingrese un número de documento para buscar.");
+      actualizarTablaClientes([]); 
+      return;
+  }
+  
+  cargarClientes(numBusqueda);
 }
+
+
 async function registrarCliente() {
   const tipo = document.getElementById("tipoDocumento").value;
   const numero = document.getElementById("numeroDocumento").value.trim();
   const nombre = document.getElementById("nombresApellidos").value.trim();
 
   if (!tipo || !numero || !nombre) {
-    alert("Por favor, Completar todos los campos.");
+    alert("Por favor, Complete todos los campos.");
     return;
   }
+  
   if (!/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(nombre)) {
     alert("Error, solo se acepta letras en Nombres y Apellidos.");
     return;
@@ -109,6 +131,7 @@ async function registrarCliente() {
       if (response.ok) {
           alert("Cliente registrado exitosamente!");
           limpiarCamposClientes();
+          cargarClientes(numero); 
       } else {
           const errorTexto = await response.text();
           alert(`Error al registrar cliente: ${errorTexto}`);
@@ -118,6 +141,7 @@ async function registrarCliente() {
       alert("No se pudo conectar con el servidor.");
   }
 }
+
 function actualizarTablaClientes(lista) {
   const tbody = document.querySelector("#tablaClientes tbody");
   tbody.innerHTML = ""; 
@@ -134,19 +158,16 @@ function actualizarTablaClientes(lista) {
     tbody.innerHTML += fila;
   });
 }
+
 function limpiarCamposClientes() {
   document.getElementById("tipoDocumento").value = "";
   document.getElementById("numeroDocumento").value = "";
   document.getElementById("nombresApellidos").value = "";
 }
 
+
 // --- EMPRESAS (API IMPLEMENTATION) ---
 async function cargarEmpresas(filtro = '') {
-    if (!filtro && (event.type === 'input' || event.type === 'change')) {
-        actualizarTablaEmpresas([]); 
-        return;
-    }
-    
     const url = filtro ? `${API_URL_EMPRESAS}?filtro=${encodeURIComponent(filtro)}` : API_URL_EMPRESAS;
 
     try {
@@ -156,13 +177,16 @@ async function cargarEmpresas(filtro = '') {
         actualizarTablaEmpresas(empresas);
     } catch (error) {
         console.error("Error en cargarEmpresas:", error);
+        alert(`Error al cargar empresas: ${error.message}`);
         actualizarTablaEmpresas([]); 
-        throw error;
     }
 }
-function buscarEmpresa(filtro) {
+
+function buscarEmpresa() {
+  const filtro = document.getElementById("buscarEmpresa").value.trim();
   cargarEmpresas(filtro);
 }
+
 async function registrarEmpresa() {
   const ruc = document.getElementById("ruc").value.trim();
   const razon = document.getElementById("razonSocial").value.trim();
@@ -192,6 +216,7 @@ async function registrarEmpresa() {
       if (response.ok) {
           alert("Empresa registrada exitosamente!");
           limpiarCamposEmpresas();
+          cargarEmpresas(); // Recargar tabla
       } else {
           const errorTexto = await response.text();
           alert(`Error al registrar empresa: ${errorTexto}`);
@@ -201,6 +226,7 @@ async function registrarEmpresa() {
       alert("No se pudo conectar con el servidor.");
   }
 }
+
 function actualizarTablaEmpresas(lista) {
   const tbody = document.querySelector("#tablaEmpresas tbody");
   tbody.innerHTML = ""; 
@@ -216,12 +242,114 @@ function actualizarTablaEmpresas(lista) {
     tbody.innerHTML += fila;
   });
 }
+
 function limpiarCamposEmpresas() {
   document.getElementById("ruc").value = "";
   document.getElementById("razonSocial").value = "";
 }
 
-// --- NUEVO: FUNCIONALIDAD PENSIONADOS ---
+// --- FUNCIONALIDAD PENSIONADOS ---
+
+// Función principal de búsqueda de pensionados
+async function buscarPensionado() {
+    const input = document.getElementById('buscarPensionado');
+    const ruc = input.value.trim();
+
+    // 1. Validación (11 dígitos numéricos)
+    const rucRegex = /^\d{11}$/;
+    if (!rucRegex.test(ruc)) {
+        alert("Datos incorrectos. Debe ingresar exactamente 11 dígitos numéricos (RUC).");
+        actualizarTablaPensionados([]);
+        return;
+    }
+
+    try {
+        // 2. Búsqueda por RUC (Endpoint: /api/asignaciones/buscar?ruc={ruc})
+        const urlBusqueda = `${API_ASIGNACIONES}/buscar?ruc=${ruc}`; 
+        
+        const response = await fetch(urlBusqueda);
+        const asignaciones = await response.json(); 
+
+        if (!response.ok) {
+            throw new Error(`Error en el servidor: ${response.status}`);
+        }
+        
+        if (asignaciones.length === 0) {
+             alert("RUC no registrada o no tiene pensionados asignados.");
+             actualizarTablaPensionados([]);
+             return;
+        }
+
+        // 4. Mostrar datos en la tabla
+        actualizarTablaPensionados(asignaciones);
+
+    } catch (error) {
+        console.error("Error buscando asignaciones:", error);
+        alert(`Error de red o servidor al buscar asignaciones: ${error.message}`);
+        actualizarTablaPensionados([]);
+    }
+}
+
+
+// MODIFICADO: Lógica para el botón (+). Ahora pide el SALDO TOTAL.
+async function ajustarSaldo(asignacionId, tipo) {
+    if (tipo === -1) {
+        // Lógica de resta (sin cambios, usa el endpoint /saldo)
+        let montoString = prompt(`Ingrese el MONTO A RESTAR (EGRESO) para la Asignación ID ${asignacionId}:`);
+        
+        if (montoString === null || montoString.trim() === '') return;
+        
+        const montoDelta = parseFloat(montoString);
+        if (isNaN(montoDelta) || montoDelta <= 0) {
+            alert("Monto inválido. Debe ser un número positivo.");
+            return;
+        }
+
+        const requestData = { montoAjuste: -montoDelta }; // Envía delta negativo
+        var endpointUrl = `${API_ASIGNACIONES}/${asignacionId}/saldo`;
+
+    } else if (tipo === 1) {
+        // LÓGICA DE EDICIÓN DIRECTA: Pide el nuevo saldo TOTAL (usa el endpoint /saldo-total)
+        let montoString = prompt(`Ingrese el NUEVO SALDO TOTAL`);
+        
+        if (montoString === null || montoString.trim() === '') return;
+        
+        const montoTotal = parseFloat(montoString);
+        if (isNaN(montoTotal) || montoTotal < 0) {
+            alert("Monto inválido. Debe ser un número no negativo.");
+            return;
+        }
+
+        // 💡 CRÍTICO: Envía el valor total como 'montoAjuste' al nuevo endpoint
+        var endpointUrl = `${API_ASIGNACIONES}/${asignacionId}/saldo-total`; 
+        var requestData = { montoAjuste: montoTotal }; 
+        
+    } else {
+        return; // Caso desconocido
+    }
+    
+    // Ejecución de la petición PUT
+    try {
+        const response = await fetch(endpointUrl, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(requestData),
+        });
+
+        if (response.ok) {
+            alert(`Saldo actualizado exitosamente. Nuevo Saldo: S/ ${montoTotal.toFixed(2)}`);
+            await buscarPensionado(); // Re-ejecutar la búsqueda para actualizar la tabla
+        } else {
+            const errorText = await response.text();
+            alert(`Error al ajustar saldo: ${errorText}`);
+        }
+        
+    } catch (error) {
+        console.error("Error de red o servidor al ajustar saldo:", error);
+        alert("No se pudo conectar con el servidor para actualizar el saldo.");
+    }
+}
+
 
 // Función para confirmar y ejecutar el DELETE
 async function confirmarEliminarAsignacion(asignacionId) {
@@ -230,17 +358,13 @@ async function confirmarEliminarAsignacion(asignacionId) {
     }
     
     try {
-        // Enviar la petición DELETE
         const response = await fetch(`${API_ASIGNACIONES}/${asignacionId}`, {
             method: "DELETE", 
         });
 
-        if (response.status === 204) { // 204 No Content es el código de éxito de DELETE
+        if (response.status === 204) {
             alert(`Asignación eliminada exitosamente.`);
-            
-            // Re-ejecutar la búsqueda para actualizar la tabla
             await buscarPensionado();
-            
         } else if (response.status === 404) {
             alert("Error: La asignación no fue encontrada en el servidor.");
         } else {
@@ -277,105 +401,13 @@ function actualizarTablaPensionados(lista) {
                 <td>
                     <button class="icon-button" style="background-color: #2ecc71; color: white; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; margin-right: 5px; font-weight: bold;" onclick="ajustarSaldo(${asignacion.id}, 1)">+</button>
                     
-                    <button class="icon-button" style="background-color: #e74c3c; color: white; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-weight: bold;" onclick="confirmarEliminarAsignacion(${asignacion.id})">-</button>
+                    <button class="icon-button" style="background-color: #e74c3c; color: white; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-weight: bold;" onclick="ajustarSaldo(${asignacion.id}, -1)">-</button>
                 </td>
             </tr>
         `;
         tbody.innerHTML += fila;
     });
 }
-
-// Lógica para los iconos (Suma/Ajuste)
-async function ajustarSaldo(asignacionId, tipo) {
-    const accion = tipo === 1 ? 'agregar' : 'quitar';
-    
-    let montoString = prompt(`Ingrese el monto a ${accion} al saldo de la Asignación ID ${asignacionId}:`);
-    
-    if (montoString === null || montoString.trim() === '') {
-        return; // Cancelado por el usuario
-    }
-    
-    const monto = parseFloat(montoString);
-    
-    if (isNaN(monto) || monto <= 0) {
-        alert("Monto inválido. Debe ser un número positivo.");
-        return;
-    }
-    
-    // Si es una resta (tipo -1), el montoAjuste debe ser negativo
-    const montoAjuste = tipo === -1 ? -monto : monto;
-    
-    const requestData = {
-        montoAjuste: montoAjuste
-    };
-
-    try {
-        const response = await fetch(`${API_ASIGNACIONES}/${asignacionId}/saldo`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(requestData),
-        });
-
-        if (response.ok) {
-            alert(`Saldo actualizado exitosamente. Monto: S/ ${montoAjuste.toFixed(2)}`);
-            
-            // Re-ejecutar la búsqueda para actualizar la tabla con el nuevo saldo
-            await buscarPensionado();
-            
-        } else {
-            const errorText = await response.text();
-            alert(`Error al ajustar saldo: ${errorText}`);
-        }
-        
-    } catch (error) {
-        console.error("Error de red o servidor al ajustar saldo:", error);
-        alert("No se pudo conectar con el servidor para actualizar el saldo.");
-    }
-}
-
-
-// Función principal de búsqueda de pensionados
-async function buscarPensionado() {
-    const input = document.getElementById('buscarPensionado');
-    const ruc = input.value.trim();
-
-    // 1. Validación (11 dígitos numéricos)
-    const rucRegex = /^\d{11}$/;
-    if (!rucRegex.test(ruc)) {
-        alert("Datos incorrectos. Debe ingresar exactamente 11 dígitos numéricos (RUC).");
-        actualizarTablaPensionados([]);
-        return;
-    }
-
-    try {
-        // 2. Búsqueda por RUC (Endpoint: /api/asignaciones/buscar?ruc={ruc})
-        const urlBusqueda = `${API_ASIGNACIONES}/buscar?ruc=${ruc}`; 
-        
-        const response = await fetch(urlBusqueda);
-        const asignaciones = await response.json(); 
-
-        if (!response.ok) {
-            // Manejo de errores 400, 500, etc.
-            throw new Error(`Error en el servidor: ${response.status}`);
-        }
-        
-        if (asignaciones.length === 0) {
-            // 3. Si la lista está vacía
-             alert("RUC no registrada o no tiene pensionados asignados.");
-             actualizarTablaPensionados([]);
-             return;
-        }
-
-        // 4. Mostrar datos en la tabla
-        actualizarTablaPensionados(asignaciones);
-
-    } catch (error) {
-        console.error("Error buscando asignaciones:", error);
-        alert(`Error de red o servidor al buscar asignaciones: ${error.message}`);
-        actualizarTablaPensionados([]);
-    }
-}
-
 
 // --- FUNCIÓN ATRÁS ---
 function retroceder() {
