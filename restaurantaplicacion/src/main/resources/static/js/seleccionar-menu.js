@@ -1,6 +1,14 @@
-let platosList = [];
-let pedidoInfo = {};
+/**
+ * seleccionar-menu.js
+ * Lógica final para la pantalla de selección de menú.
+ */
 
+let platosList = [];
+let pedidoInfo = {}; 
+
+// --- CONSTANTES DE LA API ---
+const API_URL_PLATOS = "/api/platos";
+// -----------------------------
 
 document.addEventListener('DOMContentLoaded', () => {
     obtenerInfoPedido();
@@ -12,10 +20,11 @@ function obtenerInfoPedido() {
     const params = new URLSearchParams(window.location.search);
     const pedidoId = params.get("pedidoId");
     const mesaNro = params.get("mesa");
-    const deliveryId = params.get("deliveryId"); // Asumiendo que delivery pasa esto
+    const deliveryId = params.get("deliveryId"); 
 
     const tituloEl = document.getElementById("mesa-titulo");
     
+    // Almacenar el contexto del pedido para pasarlo al resumen
     if (mesaNro) {
         tituloEl.innerText = `Mesa N° ${mesaNro}`;
         pedidoInfo = { pedidoId: pedidoId, mesa: mesaNro, tipo: 'LOCAL' };
@@ -23,7 +32,7 @@ function obtenerInfoPedido() {
         tituloEl.innerText = `Delivery Pedido N° ${deliveryId}`;
         pedidoInfo = { pedidoId: deliveryId, tipo: 'DELIVERY' };
     } else {
-         tituloEl.innerText = "Seleccione Pedido";
+        tituloEl.innerText = "Seleccione Pedido";
     }
 }
 
@@ -31,7 +40,7 @@ function fetchYcargarMenu() {
     const menuContainer = document.getElementById('menu');
     menuContainer.innerHTML = '<div class="loading">Cargando Platos...</div>';
     
-    fetch('/api/platos') 
+    fetch(API_URL_PLATOS) 
         .then(response => {
             if (!response.ok) {
                 throw new Error('Error al cargar platos. Status: ' + response.status);
@@ -39,8 +48,8 @@ function fetchYcargarMenu() {
             return response.json();
         })
         .then(platos => {
-            platosList = platos;
-            cargarMenu(platos); 
+            platosList = platos.filter(p => p.activo);
+            cargarMenu(platosList); 
         })
         .catch(error => {
             console.error("Error en fetchYcargarMenu:", error);
@@ -51,24 +60,23 @@ function fetchYcargarMenu() {
 
 function cargarMenu(platos) {
     const menuContainer = document.getElementById('menu');
-    menuContainer.innerHTML = ''; // Limpia el "Cargando..."
+    menuContainer.innerHTML = ''; 
 
     if (!platos || platos.length === 0) {
-        menuContainer.innerHTML = '<div class="error">No hay platos disponibles.</div>';
+        menuContainer.innerHTML = '<div class="error">No hay platos disponibles o activos.</div>';
         return;
     }
 
     platos.forEach(plato => {
-        // Añadimos 'data-id' para saber qué plato es
         const itemHTML = `
-          <div class="menu-item" data-id="${plato.id}">
-            <div class="item-name">${plato.nombre} </div>
-            <div class="item-qty">
-              <button class="btn-qty" onclick="updateQuantity(${plato.id}, -1)">-</button>
-              <span id="qty-${plato.id}">0</span>
-              <button class="btn-qty" onclick="updateQuantity(${plato.id}, 1)">+</button>
+            <div class="menu-item" data-id="${plato.id}">
+              <div class="item-name">${plato.nombre} (S/ ${plato.precio.toFixed(2)})</div>
+              <div class="item-qty">
+                <button class="btn-qty" onclick="updateQuantity(${plato.id}, -1)">-</button>
+                <span id="qty-${plato.id}">0</span>
+                <button class="btn-qty" onclick="updateQuantity(${plato.id}, 1)">+</button>
+              </div>
             </div>
-          </div>
         `;
         menuContainer.innerHTML += itemHTML;
     });
@@ -77,12 +85,16 @@ function cargarMenu(platos) {
 function updateQuantity(platoId, delta) {
     const qtyElement = document.getElementById(`qty-${platoId}`);
     let currentQty = parseInt(qtyElement.textContent);
-        
+    
+    let newQty;
     if (delta === -1 && currentQty > 0) {
-        qtyElement.textContent = currentQty - 1;
+        newQty = currentQty - 1;
     } else if (delta === 1) {
-        qtyElement.textContent = currentQty + 1;
+        newQty = currentQty + 1;
+    } else {
+        return;
     }
+    qtyElement.textContent = newQty;
 }
 
 function confirmarPedido() {
@@ -91,19 +103,19 @@ function confirmarPedido() {
     platosList.forEach(plato => {
         const qtyElement = document.getElementById(`qty-${plato.id}`);
         if (qtyElement) { 
-            const cantidad = parseInt(qtyElement.textContent);
-        
-        if (cantidad > 0) {
-            platosSeleccionados.push({
-                platoId: plato.id,
-                nombre: plato.nombre,
-                tipo: plato.tipo,
-                precioUnitario: plato.precio,
-                cantidad: cantidad,
-                subtotal: plato.precio * cantidad
-            });
+            // LECTURA ROBUSTA DE LA CANTIDAD: 
+            const cantidad = parseInt(qtyElement.textContent.trim()); 
+            
+            if (cantidad > 0) {
+                platosSeleccionados.push({
+                    platoId: plato.id,
+                    nombre: plato.nombre,
+                    precioUnitario: plato.precio,
+                    cantidad: cantidad,
+                    subtotal: plato.precio * cantidad
+                });
+            }
         }
-      }
     });
 
     if (platosSeleccionados.length === 0) {
@@ -111,8 +123,10 @@ function confirmarPedido() {
         return;
     }
 
-    // Guardamos los platos seleccionados y la info del pedido
+    // --- GUARDADO DE DATOS EN LOCAL STORAGE Y REDIRECCIÓN ---
     localStorage.setItem('detallePedido', JSON.stringify(platosSeleccionados));
     localStorage.setItem('infoPedido', JSON.stringify(pedidoInfo));
+    
+    // Redirigir al resumen
     window.location.href = 'resumen_pedido.html';
 }

@@ -5,19 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Resumen del Pedido</title>
     <link rel="stylesheet" href="/css/pedidos.css"> 
-
 </head>
 <body>
     <main class="stage stage-flex" role="main">
         <div class="topbar">
             <h1 class="title">Resumen del Pedido</h1>
-            <h2 class="title-mesa" id="info-pedido-titulo">Cargando...</h2>   
+            <h2 class="title-mesa" id="info-pedido-titulo">Cargando...</h2> 
             <button class="back back-top-right" onclick="window.location.href = 'seleccionar_menu.html';" aria-label="Volver">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
             </button>
         </div>
 
-        <div class="form-row">
+        <div class="form-row"> 
+            
             <div class="form-group">
                 <label class="form-label-static" for="tipoDocumento">Tipo de Documento:</label>
                 <select id="tipoDocumento" class="form-select">
@@ -26,48 +26,39 @@
                 </select>
             </div>
             
-            <div class="form-group-set" id="camposDNI" style="display: flex;">
-                <div class="form-group">
-                    <label class="form-label" for="numeroDocumentoDNI">Número de Documento (DNI):</label>
-                    <input type="text" id="numeroDocumentoDNI" class="form-input" placeholder="Buscar DNI...">
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="nombreCliente">Nombre y Apellidos:</label>
-                    <input type="text" id="nombreCliente" class="form-input-static" placeholder="Cargado por DNI..." readonly>
-                </div>
+            <div class="form-group">
+                <label class="form-label-static" for="numeroDocumento">Número de Documento:</label>
+                <input type="text" id="numeroDocumentoDNI" class="form-input" placeholder="Buscar DNI..." maxlength="8" style="display: block;">
+                <input type="text" id="numeroDocumentoRUC" class="form-input" placeholder="Buscar RUC..." maxlength="11" style="display: none;">
             </div>
 
-            <div class="form-group-set" id="camposRUC" style="display: none;">
-                <div class="form-group">
-                    <label class="form-label" for="numeroDocumentoRUC">Numero de Documento (RUC):</label>
-                    <input type="text" id="numeroDocumentoRUC" class="form-input" placeholder="Buscar RUC...">
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="empresaCliente">Empresa:</label>
-                    <input type="text" id="empresaCliente" class="form-input-static" placeholder="Cargado por RUC..." readonly>
-                </div>
+            <div class="form-group">
+                <label class="form-label-static" for="nombreCliente">Cliente / Empresa:</label>
+                <input type="text" id="nombreCliente" class="form-input-static" placeholder="Cargado por DNI..." readonly style="display: block;">
+                <input type="text" id="empresaCliente" class="form-input-static" placeholder="Cargado por RUC..." readonly style="display: none;">
             </div>
         </div>
 
-        <div class="form-row">
-            <div class="form-group">
+        <div style="display: flex; gap: 20px; max-width: 650px; margin-top: 20px; margin-left: 20px;">
+            
+            <div class="form-group" style="flex: 1;">
                 <label class="form-label-static" for="dniUsuario">DNI del Usuario:</label>
                 <input type="text" id="dniUsuario" class="form-input-static" placeholder="Cargando..." readonly>
             </div>
-            <div class="form-group">
+            
+            <div class="form-group" style="flex: 1;">
                 <label class="form-label-static" for="registradoPor">Registrado por:</label>
                 <input type="text" id="registradoPor" class="form-input-static" placeholder="Cargando Empleado..." readonly>
             </div>
         </div>
 
-        <div class="detalle-container">
-            <h2 class="title">Detalle:</h2>
-            <div class="scroll-container" style="max-height: 200px; overflow-y: auto;">
+        <div class="detalle-container" style="flex-grow: 1; display: flex; flex-direction: column;">
+            <h2 class="title" style="color: var(--border-2);">Detalle:</h2>
+            <div class="scroll-container" style="flex-grow: 1;">
                 <table class="detalle-tabla">
                     <thead>
                         <tr>
                             <th class="col-desc">Descripción</th>
-                            <th class="col-tipo">Tipo</th>
                             <th class="col-cant">Cant.</th>
                             <th class="col-pu">P/U</th>
                             <th class="col-sub">Subtotal</th>
@@ -75,22 +66,20 @@
                         </tr>
                     </thead>
                     <tbody id="detalle-tabla-body">
-                    </tbody>
+                         </tbody>
                 </table>
             </div>
         </div>
 
-        <div class="footer-summary">
+        <div class="total-footer">
             <h2 class="total-display" id="total-general">TOTAL: S/ 0.00</h2>
-            <div class="footer-buttons">
-                <button class="btn-final btn-volver" onclick="window.location.href='seleccionar_menu.html'">Volver al Menú</button>
-                <button class="btn-final btn-finalizar" onclick="finalizarPedido()">Finalizar Pedido</button>
-            </div>
         </div>
-
+        
+        <div class="final-buttons">
+            <button class="btn-final btn-volver" onclick="window.location.href='seleccionar_menu.html'">Volver al Menú</button>
+            <button class="btn-final btn-finalizar" onclick="finalizarPedido()">Finalizar Pedido</button>
+        </div>
     </main>
-
-    <script src="/js/resumen-pedido.js"></script>
+    <script src="/js/resumen_pedido.js"></script>
 </body>
 </html>
-

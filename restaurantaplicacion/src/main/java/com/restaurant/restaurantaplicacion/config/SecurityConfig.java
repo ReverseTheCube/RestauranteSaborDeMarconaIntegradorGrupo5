@@ -64,7 +64,7 @@ public class SecurityConfig {
                     "/registrarpedido.html", "/Local_mesa.html","/gestionpedidos.html","/seleccionar_menu.html","/resumen_pedido.html",
                     //Pedido_Cocina"
                     "/pedido_cocina.html",
-
+                    "/js/resumen_pedido.js",
                     // Rutas para los recursos estáticos (CSS, JS, Imágenes)
                     "/css/**", 
                     "/js/**", 

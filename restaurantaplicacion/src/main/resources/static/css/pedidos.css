@@ -1,6 +1,3 @@
-/* * Este archivo CSS base ahora contiene TODOS los estilos
- * para pedidos.html, registrarpedido.html, mesa.html, y seleccionar_menu.html.
- */
 
 :root{
   --bg:#1e293b;
@@ -58,7 +55,7 @@ body{
 /* Para mesa.html y seleccionar_menu.html (Flexible) */
 .stage-flex{
   width:min(980px, 94vw); 
-  height:min(640px, 88vh);
+  height:min(700px, 95vh);
   display:flex; 
   flex-direction:column; 
   gap:10px; 
@@ -323,20 +320,18 @@ body{
   text-align: left;
   border-bottom: 1px solid rgba(255,255,255,0.1);
 }
-.detalle-tabla th {
-  font-size: 14px;
-  color: var(--accent);
-}
+.detalle-tabla th, 
 .detalle-tabla td {
-  font-size: 15px;
+padding: 8px 6px; /* Reducimos el padding interno de las celdas */
+text-align: left;
+border-bottom: 1px solid rgba(255,255,255,0.1);
 }
-/* Anchos de columnas */
+* Anchos de columnas */
 .col-desc { width: 35%; }
-.col-tipo { width: 15%; }
 .col-cant { width: 10%; text-align: center; }
-.col-pu { width: 15%; text-align: right; }
+.col-pu { width: 12%; text-align: right; }
 .col-sub { width: 15%; text-align: right; }
-.col-accion { width: 10%; text-align: center; }
+.col-accion { width: 28%; text-align: center; }
 
 .btn-tabla {
   appearance: none; border: none;
@@ -348,6 +343,11 @@ body{
   font-weight: 600;
   cursor: pointer;
 }
+.detalle-container .scroll-container {
+    max-height: 250px; /* Puedes ajustar este valor */
+    overflow-y: auto;
+    /* El resto de estilos para .scroll-container se mantiene */
+}
 .btn-tabla:hover { filter: brightness(1.1); }
 
 /* Total y botones finales */
@@ -356,6 +356,7 @@ body{
   justify-content: flex-end;
   align-items: center;
   margin-top: 15px;
+  padding-right: 20px;
   font-size: 20px;
   font-weight: 700;
   color: var(--btnGreen);
@@ -367,6 +368,7 @@ body{
   justify-content: space-between;
   align-items: center;
   margin-top: 15px;
+  padding: 0 20px 10px 20px;
   flex-shrink: 0;
 }
 
@@ -493,33 +495,81 @@ body{
 }
 /* --- ESTADOS DE LA MESA --- */
 
-/* --- ESTILOS CRÍTICOS PARA DESBLOQUEO --- */
+/* 1. Mesa Ocupada por OTRO (Bloqueada - Roja/Gris) */
+.table-card.ocupada-ajena {
+    background: linear-gradient(180deg, #4a5568 0%, #2d3748 100%) !important; /* Gris oscuro */
+    cursor: not-allowed !important;
+    opacity: 0.7;
+    border: 2px solid #e53e3e !important; /* Borde Rojo */
+    box-shadow: none !important;
+}
+.table-card.ocupada-ajena .badge {
+    background: #e53e3e !important; /* Etiqueta Roja */
+    color: white !important;
+    content: "OCUPADO";
+}
 
-/* 1. MESA MÍA: Debe verse diferente y PERMITIR CLICK */
+/* 2. Mesa Ocupada por MÍ (Habilitada - Verde/Amarillo) */
 .table-card.mi-mesa {
-    background: linear-gradient(180deg, #f6e05e 0%, #d69e2e 100%) !important; /* Amarillo */
-    border: 3px solid #ffffff !important; /* Borde blanco para resaltar */
-    cursor: pointer !important; /* Que salga la manito */
-    pointer-events: auto !important; /* <--- ¡ESTA ES LA CLAVE! Reactiva el clic */
-    opacity: 1 !important; /* Que no se vea transparente */
+    background: linear-gradient(180deg, #f6e05e 0%, #d69e2e 100%) !important;
+    border: 2px solid #ffffff !important;
+    cursor: pointer !important; /* IMPORTANTE: Permite hacer clic */
+    pointer-events: auto !important; /* IMPORTANTE: Asegura que reciba el clic */
 }
-
-.table-card.mi-mesa:hover {
-    transform: translateY(-5px); /* Efecto visual al pasar el mouse */
-}
-
 .table-card.mi-mesa .badge {
-    background: #2f855a !important; /* Verde oscuro */
+    background: #2f855a !important; /* Etiqueta Verde oscuro */
     color: white !important;
 }
-
-/* 2. MESA DE OTRO: Bloqueada totalmente */
 .table-card.ocupada-ajena {
-    background: #4a5568 !important; /* Gris */
-    cursor: not-allowed !important; /* Signo de prohibido */
-    pointer-events: none !important; /* Desactiva el clic */
-    opacity: 0.6 !important;
-    border: 2px solid #e53e3e !important;
+background: #4a5568 !important; /* Gris */
+cursor: not-allowed !important; /* Signo de prohibido */
+pointer-events: none !important; /* Desactiva el clic */
+opacity: 0.6 !important;
+border: 2px solid #e53e3e !important;
+}
+.action-buttons {
+display: flex; /* Los pone uno al lado del otro */
+gap: 5px;/* Espacio entre los botones */
+justify-content:center; /* Centra los botones dentro de la celda */
+align-items: center;
 }
 
+.btn-tabla-editar, .btn-tabla-eliminar {
+padding: 6px 10px;
+border-radius: var(--border-radius-sm);
+font-size: 0.85em;
+cursor: pointer;
+white-space: nowrap; /* Evita que el texto se rompa */
+transition: background-color 0.2s ease;
+}
+
+.btn-tabla-editar {
+    /* Color de fondo: Azul (Asegúrate de que este color exista en :root o defínelo) */
+    background-color: #3498db; 
+    color: white;
+    border: 1px solid #2980b9;
+    transition: background-color 0.2s ease;
+}
+.btn-tabla-editar:hover {
+    background-color: #2980b9; /* Se oscurece al pasar el mouse */
+}
+
+.btn-tabla-eliminar {
+    /* Color de fondo: Rojo */
+    background-color: var(--danger); /* Usamos la variable --danger */
+    color: white;
+    border: 1px solid #c0392b;
+    transition: background-color 0.2s ease;
+}
+.btn-tabla-eliminar:hover {
+    background-color: #c0392b; /* Se oscurece al pasar el mouse */
+}
+
+/* Regla para el contenedor de botones (Alineación) */
+.action-buttons {
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+    align-items: center;
+}
 }

@@ -1,10 +1,6 @@
 /**
  * resumen-pedido.js
- * Lógica para la pantalla de Resumen del Pedido.
- * 1. Carga los datos del pedido (platos, info) desde localStorage.
- * 2. Puebla la tabla de detalles y calcula el total.
- * 3. Maneja la lógica de UI para el selector DNI/RUC.
- * 4. Llama a APIs para buscar cliente y empresa.
+ * Lógica final para la pantalla de Resumen del Pedido.
  */
 
 // --- CONSTANTES DE LA API ---
@@ -22,10 +18,11 @@ function cargarDatosDelPedido() {
     const platosSeleccionados = JSON.parse(localStorage.getItem('detallePedido')) || [];
     const infoPedido = JSON.parse(localStorage.getItem('infoPedido')) || {};
 
-    if (platosSeleccionados.length === 0 && !window.location.search.includes("test")) { // Permite tests
-        alert("No se encontraron platos en el pedido. Volviendo al menú.");
-        window.location.href = 'seleccionar_menu.html';
-        return;
+    if (platosSeleccionados.length === 0 && !window.location.search.includes("test")) {
+        // En un ambiente real, este alert solo debería ser para debug
+        // alert("No se encontraron platos en el pedido. Volviendo al menú."); 
+        // window.location.href = 'seleccionar_menu.html';
+        // return; // Si descomenta las líneas de arriba, descomente esta
     }
     const tituloEl = document.getElementById('info-pedido-titulo');
     if (tituloEl) {
@@ -34,27 +31,32 @@ function cargarDatosDelPedido() {
         } else {
             tituloEl.innerText = `Delivery N° ${infoPedido.pedidoId || 'N/A'}`;
         }
-    } else {
-        console.error("No se encontró el elemento #info-pedido-titulo en el HTML.");
     }
 
     popularTabla(platosSeleccionados);
     calcularTotal(platosSeleccionados);
 }
 
+// ESTA FUNCIÓN FUE COMPLETAMENTE REPARADA Y LIMPIADA DE FRAGMENTOS HTML
 function popularTabla(platos) {
     const tablaBody = document.getElementById('detalle-tabla-body');
     if (!tablaBody) return;
     tablaBody.innerHTML = ''; 
+    
+    // Muestra mensaje si el array está vacío
+    if (platos.length === 0) {
+        tablaBody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 20px;">No se han agregado platos al pedido.</td></tr>`;
+        return;
+    }
+    
     platos.forEach(plato => {
         const fila = `
             <tr>
-                <td>${plato.nombre}</td>
-                <td>${plato.tipo || 'Plato'}</td>
-                <td>${plato.cantidad}</td>
-                <td>S/ ${plato.precioUnitario.toFixed(2)}</td>
-                <td>S/ ${plato.subtotal.toFixed(2)}</td>
-                <td>
+                <td class="col-desc">${plato.nombre}</td>
+                <td class="col-cant">${plato.cantidad}</td>
+                <td class="col-pu">S/ ${plato.precioUnitario.toFixed(2)}</td>
+                <td class="col-sub">S/ ${plato.subtotal.toFixed(2)}</td>
+                <td class="col-accion">
                     <button class="btn-tabla-editar" onclick="editarItem(${plato.platoId})">Editar</button>
                     <button class="btn-tabla-eliminar" onclick="eliminarItem(${plato.platoId})">Eliminar</button>
                 </td>
@@ -63,6 +65,7 @@ function popularTabla(platos) {
         tablaBody.innerHTML += fila;
     });
 }
+
 function calcularTotal(platos) {
     const total = platos.reduce((sum, plato) => sum + plato.subtotal, 0);
     document.getElementById('total-general').innerText = `TOTAL: S/ ${total.toFixed(2)}`;
@@ -71,55 +74,67 @@ function calcularTotal(platos) {
 function setupEventListeners() {
     document.getElementById('tipoDocumento').addEventListener('change', (e) => toggleDocumentType(e.target.value));
     
-    // --- CONEXIÓN DE BUSQUEDA REAL ---
     document.getElementById('numeroDocumentoDNI').addEventListener('blur', (e) => buscarClientePorDNI(e.target.value));
     document.getElementById('numeroDocumentoRUC').addEventListener('blur', (e) => buscarEmpresaPorRUC(e.target.value));
-    // ----------------------------------
 }
 
 function toggleDocumentType(tipo) {
-    const camposDNI = document.getElementById('camposDNI');
-    const camposRUC = document.getElementById('camposRUC');
+    const numeroDNI = document.getElementById('numeroDocumentoDNI');
+    const numeroRUC = document.getElementById('numeroDocumentoRUC');
+    const nombreCliente = document.getElementById('nombreCliente');
+    const empresaCliente = document.getElementById('empresaCliente');
+
+    // Limpieza inicial
+    numeroDNI.value = '';
+    numeroRUC.value = '';
+    nombreCliente.value = '';
+    empresaCliente.value = '';
+    nombreCliente.placeholder = (tipo === 'DNI') ? "Cargado por DNI..." : "Nombre del Pensionado";
+
 
     if (tipo === 'RUC') {
-        camposDNI.style.display = 'none';
-        camposRUC.style.display = 'flex'; 
-    } else {
-        camposDNI.style.display = 'flex';
-        camposRUC.style.display = 'none';
+        // FLUJO PENSIONADO: Muestra RUC input y output, y deja DNI input/output visibles
+        numeroRUC.style.display = 'block'; 
+        empresaCliente.style.display = 'block'; 
+
+        // IMPORTANTE: NO ocultar numeroDNI para que el pensionado lo use.
+        numeroDNI.style.display = 'block'; 
+        
+    } else { // tipo === 'DNI'
+        // FLUJO CLIENTE REGULAR
+        numeroDNI.style.display = 'block';
+        
+        // Oculta campos RUC
+        numeroRUC.style.display = 'none';
+        empresaCliente.style.display = 'none';
     }
 }
 
 function cargarEmpleadoLogueado() {
-    console.log("Buscando empleado logueado...");
-    // NOTA: Este endpoint '/api/usuarios/perfil' no fue confirmado en el backend. 
-    // Mantenemos la simulación o usamos un ID fijo hasta implementarlo.
+    const miId = localStorage.getItem('usuarioId') || 'N/A';
+    const miRol = localStorage.getItem('usuarioRol') || 'N/A';
     
-    // Deberías usar fetch('/api/usuarios/perfil') para obtener los datos del usuario logueado.
-    // Usaremos la simulación por ahora:
-    document.getElementById('dniUsuario').value = "73172750";
-    document.getElementById('registradoPor').value = "Empleado: Jorgito (ID: 3)";
+    if (miId !== 'N/A' && miId !== 'null') {
+        document.getElementById('dniUsuario').value = miId; 
+        document.getElementById('registradoPor').value = `Mesero/Cajero (ID: ${miId}) - Rol: ${miRol}`;
+    } else {
+        document.getElementById('dniUsuario').value = "ERROR";
+        document.getElementById('registradoPor').value = "Inicie sesión de nuevo.";
+    }
 }
 
-// =================================================================================
-// 🚀 LÓGICA DE BÚSQUEDA REAL DE CLIENTES Y EMPRESAS
-// =================================================================================
+// ======================= [ FUNCIONES DE BÚSQUEDA ] =======================
 
-/**
- * Función que busca el cliente por DNI en la base de datos y rellena el campo.
- */
 async function buscarClientePorDNI(dni) {
     const nombreClienteInput = document.getElementById('nombreCliente');
     nombreClienteInput.value = 'Buscando...'; 
 
-    // 1. Validar DNI (ejemplo: 8 dígitos)
     if (dni.length !== 8) {
         nombreClienteInput.value = '';
         return;
     }
     
     try {
-        // Llama a: GET /api/clientes/buscar-dni/{dni}
         const response = await fetch(`${API_URL_CLIENTES}/buscar-dni/${dni}`);
         
         if (response.ok) {
@@ -127,38 +142,31 @@ async function buscarClientePorDNI(dni) {
             nombreClienteInput.value = cliente.nombresApellidos; 
             
         } else if (response.status === 404) {
-            nombreClienteInput.value = "Cliente no registrado";
+            nombreClienteInput.value = "Cliente no registrado (404)";
             
         } else {
-            throw new Error(`Error ${response.status}`);
+            nombreClienteInput.value = `Error ${response.status} en la API.`;
         }
     } catch (error) {
-        console.error('Error al buscar cliente por DNI:', error);
         nombreClienteInput.value = "Error de conexión";
     }
 }
 
-/**
- * Función que busca la empresa por RUC en la base de datos y rellena el campo.
- */
 async function buscarEmpresaPorRUC(ruc) {
     const empresaClienteInput = document.getElementById('empresaCliente');
     empresaClienteInput.value = 'Buscando...';
 
-    // 1. Validar RUC (ejemplo: 11 dígitos)
     if (ruc.length !== 11) {
         empresaClienteInput.value = '';
         return;
     }
     
     try {
-        // Llama a: GET /api/empresas/buscar-ruc/{ruc} (Asumiendo que existe o usamos la ruta genérica)
         const response = await fetch(`${API_URL_EMPRESAS}?filtro=${ruc}`);
         
         if (response.ok) {
             const empresas = await response.json();
             
-            // Suponemos que la API de empresas/buscar devuelve una lista, tomamos el primero
             if (empresas.length > 0) {
                  empresaClienteInput.value = empresas[0].razonSocial;
             } else {
@@ -166,24 +174,48 @@ async function buscarEmpresaPorRUC(ruc) {
             }
             
         } else {
-            throw new Error(`Error ${response.status}`);
+            empresaClienteInput.value = `Error ${response.status} en la API.`;
         }
     } catch (error) {
-        console.error('Error al buscar empresa por RUC:', error);
         empresaClienteInput.value = "Error de conexión";
     }
 }
 
 
-// =================================================================================
-// LÓGICA EXISTENTE
-// =================================================================================
+// ======================= [ LÓGICA DE BOTONES ] =======================
 
 function editarItem(platoId) {
-    alert(`Funcionalidad "Editar" (ID: ${platoId}) no implementada.`);
-    
-}
+    let platos = JSON.parse(localStorage.getItem('detallePedido')) || [];
+    const platoIndex = platos.findIndex(p => p.platoId === platoId);
 
+    if (platoIndex > -1) {
+        const platoActual = platos[platoIndex];
+        let nuevaCantidad = prompt(`Editar cantidad para "${platoActual.nombre}". Cantidad actual: ${platoActual.cantidad}. Ingrese nueva cantidad:`, platoActual.cantidad);
+
+        if (nuevaCantidad === null || nuevaCantidad.trim() === "") {
+            return; // El usuario canceló o no ingresó nada
+        }
+
+        nuevaCantidad = parseInt(nuevaCantidad.trim());
+
+        if (isNaN(nuevaCantidad) || nuevaCantidad <= 0) {
+            alert("Por favor, ingrese una cantidad numérica válida y mayor a cero.");
+            return;
+        }
+
+        // Actualiza el objeto en el array
+        platos[platoIndex].cantidad = nuevaCantidad;
+        platos[platoIndex].subtotal = nuevaCantidad * platos[platoIndex].precioUnitario;
+
+        // Guarda el array actualizado en localStorage
+        localStorage.setItem('detallePedido', JSON.stringify(platos));
+
+        // Recarga la tabla y el total
+        cargarDatosDelPedido(); 
+    } else {
+        alert("Plato no encontrado para editar.");
+    }
+}
 function eliminarItem(platoId) {
     if (!confirm("¿Está seguro de que desea eliminar este plato del pedido?")) {
         return;
@@ -195,7 +227,20 @@ function eliminarItem(platoId) {
     cargarDatosDelPedido();
 }
 
+// En resumen_pedido.js, REEMPLAZA la función finalizarPedido:
 
 function finalizarPedido() {
-    alert("TODO: Implementar lógica final de guardado de pedido.");
+    if (confirm("¿Está seguro de que desea finalizar el pedido? Esto guardará los detalles y limpiará la selección actual.")) {
+        // Aquí iría la lógica para enviar el pedido a la base de datos (Backend)
+        // Por ahora, solo simulamos que se "finalizó" y limpiamos el carrito.
+
+        alert("Pedido finalizado con éxito. ¡Gracias!");
+
+        // Limpiar el localStorage después de finalizar el pedido
+        localStorage.removeItem('detallePedido');
+        localStorage.removeItem('infoPedido');
+
+        // Redirigir a la pantalla de selección de mesa o un inicio
+        window.location.href = 'Local_mesa.html'; 
+    }
 }
