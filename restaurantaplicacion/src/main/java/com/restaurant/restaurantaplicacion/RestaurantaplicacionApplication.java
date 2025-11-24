@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class RestaurantaplicacionApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(RestaurantaplicacionApplication.class, args);
+	SpringApplication.run(RestaurantaplicacionApplication.class, args);
 	}
 
 }

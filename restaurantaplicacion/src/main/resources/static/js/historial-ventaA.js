@@ -1,55 +1,104 @@
-// Funcionalidad para los botones
+// Funcionalidad para los botones de navegación
 document.getElementById('backButton').addEventListener('click', () => {
-    // Vuelve a la pantalla anterior (ventaehistorial.html)
     window.location.href = 'ventaehistorial.html';
 });
 
-document.getElementById('generateButton').addEventListener('click', async () => { // Marcado como async
-    // 1. Obtener las opciones seleccionadas
-    const periodoSeleccionado = document.querySelector('input[name="periodo"]:checked').id;
+// Manejo del botón "Generar Reporte"
+document.getElementById('generateButton').addEventListener('click', async () => {
+    
+    // 1. Obtener las opciones seleccionadas por el usuario
+    const periodoElement = document.querySelector('input[name="periodo"]:checked');
+    if (!periodoElement) {
+        alert("Por favor, seleccione un periodo.");
+        return;
+    }
+    const periodoSeleccionado = periodoElement.id; // 'diario', 'quincenal', etc.
+    
     const fechaReferencia = document.getElementById('fechaInput').value;
+    
+    // Checkboxes de contenido
     const incluirGraficos = document.getElementById('graficos').checked;
     const incluirResumen = document.getElementById('resumen').checked;
     const datosDetallados = document.getElementById('detallados').checked;
-    // Obtiene 'pdf' o 'excel' directamente
-    const tipoArchivo = document.querySelector('input[name="tipoArchivo"]:checked')?.id.replace('tipo', '').toLowerCase();
 
-    // 2. Validar que se seleccionó tipo de archivo
+    // Determinar tipo de archivo (PDF o Excel)
+    let tipoArchivo = null;
+    if (document.getElementById('tipoPdf').checked) tipoArchivo = 'pdf';
+    if (document.getElementById('tipoExcel').checked) tipoArchivo = 'excel';
+
+    // 2. Validaciones antes de enviar
     if (!tipoArchivo) {
         alert("Por favor, seleccione un tipo de archivo (PDF o Excel).");
         return;
     }
 
-    // 3. Mostrar mensaje de generación
-    alert('Generando reporte...');
-    console.log("Configuración del reporte:", {
+    if (periodoSeleccionado === 'fechaReferencia' && !fechaReferencia) {
+        alert("Por favor, seleccione una fecha de referencia en el calendario.");
+        return;
+    }
+
+    // Bloquear botón para evitar dobles clics
+    const btnGenerar = document.getElementById('generateButton');
+    btnGenerar.disabled = true;
+    btnGenerar.textContent = "Generando...";
+
+    // 3. Preparar los datos para enviar al Backend (DTO)
+    const requestData = {
         periodo: periodoSeleccionado,
-        fecha: fechaReferencia,
+        fecha: fechaReferencia, 
         graficos: incluirGraficos,
         resumen: incluirResumen,
         detallados: datosDetallados,
-        archivo: tipoArchivo // Ya está en minúscula 'pdf' o 'excel'
-    });
+        archivo: tipoArchivo
+    };
 
-    // 4. Simular llamada a API para generar el reporte y obtener un ID
+    try {
+        console.log("Enviando solicitud de reporte:", requestData);
 
-    // Como no tenemos la API real, simulamos un ID de reporte
-    const reporteIdSimulado = Math.floor(Math.random() * 1000) + 1; // Genera un ID aleatorio (ej. 123)
+        // 4. Llamada REAL a la API Spring Boot
+        const response = await fetch('/api/reportes', { 
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestData)
+        });
 
-    // 5. Redirigir a la pantalla de resultados B, PASANDO EL ID en la URL
-    window.location.href = `ventaehistorialB.html?reporteId=${reporteIdSimulado}`;
-    // La URL se verá así: ventaehistorialB.html?reporteId=123
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || `Error del servidor: ${response.status}`);
+        }
+
+        // 5. Obtener respuesta exitosa (con el ID del reporte generado)
+        const reporteGenerado = await response.json();
+        console.log("Reporte generado con éxito. ID:", reporteGenerado.id);
+
+        // 6. Redirigir a la pantalla de resultados B pasando el ID real
+        window.location.href = `ventaehistorialB.html?reporteId=${reporteGenerado.id}`;
+
+    } catch (error) {
+        console.error("Error al generar reporte:", error);
+        alert("Hubo un problema al generar el reporte:\n" + error.message);
+        
+        // Restaurar botón en caso de error
+        btnGenerar.disabled = false;
+        btnGenerar.textContent = "Generar Reporte";
+    }
 });
 
-// Desactivar el campo de fecha inicialmente y manejar cambios
-const fechaRadio = document.getElementById('fechaReferencia');
+// --- Lógica visual para habilitar/deshabilitar el calendario ---
 const fechaInput = document.getElementById('fechaInput');
 fechaInput.disabled = true; // Empieza deshabilitado
 
 const periodos = document.querySelectorAll('input[name="periodo"]');
 periodos.forEach(radio => {
     radio.addEventListener('change', function() {
-        // Habilita el input de fecha solo si se selecciona "Fecha de Referencia"
+        // Solo habilita el input de fecha si se selecciona "Fecha de Referencia"
         fechaInput.disabled = (this.id !== 'fechaReferencia');
+        if (!fechaInput.disabled) {
+            fechaInput.focus(); // Poner el cursor ahí automáticamente
+        } else {
+            fechaInput.value = ""; // Limpiar si se deshabilita
+        }
     });
 });
