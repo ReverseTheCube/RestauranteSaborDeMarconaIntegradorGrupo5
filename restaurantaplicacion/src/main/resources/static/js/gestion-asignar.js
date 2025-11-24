@@ -1,16 +1,17 @@
 // --- URLs DE LAS APIS ---
 const API_EMPRESAS = "http://localhost:8080/api/empresas";
-const API_USUARIOS = "http://localhost:8080/api/usuarios";
+const API_CLIENTES = "http://localhost:8080/api/clientes"; 
+const API_ASIGNACIONES = "http://localhost:8080/api/asignaciones"; // NUEVO ENDPOINT
 
 // --- Se ejecuta cuando el HTML termina de cargar ---
 document.addEventListener('DOMContentLoaded', () => {
     cargarDatosSelects();
 });
 
-// --- FUNCIÓN NUEVA: Carga Empresas y Trabajadores en los <select> ---
+// --- FUNCIÓN: Carga Empresas y Clientes en los <select> ---
 async function cargarDatosSelects() {
     try {
-        // Cargar Empresas (para el RUC)
+        // 1. Cargar Empresas (para el RUC)
         const responseEmpresas = await fetch(API_EMPRESAS);
         if (!responseEmpresas.ok) throw new Error('Error al cargar empresas');
         const empresas = await responseEmpresas.json();
@@ -18,50 +19,78 @@ async function cargarDatosSelects() {
         const selectRuc = document.getElementById('ruc');
         empresas.forEach(empresa => {
             const option = document.createElement('option');
-            option.value = empresa.ruc; // El valor será el RUC
-            option.textContent = `${empresa.razonSocial} (${empresa.ruc})`; // Muestra Razón Social y RUC
+            option.value = empresa.ruc; 
+            option.textContent = `${empresa.razonSocial} (${empresa.ruc})`; 
             selectRuc.appendChild(option);
         });
 
-        // Cargar Usuarios (para Trabajador)
-        const responseUsuarios = await fetch(API_USUARIOS);
-        if (!responseUsuarios.ok) throw new Error('Error al cargar usuarios');
-        const usuarios = await responseUsuarios.json();
+        // 2. Cargar CLIENTES (Pensionistas)
+        const responseClientes = await fetch(API_CLIENTES);
+        if (!responseClientes.ok) throw new Error('Error al cargar clientes');
+        const clientes = await responseClientes.json();
         
         const selectTrabajador = document.getElementById('trabajador');
-        usuarios.forEach(usuario => {
+        clientes.forEach(cliente => {
             const option = document.createElement('option');
-            option.value = usuario.id; // El valor será el ID del usuario
-            option.textContent = `${usuario.usuario} (${usuario.rol})`; // Muestra nombre y Rol
+            option.value = cliente.id; 
+            
+            // Muestra Nombres y Apellidos (Número de Documento)
+            option.textContent = `${cliente.nombresApellidos} (${cliente.numeroDocumento})`; 
+            
             selectTrabajador.appendChild(option);
         });
 
     } catch (error) {
         console.error("Error cargando datos para selects:", error);
-        alert("No se pudieron cargar las listas de empresas o trabajadores. " + error.message);
+        alert("No se pudieron cargar las listas de empresas o clientes. " + error.message);
     }
 }
 
-// --- Funciones existentes ---
-
+// --- FUNCIÓN CERRAR (Regresa a gestión-cliente.html) ---
 function cerrarVentana() {
-  if (confirm("¿Desea cerrar la ventana?")) {
-    window.close(); // Cierra la ventana emergente
-    // Si no es emergente, puedes redirigir:
-    // window.location.href = 'gestion-cliente.html'; 
+  if (confirm("¿Desea regresar a la gestión de clientes y empresas?")) {
+    window.location.href = 'gestion-cliente.html'; 
   }
 }
 
-function guardarDatos() {
+// --- FUNCIÓN GUARDAR (Almacena en la BD) ---
+async function guardarDatos() {
   const ruc = document.getElementById("ruc").value;
-  const trabajadorId = document.getElementById("trabajador").value;
+  const clienteId = document.getElementById("trabajador").value; 
   const saldo = document.getElementById("saldo").value;
 
-  if (!ruc || !trabajadorId || !saldo) {
+  if (!ruc || !clienteId || !saldo) {
     alert("Por favor complete todos los campos.");
     return;
   }
+  
+  // 1. Crear el DTO (AsignacionRequest)
+  const asignacionRequest = {
+    rucEmpresa: ruc,
+    clienteId: parseInt(clienteId), 
+    saldo: parseFloat(saldo)
+  };
+  
+  // 2. Llamada POST a la nueva API
+  try {
+    const response = await fetch(API_ASIGNACIONES, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(asignacionRequest),
+    });
 
-  // Aquí iría la lógica para guardar los datos, por ejemplo, una llamada a una API.  
-  alert(`Datos guardados (simulado):\n\nRUC: ${ruc}\nTrabajador ID: ${trabajadorId}\nSaldo: ${saldo}`);
+    if (response.ok) {
+      alert("¡Asignación de pensión guardada exitosamente!");
+      // Redirigir a la página principal después de guardar
+      window.location.href = 'gestion-cliente.html';
+    } else {
+      const errorText = await response.text();
+      alert(`Error al guardar la asignación: ${errorText}`);
+    }
+  } catch (error) {
+    console.error("Error de red al guardar asignación:", error);
+    alert("No se pudo conectar con el servidor para guardar los datos.");
+  }
 }

@@ -96,8 +96,8 @@ public class ReporteService {
 
         // 2. Consultar los pedidos
         // ¡IMPORTANTE! Necesitas crear este método en PedidoRepository.java
-        // Ejemplo en PedidoRepository: List<Pedido> findByFechaHoraBetween(LocalDateTime start, LocalDateTime end);
-        List<Pedido> pedidos = pedidoRepository.findAll(); //findAllByFechaHoraBetween(fechaInicio, fechaFin);
+        // List<Pedido> pedidos = pedidoRepository.findAll(); // <-- BORRA O COMENTA ESTA LÍNEA
+List<Pedido> pedidos = pedidoRepository.findAllByFechaHoraBetween(fechaInicio, fechaFin);//findAllByFechaHoraBetween(fechaInicio, fechaFin);
          if (pedidos.isEmpty()) {
               throw new RuntimeException("No hay datos de pedidos para el periodo seleccionado.");
          }

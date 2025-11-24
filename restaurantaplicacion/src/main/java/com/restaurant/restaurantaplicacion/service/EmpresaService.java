@@ -14,12 +14,21 @@ public class EmpresaService {
     @Autowired
     private EmpresaRepository empresaRepository;
 
-    // OBTENER TODAS LAS EMPRESAS
-    public List<Empresa> obtenerTodasLasEmpresas() {
-        return empresaRepository.findAll();
+    // --- MÉTODO MODIFICADO/UNIFICADO PARA LISTAR Y BUSCAR ---
+    // Reemplaza al anterior obtenerTodasLasEmpresas()
+    public List<Empresa> buscarEmpresasPorFiltro(String filtro) {
+         // Si el filtro es nulo o vacío, devuelve TODAS las empresas (comportamiento sin filtro)
+         if (filtro == null || filtro.trim().isEmpty()) {
+             return empresaRepository.findAll();
+         }
+         
+         // Si hay filtro, busca por RUC o Razón Social (parcial)
+         String busqueda = filtro.trim();
+         return empresaRepository.findByRucContainingOrRazonSocialContainingIgnoreCase(busqueda, busqueda);
     }
 
-    // REGISTRAR EMPRESA
+
+    // REGISTRAR EMPRESA (sin cambios)
     public Empresa registrarEmpresa(EmpresaRequest request) {
         // Validación de existencia
         if (empresaRepository.findByRuc(request.getRuc()).isPresent()) {

@@ -3,13 +3,12 @@ package com.restaurant.restaurantaplicacion.service;
 import com.restaurant.restaurantaplicacion.dto.CrearPedidoRequest;
 import com.restaurant.restaurantaplicacion.dto.PedidoPlatoRequest;
 import com.restaurant.restaurantaplicacion.model.*;
-import com.restaurant.restaurantaplicacion.repository.ClienteRepository; // <-- IMPORTAR
-import com.restaurant.restaurantaplicacion.repository.EmpresaRepository; // <-- IMPORTAR
+import com.restaurant.restaurantaplicacion.repository.ClienteRepository;
+import com.restaurant.restaurantaplicacion.repository.EmpresaRepository;
 import com.restaurant.restaurantaplicacion.repository.PedidoRepository;
 import com.restaurant.restaurantaplicacion.repository.PlatoRepository;
 import com.restaurant.restaurantaplicacion.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class PedidoService {
@@ -29,42 +27,28 @@ public class PedidoService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-<<<<<<< HEAD
-    /**
-     * Lógica para el Historial de Pedidos
-     */
-=======
-    // --- AÑADIR ESTOS REPOSITORIOS ---
+    // --- Repositorios añadidos por la fusión de Git ---
     @Autowired
     private ClienteRepository clienteRepository;
     @Autowired
     private EmpresaRepository empresaRepository;
     // ------------------------------------
 
-    // OBTENER TODOS LOS PEDIDOS (Para el historial)
-    // (Este método se queda igual por ahora)
->>>>>>> 6f0277f4f98acad18a1d9090a0667b34563672e5
+    /**
+     * Lógica para el Historial de Pedidos
+     */
     public List<Pedido> obtenerTodosLosPedidos() {
         return pedidoRepository.findAll();
     }
 
-<<<<<<< HEAD
     /**
      * Lógica para el INICIO del Pedido (Delivery o Local).
-     * Este es el método que llama RegistrarPedidoController.
+     * (Este método venía del archivo RegistrarPedidoController)
      */
-=======
-    // CREAR UN NUEVO PEDIDO (ACTUALIZADO)
->>>>>>> 6f0277f4f98acad18a1d9090a0667b34563672e5
     @Transactional
     public Pedido iniciarPedido(String tipoServicio, Integer numeroMesa) {
         
         // --- INICIO DE LA CORRECCIÓN (Simulación de Usuario) ---
-        // El código original fallaba aquí porque buscaba "anonymousUser"
-        // String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        // Usuario usuario = usuarioRepository.findByUsuario(username)
-        //         .orElseThrow(() -> new UsernameNotFoundException("Usuario (Empleado) no encontrado: " + username));
-
         // SIMULACIÓN TEMPORAL:
         // Asumimos que el empleado "Jorgito" (ID 1) está logueado.
         // CAMBIA 1L por un ID de usuario que SÍ exista en tu BD.
@@ -80,17 +64,15 @@ public class PedidoService {
         nuevoPedido.setFechaHora(LocalDateTime.now());
         nuevoPedido.setTotal(0.0); // El total se calcula al final
 
-        // 3. Asignar estado y mesa
-        // --- CORRECCIÓN DE ESTADO ---
-        // Usamos "PENDIENTE" que es el valor que sí existe en el Enum
-        nuevoPedido.setEstado(EstadoPedido.PENDIENTE);
+        // 3. Asignar estado y tipo/info
+        nuevoPedido.setEstado(EstadoPedido.PENDIENTE); // Usamos el valor que sí existe en el Enum
 
         if ("LOCAL".equals(tipoServicio) && numeroMesa != null) {
-            // (Opcional: si tu Modelo Pedido tiene un campo para el N° de mesa)
-            // nuevoPedido.setNumeroMesa(numeroMesa); 
+            nuevoPedido.setTipoServicio("LOCAL");
+            nuevoPedido.setInfoServicio(String.valueOf(numeroMesa)); // Guardamos el N° de Mesa
         } else {
-            // (Opcional: si tu Modelo Pedido tiene un campo para "tipo")
-            // nuevoPedido.setTipo("DELIVERY");
+            nuevoPedido.setTipoServicio("DELIVERY");
+            // (infoServicio puede quedar nulo o guardar alguna referencia si la tuvieras)
         }
         // --- FIN DE CORRECCIÓN DE ESTADO ---
 
@@ -101,10 +83,11 @@ public class PedidoService {
 
     /**
      * Lógica para CREAR/FINALIZAR el Pedido Completo (con platos).
-     * Este método se llamará desde la pantalla de Resumen.
+     * NOTA: Se renombró de "crearPedidoCompleto" a "crearPedido"
+     * para que coincida con lo que tu PedidoController espera.
      */
     @Transactional
-    public Pedido crearPedidoCompleto(CrearPedidoRequest request) {
+    public Pedido crearPedido(CrearPedidoRequest request) {
 
         // 1. Buscar al Usuario (Cajero/Mesero)
         Usuario usuario = usuarioRepository.findById(request.getUsuarioId())
@@ -161,18 +144,7 @@ public class PedidoService {
         nuevoPedido.setTotal(totalPedido);
         nuevoPedido.setDetallePlatos(detallePlatos);
 
-<<<<<<< HEAD
-        // 8. Guardar el pedido principal en la BD
-        return pedidoRepository.save(nuevoPedido);
-    }
-    
-    // (Aquí irían los otros métodos que tenías, como el de actualizar, etc.)
-}
-=======
         // 7. Guardar todo en la BD
         return pedidoRepository.save(nuevoPedido);
     }
-    
-    // (Aquí iría la lógica de filtros que hicimos antes)
 }
->>>>>>> 6f0277f4f98acad18a1d9090a0667b34563672e5
