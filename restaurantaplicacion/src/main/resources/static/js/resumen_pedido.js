@@ -4,14 +4,20 @@
  * 1. Carga los datos del pedido (platos, info) desde localStorage.
  * 2. Puebla la tabla de detalles y calcula el total.
  * 3. Maneja la lógica de UI para el selector DNI/RUC.
- * 4. Llama a APIs para buscar cliente y empleado.
+ * 4. Llama a APIs para buscar cliente y empresa.
  */
+
+// --- CONSTANTES DE LA API ---
+const API_URL_CLIENTES = "http://localhost:8080/api/clientes"; 
+const API_URL_EMPRESAS = "http://localhost:8080/api/empresas"; 
+// ----------------------------
 
 document.addEventListener('DOMContentLoaded', () => {
     cargarDatosDelPedido();
-    setupEventListeners()   ;
+    setupEventListeners(); 
     cargarEmpleadoLogueado(); 
 });
+
 function cargarDatosDelPedido() {
     const platosSeleccionados = JSON.parse(localStorage.getItem('detallePedido')) || [];
     const infoPedido = JSON.parse(localStorage.getItem('infoPedido')) || {};
@@ -64,8 +70,11 @@ function calcularTotal(platos) {
 
 function setupEventListeners() {
     document.getElementById('tipoDocumento').addEventListener('change', (e) => toggleDocumentType(e.target.value));
+    
+    // --- CONEXIÓN DE BUSQUEDA REAL ---
     document.getElementById('numeroDocumentoDNI').addEventListener('blur', (e) => buscarClientePorDNI(e.target.value));
     document.getElementById('numeroDocumentoRUC').addEventListener('blur', (e) => buscarEmpresaPorRUC(e.target.value));
+    // ----------------------------------
 }
 
 function toggleDocumentType(tipo) {
@@ -83,42 +92,96 @@ function toggleDocumentType(tipo) {
 
 function cargarEmpleadoLogueado() {
     console.log("Buscando empleado logueado...");
-    fetch('/api/usuarios/perfil') 
-        .then(response => {
-            if (!response.ok) throw new Error('Error al obtener perfil del empleado.');
-            return response.json();
-        })
-        .then(usuario => {
-            document.getElementById('dniUsuario').value = usuario.dni || 'N/A'; 
-            document.getElementById('registradoPor').value = `Empleado: ${usuario.nombres} (ID: ${usuario.id})`;
-        })
-        .catch(error => {
-            console.error('Error al cargar empleado:', error);
-            document.getElementById('dniUsuario').value = "73172750";
-            document.getElementById('registradoPor').value = "Empleado: Jorgito (ID: 3)";
-        });
+    // NOTA: Este endpoint '/api/usuarios/perfil' no fue confirmado en el backend. 
+    // Mantenemos la simulación o usamos un ID fijo hasta implementarlo.
+    
+    // Deberías usar fetch('/api/usuarios/perfil') para obtener los datos del usuario logueado.
+    // Usaremos la simulación por ahora:
+    document.getElementById('dniUsuario').value = "73172750";
+    document.getElementById('registradoPor').value = "Empleado: Jorgito (ID: 3)";
 }
 
-function buscarClientePorDNI(dni) {
-    if (dni.length !== 8) return;
-    console.log(`Buscando DNI: ${dni}`);
-    setTimeout(() => {
-        document.getElementById('nombreCliente').value = "Edgard C. (Simulado)";
-    }, 500);
+// =================================================================================
+// 🚀 LÓGICA DE BÚSQUEDA REAL DE CLIENTES Y EMPRESAS
+// =================================================================================
+
+/**
+ * Función que busca el cliente por DNI en la base de datos y rellena el campo.
+ */
+async function buscarClientePorDNI(dni) {
+    const nombreClienteInput = document.getElementById('nombreCliente');
+    nombreClienteInput.value = 'Buscando...'; 
+
+    // 1. Validar DNI (ejemplo: 8 dígitos)
+    if (dni.length !== 8) {
+        nombreClienteInput.value = '';
+        return;
+    }
+    
+    try {
+        // Llama a: GET /api/clientes/buscar-dni/{dni}
+        const response = await fetch(`${API_URL_CLIENTES}/buscar-dni/${dni}`);
+        
+        if (response.ok) {
+            const cliente = await response.json();
+            nombreClienteInput.value = cliente.nombresApellidos; 
+            
+        } else if (response.status === 404) {
+            nombreClienteInput.value = "Cliente no registrado";
+            
+        } else {
+            throw new Error(`Error ${response.status}`);
+        }
+    } catch (error) {
+        console.error('Error al buscar cliente por DNI:', error);
+        nombreClienteInput.value = "Error de conexión";
+    }
 }
 
-function buscarEmpresaPorRUC(ruc) {
-    if (ruc.length !== 11) return;
-    console.log(`Buscando RUC: ${ruc}`);
+/**
+ * Función que busca la empresa por RUC en la base de datos y rellena el campo.
+ */
+async function buscarEmpresaPorRUC(ruc) {
+    const empresaClienteInput = document.getElementById('empresaCliente');
+    empresaClienteInput.value = 'Buscando...';
 
-    setTimeout(() => {
-        document.getElementById('empresaCliente').value = "MITSUI AUTO FINANCE (Simulado)";
-    }, 500);
+    // 1. Validar RUC (ejemplo: 11 dígitos)
+    if (ruc.length !== 11) {
+        empresaClienteInput.value = '';
+        return;
+    }
+    
+    try {
+        // Llama a: GET /api/empresas/buscar-ruc/{ruc} (Asumiendo que existe o usamos la ruta genérica)
+        const response = await fetch(`${API_URL_EMPRESAS}?filtro=${ruc}`);
+        
+        if (response.ok) {
+            const empresas = await response.json();
+            
+            // Suponemos que la API de empresas/buscar devuelve una lista, tomamos el primero
+            if (empresas.length > 0) {
+                 empresaClienteInput.value = empresas[0].razonSocial;
+            } else {
+                empresaClienteInput.value = "Empresa no registrada";
+            }
+            
+        } else {
+            throw new Error(`Error ${response.status}`);
+        }
+    } catch (error) {
+        console.error('Error al buscar empresa por RUC:', error);
+        empresaClienteInput.value = "Error de conexión";
+    }
 }
+
+
+// =================================================================================
+// LÓGICA EXISTENTE
+// =================================================================================
 
 function editarItem(platoId) {
     alert(`Funcionalidad "Editar" (ID: ${platoId}) no implementada.`);
-   
+    
 }
 
 function eliminarItem(platoId) {

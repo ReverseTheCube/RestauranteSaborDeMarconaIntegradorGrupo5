@@ -2,6 +2,7 @@ package com.restaurant.restaurantaplicacion.service;
 
 import com.restaurant.restaurantaplicacion.dto.CrearPedidoRequest;
 import com.restaurant.restaurantaplicacion.dto.PedidoPlatoRequest;
+import com.restaurant.restaurantaplicacion.dto.FinalizarPedidoRequest;
 import com.restaurant.restaurantaplicacion.model.*;
 import com.restaurant.restaurantaplicacion.repository.ClienteRepository;
 import com.restaurant.restaurantaplicacion.repository.EmpresaRepository;
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional; 
 
 @Service
 public class PedidoService {
@@ -27,104 +29,95 @@ public class PedidoService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-    // --- Repositorios añadidos por la fusión de Git ---
     @Autowired
     private ClienteRepository clienteRepository;
     @Autowired
     private EmpresaRepository empresaRepository;
-    // ------------------------------------
 
-    /**
-     * Lógica para el Historial de Pedidos
-     */
     public List<Pedido> obtenerTodosLosPedidos() {
         return pedidoRepository.findAll();
     }
 
-    /**
-     * Lógica para el INICIO del Pedido (Delivery o Local).
-     * (Este método venía del archivo RegistrarPedidoController)
-     */
+    // =========================================================================
+    // LÓGICA DE INICIO (Creación / Reutilización del Pedido)
+    // =========================================================================
     @Transactional
-    public Pedido iniciarPedido(String tipoServicio, Integer numeroMesa) {
+    public Pedido iniciarPedido(String tipoServicio, Integer numeroMesa, Long usuarioId) { // AHORA RECIBE EL ID REAL
         
-        // --- INICIO DE LA CORRECCIÓN (Simulación de Usuario) ---
-        // SIMULACIÓN TEMPORAL:
-        // Asumimos que el empleado "Jorgito" (ID 1) está logueado.
-        // CAMBIA 1L por un ID de usuario que SÍ exista en tu BD.
-        Long usuarioIdSimulado = 1L; // <--- CAMBIO REALIZADO (de 3L a 1L)
-        Usuario usuario = usuarioRepository.findById(usuarioIdSimulado)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuario (Empleado) SIMULADO con ID: " + usuarioIdSimulado + " no encontrado."));
-        // --- FIN DE LA CORRECCIÓN ---
+        // 1. Usar el usuario REAL que viene del login
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario con ID " + usuarioId + " no encontrado."));
 
+        // 2. Verificar si ya existe pedido PENDIENTE en esa mesa (Evitar duplicados)
+        if ("LOCAL".equals(tipoServicio) && numeroMesa != null) {
+            String mesaStr = String.valueOf(numeroMesa);
+            
+            Optional<Pedido> pedidoExistente = pedidoRepository
+                .findByInfoServicioAndEstadoAndTipoServicio(mesaStr, EstadoPedido.PENDIENTE, "LOCAL");
+            
+            if (pedidoExistente.isPresent()) {
+                // Si existe, verificamos que sea del MISMO usuario (TU LÓGICA DE BLOQUEO)
+                Pedido existente = pedidoExistente.get();
+                if (!existente.getUsuario().getId().equals(usuarioId)) {
+                     throw new RuntimeException("Esta mesa ya está ocupada por otro mesero.");
+                }
+                return existente; // Devolvemos el pedido existente para que lo continúe
+            }
+        }
 
-        // 2. Crear el objeto Pedido principal (vacío)
+        // 3. Crear nuevo pedido si no existía (LÓGICA ORIGINAL)
         Pedido nuevoPedido = new Pedido();
-        nuevoPedido.setUsuario(usuario);
+        nuevoPedido.setUsuario(usuario); // ASIGNAMOS AL USUARIO REAL
         nuevoPedido.setFechaHora(LocalDateTime.now());
-        nuevoPedido.setTotal(0.0); // El total se calcula al final
-
-        // 3. Asignar estado y tipo/info
-        nuevoPedido.setEstado(EstadoPedido.PENDIENTE); // Usamos el valor que sí existe en el Enum
+        nuevoPedido.setTotal(0.0); 
+        nuevoPedido.setEstado(EstadoPedido.PENDIENTE);
 
         if ("LOCAL".equals(tipoServicio) && numeroMesa != null) {
             nuevoPedido.setTipoServicio("LOCAL");
-            nuevoPedido.setInfoServicio(String.valueOf(numeroMesa)); // Guardamos el N° de Mesa
+            nuevoPedido.setInfoServicio(String.valueOf(numeroMesa)); 
         } else {
             nuevoPedido.setTipoServicio("DELIVERY");
-            // (infoServicio puede quedar nulo o guardar alguna referencia si la tuvieras)
+            if (nuevoPedido.getInfoServicio() == null) {
+                 nuevoPedido.setInfoServicio("DEL-" + System.currentTimeMillis());
+            }
         }
-        // --- FIN DE CORRECCIÓN DE ESTADO ---
 
-        // 4. Guardar el pedido inicial (aún sin platos)
         return pedidoRepository.save(nuevoPedido);
     }
 
-
-    /**
-     * Lógica para CREAR/FINALIZAR el Pedido Completo (con platos).
-     * NOTA: Se renombró de "crearPedidoCompleto" a "crearPedido"
-     * para que coincida con lo que tu PedidoController espera.
-     */
+    // =========================================================================
+    // LÓGICA DE CREACIÓN COMPLETA (Mantengo por si la usas en otro lado)
+    // =========================================================================
     @Transactional
     public Pedido crearPedido(CrearPedidoRequest request) {
-
-        // 1. Buscar al Usuario (Cajero/Mesero)
         Usuario usuario = usuarioRepository.findById(request.getUsuarioId())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        // 2. Buscar Cliente (si se proporcionó ID)
         Cliente cliente = null;
         if (request.getClienteId() != null) {
             cliente = clienteRepository.findById(request.getClienteId()).orElse(null);
         }
 
-        // 3. Buscar Empresa (si se proporcionó RUC)
         Empresa empresa = null;
         if (request.getRucEmpresa() != null && !request.getRucEmpresa().isEmpty()) {
             empresa = empresaRepository.findByRuc(request.getRucEmpresa()).orElse(null);
         }
 
-        // 4. Crear el Pedido principal
         Pedido nuevoPedido = new Pedido();
         nuevoPedido.setUsuario(usuario);
         nuevoPedido.setFechaHora(LocalDateTime.now());
         nuevoPedido.setEstado(EstadoPedido.PENDIENTE);
         
-        // --- GUARDAR LOS NUEVOS CAMPOS ---
         nuevoPedido.setCliente(cliente);
         nuevoPedido.setEmpresa(empresa);
         nuevoPedido.setTipoServicio(request.getTipoServicio());
         nuevoPedido.setInfoServicio(request.getInfoServicio());
-        // ---------------------------------
         
         double totalPedido = 0.0;
         List<PedidoPlato> detallePlatos = new ArrayList<>();
 
-        // 5. Procesar platos SOLO SI la lista no está vacía
         if (request.getDetallePlatos() != null && !request.getDetallePlatos().isEmpty()) {
             for (PedidoPlatoRequest itemRequest : request.getDetallePlatos()) {
-                
                 Plato plato = platoRepository.findById(itemRequest.getPlatoId())
                         .orElseThrow(() -> new RuntimeException("Plato no encontrado: ID " + itemRequest.getPlatoId()));
 
@@ -138,13 +131,74 @@ public class PedidoService {
                 totalPedido += (plato.getPrecio() * itemRequest.getCantidad());
             }
         }
-        // Si la lista está vacía, el total simplemente se queda en 0.0
 
-        // 6. Guardar total y detalles
         nuevoPedido.setTotal(totalPedido);
         nuevoPedido.setDetallePlatos(detallePlatos);
 
-        // 7. Guardar todo en la BD
         return pedidoRepository.save(nuevoPedido);
+    }
+
+    // =========================================================================
+    // LÓGICA DE FINALIZACIÓN (Desbloquea la Mesa)
+    // =========================================================================
+    @Transactional
+    public Pedido finalizarPedido(Long pedidoId, FinalizarPedidoRequest request) {
+        Pedido pedido = pedidoRepository.findById(pedidoId)
+                .orElseThrow(() -> new RuntimeException("Pedido no encontrado: " + pedidoId));
+
+        if (request.getNumeroDocumento() != null && !request.getNumeroDocumento().isEmpty()) {
+            Cliente cliente = clienteRepository.findByNumeroDocumento(request.getNumeroDocumento())
+                    .orElse(null); 
+            pedido.setCliente(cliente);
+        }
+
+        if (request.getRucEmpresa() != null && !request.getRucEmpresa().isEmpty()) {
+            Empresa empresa = empresaRepository.findByRuc(request.getRucEmpresa())
+                    .orElse(null);
+            pedido.setEmpresa(empresa);
+        }
+
+        double total = 0.0;
+        List<PedidoPlato> detalles = new ArrayList<>();
+        
+        if (request.getDetallePlatos() != null) {
+            for (PedidoPlatoRequest item : request.getDetallePlatos()) {
+                Plato plato = platoRepository.findById(item.getPlatoId())
+                        .orElseThrow(() -> new RuntimeException("Plato no encontrado ID: " + item.getPlatoId()));
+
+                PedidoPlato detalle = new PedidoPlato();
+                detalle.setPedido(pedido);
+                detalle.setPlato(plato);
+                detalle.setCantidad(item.getCantidad());
+                detalle.setPrecioUnitario(plato.getPrecio());
+                
+                detalles.add(detalle);
+                total += (plato.getPrecio() * item.getCantidad());
+            }
+        }
+
+        pedido.setDetallePlatos(detalles);
+        pedido.setTotal(total);
+        
+        // ¡ESTA LÍNEA LIBERA LA MESA!
+        pedido.setEstado(EstadoPedido.PAGADO); 
+
+        return pedidoRepository.save(pedido);
+    }
+
+    // =========================================================================
+    // LÓGICA DE BÚSQUEDA (Mesa Ocupada)
+    // =========================================================================
+    public List<java.util.Map<String, Object>> obtenerMesasOcupadas() {
+        List<Object[]> resultados = pedidoRepository.findMesasOcupadasConUsuario();
+        List<java.util.Map<String, Object>> listaLimpia = new ArrayList<>();
+
+        for (Object[] fila : resultados) {
+            java.util.Map<String, Object> mapa = new java.util.HashMap<>();
+            mapa.put("mesa", fila[0]);      
+            mapa.put("usuarioId", fila[1]); 
+            listaLimpia.add(mapa);
+        }
+        return listaLimpia;
     }
 }

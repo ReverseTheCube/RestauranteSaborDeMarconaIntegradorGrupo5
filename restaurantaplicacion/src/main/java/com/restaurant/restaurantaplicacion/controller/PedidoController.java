@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.restaurant.restaurantaplicacion.dto.FinalizarPedidoRequest;
 
 import java.util.List;
 
@@ -44,6 +45,23 @@ public class PedidoController {
         List<Pedido> pedidos = pedidoService.obtenerTodosLosPedidos();
         return ResponseEntity.ok(pedidos);
     }
+// En src/main/java/com/restaurant/restaurantaplicacion/controller/PedidoController.java
 
-    
+// ... imports existentes ...
+
+@GetMapping("/mesas-ocupadas")
+public ResponseEntity<List<java.util.Map<String, Object>>> obtenerMesasOcupadas() {
+    return ResponseEntity.ok(pedidoService.obtenerMesasOcupadas());
+}
+
+@PutMapping("/finalizar")
+    public ResponseEntity<Pedido> finalizarPedido(@RequestBody FinalizarPedidoRequest request) {
+        try {
+            // Llamamos al método que acabamos de arreglar en el Service
+            Pedido pedidoActualizado = pedidoService.finalizarPedido(request.getPedidoId(), request);
+            return ResponseEntity.ok(pedidoActualizado);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
 }

@@ -473,4 +473,53 @@ body{
     font-weight: 600;
     color: var(--accent);
   }
+  /* ESTILO PARA MESA BLOQUEADA */
+.table-card.ocupada {
+    background: #4a5568 !important; /* Gris oscuro */
+    cursor: not-allowed;
+    opacity: 0.6;
+    pointer-events: none; /* Esto evita que le hagan click */
+    box-shadow: none;
+    border: 2px solid #e53e3e; /* Borde rojo */
+}
+
+.table-card.ocupada .badge {
+    background: #e53e3e; /* Etiqueta roja */
+    color: white;
+}
+
+.table-card.ocupada .label {
+    color: #cbd5e0;
+}
+/* --- ESTADOS DE LA MESA --- */
+
+/* --- ESTILOS CRÍTICOS PARA DESBLOQUEO --- */
+
+/* 1. MESA MÍA: Debe verse diferente y PERMITIR CLICK */
+.table-card.mi-mesa {
+    background: linear-gradient(180deg, #f6e05e 0%, #d69e2e 100%) !important; /* Amarillo */
+    border: 3px solid #ffffff !important; /* Borde blanco para resaltar */
+    cursor: pointer !important; /* Que salga la manito */
+    pointer-events: auto !important; /* <--- ¡ESTA ES LA CLAVE! Reactiva el clic */
+    opacity: 1 !important; /* Que no se vea transparente */
+}
+
+.table-card.mi-mesa:hover {
+    transform: translateY(-5px); /* Efecto visual al pasar el mouse */
+}
+
+.table-card.mi-mesa .badge {
+    background: #2f855a !important; /* Verde oscuro */
+    color: white !important;
+}
+
+/* 2. MESA DE OTRO: Bloqueada totalmente */
+.table-card.ocupada-ajena {
+    background: #4a5568 !important; /* Gris */
+    cursor: not-allowed !important; /* Signo de prohibido */
+    pointer-events: none !important; /* Desactiva el clic */
+    opacity: 0.6 !important;
+    border: 2px solid #e53e3e !important;
+}
+
 }

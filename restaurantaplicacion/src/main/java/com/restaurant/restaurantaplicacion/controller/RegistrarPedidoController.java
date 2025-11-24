@@ -34,13 +34,14 @@ public class RegistrarPedidoController {
     public ResponseEntity<?> iniciarRegistroPedido(
             // --- CAMBIO CLAVE AÑADIDO ---
             @RequestParam String tipoServicio,
-            @RequestParam(required = false) Integer numeroMesa 
+            @RequestParam(required = false) Integer numeroMesa,
+            @RequestParam Long usuarioId //
     ) {
         try {
             
             // 1. LLAMADA AL SERVICIO REAL (YA NO ES SIMULACIÓN)
             // Llama al método que creamos en PedidoService.java
-            Pedido nuevoPedido = pedidoService.iniciarPedido(tipoServicio, numeroMesa);
+            Pedido nuevoPedido = pedidoService.iniciarPedido(tipoServicio, numeroMesa,usuarioId);
 
             // 2. CREAR EL DTO DE RESPUESTA
             // Usamos los datos del Pedido real que se guardó en la BD (con el ID real).

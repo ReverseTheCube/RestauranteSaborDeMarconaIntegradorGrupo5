@@ -1,111 +1,92 @@
-// Espera a que todo el contenido del HTML esté cargado
+/**
+ * LOGIN.JS
+ * Maneja el inicio de sesión evitando la recarga de página.
+ */
+
 document.addEventListener("DOMContentLoaded", () => {
-    
-    // --- Referencias a elementos del DOM ---
+    console.log("SCRIPT LOGIN CARGADO CORRECTAMENTE"); // Si no ves esto en consola, el archivo está mal
+
+    // Referencias al DOM
     const loginForm = document.getElementById("login-form");
     const usuarioInput = document.getElementById("usuario");
     const contrasenaInput = document.getElementById("contrasena");
-    
-    // Botones
+    const errorMessage = document.getElementById("error-message");
     const btnProblemas = document.getElementById("btn-problemas");
     const btnVolver = document.getElementById("btn-problemas-volver");
-    
-    // Cajas de mensajes (basadas en figma)
-    const errorMessage = document.getElementById("error-message");
     const problemasBox = document.getElementById("problemas-box");
     const bloqueadoBox = document.getElementById("bloqueado-box");
 
-    // --- Lógica de Login ---
-    loginForm.addEventListener("submit", async (e) => {
-        // Previene que el formulario se envíe de la forma tradicional
-        e.preventDefault(); 
-        
-        // Ocultar mensajes de error previos
+    // Verificamos que el formulario exista antes de añadir eventos
+    if (!loginForm) {
+        console.error("ERROR: No se encontró el formulario con id 'login-form'");
+        return;
+    }
+
+    // EVENTO PRINCIPAL: SUBMIT
+    loginForm.addEventListener("submit", async (event) => {
+        // 1. DETENER EL ENVÍO NORMAL (CRUCIAL)
+        event.preventDefault();
+        console.log("Formulario detenido. Iniciando Fetch...");
+
+        // 2. Limpiar errores previos
         ocultarMensajes();
 
-        // 1. Obtener los datos del formulario
+        // 3. Obtener datos
         const usuario = usuarioInput.value;
         const contrasena = contrasenaInput.value;
 
-        // 2. Crear el objeto de datos (LoginRequest DTO)
-        const loginData = {
-            usuario: usuario,
-            contrasena: contrasena
-        };
-
         try {
-            // 3. Enviar la petición a la API de Spring Boot
+            // 4. Petición al Backend
             const response = await fetch("http://localhost:8080/api/auth/login", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(loginData)
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ usuario, contrasena })
             });
 
-            // 4. Manejar la respuesta
+            // 5. Procesar respuesta
             if (response.ok) {
-                // ¡Login Exitoso! (HTTP 200)
-                const loginResponse = await response.json();
-                
-                // Redirigir según el ROL (como en el flujo)
-                switch(loginResponse.rol) {
-                    case "ADMINISTRADOR":
-                        window.location.href = "/admin.html"; // (Debes crear esta página)
-                        break;
-                    case "CAJERO":
-                        window.location.href = "/cajero.html"; // (Debes crear esta página)
-                        break;
-                    case "MESERO":
-                        window.location.href = "/mesero.html"; // (Debes crear esta página)
-                        break;
-                    case "COCINERO":
-                         window.location.href = "/cocinero.html"; // (Debes crear esta página)
-                        break;
-                    default:
-                        alert("Rol no reconocido.");
+                const data = await response.json();
+                console.log("Login exitoso:", data);
+
+                // Guardar sesión
+                localStorage.setItem('usuarioId', data.id);
+                localStorage.setItem('usuarioRol', data.rol);
+
+                // Redirección
+                switch(data.rol) {
+                    case "ADMINISTRADOR": window.location.href = "/admin.html"; break;
+                    case "CAJERO": window.location.href = "/cajero.html"; break;
+                    case "MESERO": window.location.href = "/mesero.html"; break;
+                    case "COCINERO": window.location.href = "/cocinero.html"; break;
+                    default: alert("Rol desconocido: " + data.rol);
                 }
             } else {
-                // Error de Login (HTTP 401)
-                const errorTexto = await response.text();
-                mostrarError(errorTexto);
+                const textoError = await response.text();
+                mostrarError(textoError);
             }
-
         } catch (error) {
-            console.error("Error de conexión:", error);
-            mostrarError("No se pudo conectar con el servidor.");
+            console.error("Error de red:", error);
+            mostrarError("No se pudo conectar con el servidor (Backend apagado o error de red).");
         }
     });
 
-    // --- Lógica para mostrar/ocultar cajas de error ---
-
-    function mostrarError(mensaje) {
-        if (mensaje.includes("bloqueado")) {
-            // Muestra la caja roja de "bloqueado"
+    // Funciones auxiliares
+    function mostrarError(msg) {
+        if (msg.includes("bloqueado") && bloqueadoBox) {
             bloqueadoBox.style.display = "flex";
-        } else if (mensaje.includes("incorrecto")) {
-             // Muestra el texto rojo "Usuario o contraseña incorrecto"
-            errorMessage.style.display = "block";
-        } else {
-            errorMessage.textContent = mensaje;
+        } else if(errorMessage) {
+            errorMessage.textContent = msg;
             errorMessage.style.display = "block";
         }
     }
 
     function ocultarMensajes() {
-        errorMessage.style.display = "none";
-        problemasBox.style.display = "none";
-        bloqueadoBox.style.display = "none";
+        if(errorMessage) errorMessage.style.display = "none";
+        if(problemasBox) problemasBox.style.display = "none";
+        if(bloqueadoBox) bloqueadoBox.style.display = "none";
     }
 
-    // --- Lógica botones "Problemas" ---
-    
-    btnProblemas.addEventListener("click", () => {
-        ocultarMensajes();
-        problemasBox.style.display = "flex";
-    });
-
-    btnVolver.addEventListener("click", () => {
-        ocultarMensajes();
-    });
+    // Botones extra
+    if(btnProblemas) btnProblemas.addEventListener("click", () => { ocultarMensajes(); problemasBox.style.display = "flex"; });
+    if(btnVolver) btnVolver.addEventListener("click", ocultarMensajes);
 });
