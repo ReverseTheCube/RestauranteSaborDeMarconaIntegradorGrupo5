@@ -207,4 +207,65 @@ public class ReporteService {
         String pre = "KMGTPE".charAt(exp-1) + "";
         return String.format("%.1f %sB", bytes / Math.pow(1024, exp), pre);
     }
+
+    // --- NUEVO MÉTODO: EXPORTAR BÚSQUEDA ---
+    public Resource exportarBusqueda(LocalDate fDesde, LocalDate fHasta, Long clienteId, String ruc, String mesa, String delivery, String tipoArchivo) throws IOException {
+        
+        // 1. Preparar Fechas
+        LocalDateTime inicio = (fDesde != null) ? fDesde.atStartOfDay() : null;
+        LocalDateTime fin = (fHasta != null) ? fHasta.atTime(23, 59, 59) : null;
+
+        // 2. Limpiar datos (Igual que en PedidoService)
+        if (ruc != null && ruc.trim().isEmpty()) ruc = null;
+        if (mesa != null && mesa.trim().isEmpty()) mesa = null;
+        if (delivery != null && delivery.trim().isEmpty()) delivery = null;
+        
+        String infoServicio = null;
+        if (mesa != null) infoServicio = mesa.replace("mesa", "").trim();
+        else if (delivery != null) infoServicio = delivery.trim();
+
+        // 3. Buscar datos
+        List<Pedido> pedidos = pedidoRepository.buscarPedidosConFiltros(inicio, fin, clienteId, ruc, infoServicio);
+
+        if (pedidos.isEmpty()) {
+            throw new RuntimeException("No hay datos para exportar con estos filtros.");
+        }
+
+        // 4. Configuración "Dummy" para reutilizar tus generadores
+        GenerarReporteRequest config = new GenerarReporteRequest();
+        config.setPeriodo("BÚSQUEDA PERSONALIZADA");
+        config.setResumen(true);   // Siempre incluir resumen
+        config.setDetallados(true); // Siempre incluir tabla
+        config.setGraficos(false);
+
+        // 5. Generar Archivo Temporal
+        String timestamp = LocalDateTime.now().format(FILENAME_FORMATTER);
+        String extension = "pdf".equalsIgnoreCase(tipoArchivo) ? "pdf" : "xlsx";
+        String nombreArchivo = String.format("Busqueda_%s.%s", timestamp, extension);
+        
+        Path rutaDirectorio = Paths.get(directorioReportes);
+        if (!Files.exists(rutaDirectorio)) Files.createDirectories(rutaDirectorio);
+        Path rutaArchivo = rutaDirectorio.resolve(nombreArchivo);
+
+        if ("pdf".equalsIgnoreCase(tipoArchivo)) {
+            // NOTA: Si tus métodos generarPdf/Excel piden fechaInicio/Fin obligatorias y son null, 
+            // pasamos fechas dummy o las del primer/último pedido para evitar error.
+            LocalDateTime safeInicio = (inicio != null) ? inicio : pedidos.get(0).getFechaHora();
+            LocalDateTime safeFin = (fin != null) ? fin : pedidos.get(pedidos.size()-1).getFechaHora();
+            
+            generarPdf(pedidos, config, rutaArchivo.toString(), safeInicio, safeFin);
+        } else {
+            LocalDateTime safeInicio = (inicio != null) ? inicio : pedidos.get(0).getFechaHora();
+            LocalDateTime safeFin = (fin != null) ? fin : pedidos.get(pedidos.size()-1).getFechaHora();
+            
+            generarExcel(pedidos, config, rutaArchivo.toString(), safeInicio, safeFin);
+        }
+
+        // 6. Retornar Recurso
+        try {
+            return new UrlResource(rutaArchivo.toUri());
+        } catch (MalformedURLException e) {
+            throw new RuntimeException("Error al generar recurso de descarga");
+        }
+    }
 }

@@ -11,7 +11,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.nio.file.Files;
-
+import java.time.LocalDate;
+import org.springframework.format.annotation.DateTimeFormat;
 @RestController
 @RequestMapping("/api/reportes")
 @CrossOrigin(origins = "*")
@@ -100,6 +101,33 @@ public class ReporteController {
         } catch (Exception e) {
             System.err.println("Error inesperado al visualizar: " + e.getMessage());
             return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    // --- NUEVO ENDPOINT: DESCARGAR BÚSQUEDA ---
+    @GetMapping("/busqueda/descargar")
+    public ResponseEntity<Resource> descargarBusqueda(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaDesde,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaHasta,
+            @RequestParam(required = false) Long clienteId,
+            @RequestParam(required = false) String rucEmpresa,
+            @RequestParam(required = false) String mesa,
+            @RequestParam(required = false) String delivery,
+            @RequestParam String formato // "pdf" o "excel"
+    ) {
+        try {
+            Resource resource = reporteService.exportarBusqueda(fechaDesde, fechaHasta, clienteId, rucEmpresa, mesa, delivery, formato);
+            
+            String contentType = "application/octet-stream";
+            if ("pdf".equalsIgnoreCase(formato)) contentType = "application/pdf";
+            else if ("excel".equalsIgnoreCase(formato)) contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+                    .body(resource);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(null);
         }
     }
 }

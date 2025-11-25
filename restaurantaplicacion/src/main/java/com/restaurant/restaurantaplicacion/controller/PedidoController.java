@@ -78,7 +78,7 @@ public class PedidoController {
         return ResponseEntity.ok(pedidoService.obtenerMesasOcupadas());
     }
 
-    // --- 6. BÚSQUEDA CON FILTROS (NUEVO) ---
+    // --- 6. BÚSQUEDA CON FILTROS ---
     @GetMapping("/buscar")
     public ResponseEntity<List<Pedido>> buscarPedidos(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaDesde,
@@ -88,7 +88,6 @@ public class PedidoController {
             @RequestParam(required = false) String mesa,
             @RequestParam(required = false) String delivery
     ) {
-        // Llamamos al nuevo método avanzado del servicio
         List<Pedido> resultados = pedidoService.buscarPedidosAvanzado(fechaDesde, fechaHasta, clienteId, rucEmpresa, mesa, delivery);
         return ResponseEntity.ok(resultados);
     }

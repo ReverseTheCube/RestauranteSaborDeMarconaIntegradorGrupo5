@@ -14,23 +14,25 @@ import java.util.Optional;
 @Repository
 public interface PedidoRepository extends JpaRepository<Pedido, Long> {
 
-    // Consulta para Reportes (Ya la tenías)
+    // Para Reportes (Ya existente)
     List<Pedido> findAllByFechaHoraBetween(LocalDateTime fechaInicio, LocalDateTime fechaFin);
 
-    // Consulta para Mesas Ocupadas (Ya la tenías)
+    // Para Mesas (Ya existente)
     @Query("SELECT p.infoServicio, p.usuario.id FROM Pedido p WHERE p.estado = 'PENDIENTE' AND p.tipoServicio = 'LOCAL'")
     List<Object[]> findMesasOcupadasConUsuario();
 
-    // Validar mesa (Ya la tenías)
     Optional<Pedido> findByInfoServicioAndEstadoAndTipoServicio(String infoServicio, EstadoPedido estado, String tipoServicio);
 
-    // --- NUEVA CONSULTA PARA BÚSQUEDA CON FILTROS ---
-    // Esta consulta es "dinámica": si un parámetro es NULL, ignora esa condición.
-    @Query("SELECT p FROM Pedido p WHERE " +
+    // --- NUEVA CONSULTA MAESTRA PARA BÚSQUEDA ---
+    // Usa LEFT JOIN para no perder pedidos sin cliente/empresa
+    @Query("SELECT p FROM Pedido p " +
+           "LEFT JOIN p.cliente c " +
+           "LEFT JOIN p.empresa e " +
+           "WHERE " +
            "(:fechaInicio IS NULL OR p.fechaHora >= :fechaInicio) AND " +
            "(:fechaFin IS NULL OR p.fechaHora <= :fechaFin) AND " +
-           "(:clienteId IS NULL OR p.cliente.id = :clienteId) AND " +
-           "(:rucEmpresa IS NULL OR p.empresa.ruc = :rucEmpresa) AND " +
+           "(:clienteId IS NULL OR (c.id IS NOT NULL AND c.id = :clienteId)) AND " +
+           "(:rucEmpresa IS NULL OR (e.ruc IS NOT NULL AND e.ruc = :rucEmpresa)) AND " +
            "(:infoServicio IS NULL OR p.infoServicio = :infoServicio)")
     List<Pedido> buscarPedidosConFiltros(
             @Param("fechaInicio") LocalDateTime fechaInicio,

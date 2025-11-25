@@ -125,23 +125,27 @@ public class PedidoService {
     }
 
 // --- LÓGICA DE BÚSQUEDA AVANZADA ---
-    public List<Pedido> buscarPedidosAvanzado(LocalDate fechaDesde, LocalDate fechaHasta, Long clienteId, String rucEmpresa, String mesa, String deliveryCode) {
+   public List<Pedido> buscarPedidosAvanzado(LocalDate fechaDesde, LocalDate fechaHasta, Long clienteId, String rucEmpresa, String mesa, String deliveryCode) {
         
-        // 1. Procesar Fechas (Desde el inicio del día 1 hasta el final del día 2)
+        // 1. Ajustar Fechas (Inicio del día 00:00 -> Fin del día 23:59)
         LocalDateTime inicio = (fechaDesde != null) ? fechaDesde.atStartOfDay() : null;
         LocalDateTime fin = (fechaHasta != null) ? fechaHasta.atTime(23, 59, 59) : null;
 
-        // 2. Procesar Info de Servicio (Mesa o Delivery)
-        // Si el usuario seleccionó mesa, usamos eso. Si escribió código delivery, usamos eso.
+        // 2. Limpiar Strings vacíos (Convertir "" a null)
+        if (rucEmpresa != null && rucEmpresa.trim().isEmpty()) rucEmpresa = null;
+        if (mesa != null && mesa.trim().isEmpty()) mesa = null;
+        if (deliveryCode != null && deliveryCode.trim().isEmpty()) deliveryCode = null;
+
+        // 3. Unificar info de servicio
         String infoServicio = null;
-        if (mesa != null && !mesa.isEmpty()) {
-            // Tu HTML envía "mesa1", "mesa2". La BD guarda "1", "2". Limpiamos el texto:
-            infoServicio = mesa.replace("mesa", ""); 
-        } else if (deliveryCode != null && !deliveryCode.isEmpty()) {
-            infoServicio = deliveryCode;
+        if (mesa != null) {
+            // Si viene "mesa1", guardamos "1"
+            infoServicio = mesa.replace("mesa", "").trim(); 
+        } else if (deliveryCode != null) {
+            infoServicio = deliveryCode.trim();
         }
 
-        // 3. Llamar al repositorio
+        // 4. Ejecutar consulta
         return pedidoRepository.buscarPedidosConFiltros(inicio, fin, clienteId, rucEmpresa, infoServicio);
     }
 }
