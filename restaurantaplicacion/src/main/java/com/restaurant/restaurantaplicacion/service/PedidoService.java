@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -121,5 +122,26 @@ public class PedidoService {
             lista.add(mapa);
         }
         return lista;
+    }
+
+// --- LÓGICA DE BÚSQUEDA AVANZADA ---
+    public List<Pedido> buscarPedidosAvanzado(LocalDate fechaDesde, LocalDate fechaHasta, Long clienteId, String rucEmpresa, String mesa, String deliveryCode) {
+        
+        // 1. Procesar Fechas (Desde el inicio del día 1 hasta el final del día 2)
+        LocalDateTime inicio = (fechaDesde != null) ? fechaDesde.atStartOfDay() : null;
+        LocalDateTime fin = (fechaHasta != null) ? fechaHasta.atTime(23, 59, 59) : null;
+
+        // 2. Procesar Info de Servicio (Mesa o Delivery)
+        // Si el usuario seleccionó mesa, usamos eso. Si escribió código delivery, usamos eso.
+        String infoServicio = null;
+        if (mesa != null && !mesa.isEmpty()) {
+            // Tu HTML envía "mesa1", "mesa2". La BD guarda "1", "2". Limpiamos el texto:
+            infoServicio = mesa.replace("mesa", ""); 
+        } else if (deliveryCode != null && !deliveryCode.isEmpty()) {
+            infoServicio = deliveryCode;
+        }
+
+        // 3. Llamar al repositorio
+        return pedidoRepository.buscarPedidosConFiltros(inicio, fin, clienteId, rucEmpresa, infoServicio);
     }
 }

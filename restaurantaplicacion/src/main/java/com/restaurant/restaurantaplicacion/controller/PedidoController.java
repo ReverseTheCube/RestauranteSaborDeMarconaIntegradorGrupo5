@@ -2,14 +2,16 @@ package com.restaurant.restaurantaplicacion.controller;
 
 import com.restaurant.restaurantaplicacion.dto.CrearPedidoRequest;
 import com.restaurant.restaurantaplicacion.dto.FinalizarPedidoRequest;
-import com.restaurant.restaurantaplicacion.dto.PedidoInicioResponseDTO; // Asegúrate de tener este DTO
+import com.restaurant.restaurantaplicacion.dto.PedidoInicioResponseDTO;
 import com.restaurant.restaurantaplicacion.model.Pedido;
 import com.restaurant.restaurantaplicacion.service.PedidoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat; // <--- IMPORTANTE
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate; // <--- IMPORTANTE
 import java.util.List;
 import java.util.Map;
 
@@ -22,7 +24,6 @@ public class PedidoController {
     private PedidoService pedidoService;
 
     // --- 1. INICIAR PEDIDO (Mesa o Delivery) ---
-    // Reemplaza la funcionalidad del archivo que borraste
     @PostMapping("/registrar-inicio")
     public ResponseEntity<?> iniciarRegistroPedido(
             @RequestParam String tipoServicio,
@@ -32,7 +33,6 @@ public class PedidoController {
         try {
             Pedido nuevoPedido = pedidoService.iniciarPedido(tipoServicio, numeroMesa, usuarioId);
             
-            // Devolvemos el DTO simple que espera el JavaScript
             PedidoInicioResponseDTO response = new PedidoInicioResponseDTO(
                 nuevoPedido.getId(),
                 nuevoPedido.getTipoServicio(),
@@ -66,7 +66,7 @@ public class PedidoController {
         }
     }
 
-    // --- 4. OBTENER HISTORIAL ---
+    // --- 4. OBTENER HISTORIAL COMPLETO ---
     @GetMapping
     public ResponseEntity<List<Pedido>> obtenerTodosLosPedidos() {
         return ResponseEntity.ok(pedidoService.obtenerTodosLosPedidos());
@@ -76,5 +76,20 @@ public class PedidoController {
     @GetMapping("/mesas-ocupadas")
     public ResponseEntity<List<Map<String, Object>>> obtenerMesasOcupadas() {
         return ResponseEntity.ok(pedidoService.obtenerMesasOcupadas());
+    }
+
+    // --- 6. BÚSQUEDA CON FILTROS (NUEVO) ---
+    @GetMapping("/buscar")
+    public ResponseEntity<List<Pedido>> buscarPedidos(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaDesde,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaHasta,
+            @RequestParam(required = false) Long clienteId,
+            @RequestParam(required = false) String rucEmpresa,
+            @RequestParam(required = false) String mesa,
+            @RequestParam(required = false) String delivery
+    ) {
+        // Llamamos al nuevo método avanzado del servicio
+        List<Pedido> resultados = pedidoService.buscarPedidosAvanzado(fechaDesde, fechaHasta, clienteId, rucEmpresa, mesa, delivery);
+        return ResponseEntity.ok(resultados);
     }
 }
