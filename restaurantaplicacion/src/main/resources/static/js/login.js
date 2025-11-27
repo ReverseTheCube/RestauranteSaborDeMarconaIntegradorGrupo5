@@ -1,92 +1,89 @@
-/**
- * LOGIN.JS
- * Maneja el inicio de sesión evitando la recarga de página.
- */
-
+// Espera a que todo el contenido del HTML esté cargado
 document.addEventListener("DOMContentLoaded", () => {
-    console.log("SCRIPT LOGIN CARGADO CORRECTAMENTE"); // Si no ves esto en consola, el archivo está mal
-
-    // Referencias al DOM
+    
+    // --- Referencias a elementos del DOM ---
     const loginForm = document.getElementById("login-form");
     const usuarioInput = document.getElementById("usuario");
     const contrasenaInput = document.getElementById("contrasena");
-    const errorMessage = document.getElementById("error-message");
+    
+    // Botones
     const btnProblemas = document.getElementById("btn-problemas");
-    const btnVolver = document.getElementById("btn-problemas-volver");
-    const problemasBox = document.getElementById("problemas-box");
+    
+    // Cajas y Modales
+    const errorMessage = document.getElementById("error-message");
     const bloqueadoBox = document.getElementById("bloqueado-box");
+    
+    // Referencias del NUEVO MODAL
+    const modalProblemas = document.getElementById("modal-problemas");
+    const btnCerrarModal = document.getElementById("close-modal-problemas");
 
-    // Verificamos que el formulario exista antes de añadir eventos
-    if (!loginForm) {
-        console.error("ERROR: No se encontró el formulario con id 'login-form'");
-        return;
-    }
+    // --- Lógica de Login ---
+    loginForm.addEventListener("submit", async (e) => {
+        e.preventDefault(); 
+        
+        // Ocultar mensajes previos
+        errorMessage.style.display = "none";
+        bloqueadoBox.style.display = "none";
 
-    // EVENTO PRINCIPAL: SUBMIT
-    loginForm.addEventListener("submit", async (event) => {
-        // 1. DETENER EL ENVÍO NORMAL (CRUCIAL)
-        event.preventDefault();
-        console.log("Formulario detenido. Iniciando Fetch...");
-
-        // 2. Limpiar errores previos
-        ocultarMensajes();
-
-        // 3. Obtener datos
-        const usuario = usuarioInput.value;
-        const contrasena = contrasenaInput.value;
+        const loginData = {
+            usuario: usuarioInput.value,
+            contrasena: contrasenaInput.value
+        };
 
         try {
-            // 4. Petición al Backend
             const response = await fetch("http://localhost:8080/api/auth/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ usuario, contrasena })
+                body: JSON.stringify(loginData)
             });
 
-            // 5. Procesar respuesta
             if (response.ok) {
-                const data = await response.json();
-                console.log("Login exitoso:", data);
-
-                // Guardar sesión
-                localStorage.setItem('usuarioId', data.id);
-                localStorage.setItem('usuarioRol', data.rol);
-
-                // Redirección
-                switch(data.rol) {
+                const loginResponse = await response.json();
+                
+                // Redirigir según el ROL
+                switch(loginResponse.rol) {
                     case "ADMINISTRADOR": window.location.href = "/admin.html"; break;
                     case "CAJERO": window.location.href = "/cajero.html"; break;
                     case "MESERO": window.location.href = "/mesero.html"; break;
                     case "COCINERO": window.location.href = "/cocinero.html"; break;
-                    default: alert("Rol desconocido: " + data.rol);
+                    default: alert("Rol no reconocido.");
                 }
             } else {
-                const textoError = await response.text();
-                mostrarError(textoError);
+                const errorTexto = await response.text();
+                mostrarError(errorTexto);
             }
+
         } catch (error) {
-            console.error("Error de red:", error);
-            mostrarError("No se pudo conectar con el servidor (Backend apagado o error de red).");
+            console.error("Error de conexión:", error);
+            mostrarError("No se pudo conectar con el servidor.");
         }
     });
 
-    // Funciones auxiliares
-    function mostrarError(msg) {
-        if (msg.includes("bloqueado") && bloqueadoBox) {
-            bloqueadoBox.style.display = "flex";
-        } else if(errorMessage) {
-            errorMessage.textContent = msg;
-            errorMessage.style.display = "block";
+    function mostrarError(mensaje) {
+        if (mensaje.includes("bloqueado")) {
+            bloqueadoBox.style.display = "flex"; // Muestra la caja roja sobre el form
+        } else {
+            errorMessage.textContent = mensaje;
+            errorMessage.style.display = "block"; // Muestra texto rojo pequeño
         }
     }
 
-    function ocultarMensajes() {
-        if(errorMessage) errorMessage.style.display = "none";
-        if(problemasBox) problemasBox.style.display = "none";
-        if(bloqueadoBox) bloqueadoBox.style.display = "none";
-    }
+    // --- LÓGICA DEL MODAL DE PROBLEMAS ---
+    
+    // 1. Abrir modal al hacer clic en "¿Problemas...?"
+    btnProblemas.addEventListener("click", () => {
+        modalProblemas.style.display = "flex";
+    });
 
-    // Botones extra
-    if(btnProblemas) btnProblemas.addEventListener("click", () => { ocultarMensajes(); problemasBox.style.display = "flex"; });
-    if(btnVolver) btnVolver.addEventListener("click", ocultarMensajes);
+    // 2. Cerrar modal al hacer clic en la "X"
+    btnCerrarModal.addEventListener("click", () => {
+        modalProblemas.style.display = "none";
+    });
+
+    // 3. Cerrar modal al hacer clic fuera del contenido (en el fondo oscuro)
+    window.addEventListener("click", (e) => {
+        if (e.target === modalProblemas) {
+            modalProblemas.style.display = "none";
+        }
+    });
 });

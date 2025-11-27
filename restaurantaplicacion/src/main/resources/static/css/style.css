@@ -110,7 +110,8 @@ body {
 }
 
 
-/* Botones Generales */
+/* --- BOTONES GENERALES --- */
+/* Corrección aplicada: Se quitó el "color: white" global */
 .btn {
     border: none;
     border-radius: 5px;
@@ -119,7 +120,6 @@ body {
     cursor: pointer;
     margin-top: 0.5rem;
     text-decoration: none;
-    color: white;
     text-align: center;
 }
 
@@ -131,17 +131,18 @@ body {
 
 .btn-secondary {
     background-color: var(--color-btn-secondary);
-    color: var(--color-form);
+    color: var(--color-form); /* Texto oscuro para contraste */
+    font-weight: bold;
 }
 
-/* --- (NUEVO) ESTILOS MENÚS --- */
+/* --- ESTILOS MENÚS (Admin, Cajero, etc.) --- */
 
 .menu-container {
     background-color: var(--color-form);
     padding: 2rem;
     border-radius: 10px;
     color: var(--color-texto);
-    width: 600px; /* Más ancho que el login */
+    width: 600px;
     min-height: 400px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     display: flex;
@@ -164,6 +165,7 @@ body {
 
 .btn-logout {
     background-color: var(--color-btn-logout);
+    color: white;
     padding: 0.5rem 1rem;
     font-size: 0.9rem;
     margin: 0;
@@ -179,23 +181,18 @@ body {
     padding: 1.5rem;
     font-size: 1.2rem;
     font-weight: bold;
+    color: white;
+    display: block; /* Para que ocupen todo el ancho si son <a> */
 }
 
 /* Colores de botones por rol */
-.btn-menu-admin {
-    background-color: var(--color-btn-admin);
-}
-.btn-menu-cajero {
-    background-color: var(--color-btn-cajero);
-}
-.btn-menu-mesero {
-    background-color: var(--color-btn-mesero);
-}
-.btn-menu-cocinero {
-    background-color: var(--color-btn-cocinero);
-}
+.btn-menu-admin { background-color: var(--color-btn-admin); }
+.btn-menu-cajero { background-color: var(--color-btn-cajero); }
+.btn-menu-mesero { background-color: var(--color-btn-mesero); }
+.btn-menu-cocinero { background-color: var(--color-btn-cocinero); }
 
-/* --- (NUEVO) ESTILOS GESTIÓN DE USUARIOS --- */
+
+/* --- ESTILOS GESTIÓN DE USUARIOS --- */
 
 /* Contenedor principal de la página */
 .gestion-container {
@@ -203,7 +200,7 @@ body {
     padding: 2rem;
     border-radius: 10px;
     color: var(--color-texto);
-    width: 90%; /* Más ancho */
+    width: 90%; 
     max-width: 1200px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     display: grid; /* Usamos Grid para las columnas */
@@ -213,9 +210,10 @@ body {
         "header header"
         "form   lista";
     gap: 2rem;
+    max-height: 90vh; /* Para que no se salga de la pantalla */
 }
 
-/* Encabezado (Título y botón volver) */
+/* Encabezado */
 .gestion-header {
     grid-area: header;
     display: flex;
@@ -240,9 +238,10 @@ body {
 /* Columna Izquierda (Formulario) */
 .gestion-form-container {
     grid-area: form;
-    background-color: var(--color-btn-admin); /* Fondo morado como en figma */
+    background-color: var(--color-btn-admin); /* Fondo morado */
     padding: 1.5rem;
     border-radius: 8px;
+    height: fit-content;
 }
 
 .gestion-form-container form {
@@ -273,22 +272,17 @@ body {
 .btn-form-crear {
     background-color: var(--color-btn-cajero); /* Verde */
     color: white;
-    padding: 0.8rem;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1rem;
-    font-weight: bold;
     margin-top: 1rem;
+    font-weight: bold;
 }
 
 /* Columna Derecha (Tabla) */
 .gestion-lista-container {
     grid-area: lista;
-    background-color: #34495e; /* Un azul/gris oscuro */
+    background-color: #34495e; /* Azul grisáceo */
     padding: 1.5rem;
     border-radius: 8px;
-    overflow-y: auto; /* Scroll si la tabla es muy larga */
+    overflow-y: auto; /* Scroll si hay muchos usuarios */
 }
 
 .gestion-lista-container h3 {
@@ -298,7 +292,7 @@ body {
 
 #tabla-usuarios {
     width: 100%;
-    border-collapse: collapse; /* Bordes unidos */
+    border-collapse: collapse;
 }
 
 #tabla-usuarios th,
@@ -321,48 +315,31 @@ body {
 .btn-accion-editar,
 .btn-accion-eliminar {
     padding: 0.4rem 0.8rem;
-    border: none;
     border-radius: 5px;
     color: white;
+    font-size: 0.9rem;
     cursor: pointer;
 }
-.btn-accion-editar {
-    background-color: var(--color-btn-mesero); /* Azul */
-}
-.btn-accion-eliminar {
-    background-color: var(--color-btn-logout); /* Rojo */
-}
+.btn-accion-editar { background-color: var(--color-btn-mesero); }
+.btn-accion-eliminar { background-color: var(--color-btn-logout); }
 
-/* Estilos de botones (colores figma) */
-.btn-menu-admin-eliminar {
-    background-color: var(--color-btn-logout); /* Rojo */
-    color: white;
-    padding: 0.8rem;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1rem;
-}
-
-
-/* --- (NUEVO) ESTILOS MODALES (Pop-ups) --- */
+/* --- ESTILOS MODALES (Pop-ups) --- */
 .modal {
     display: none; /* Oculto por defecto */
-    position: fixed; /* Quedarse fijo en la pantalla */
+    position: fixed;
     z-index: 1000;
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
     overflow: auto;
-    background-color: rgba(0, 0, 0, 0.6); /* Fondo negro semitransparente */
+    background-color: rgba(0, 0, 0, 0.6);
     justify-content: center;
     align-items: center;
-    flex-direction: column;
 }
 
 .modal-content {
-    background-color: var(--color-btn-admin); /* Morado como el formulario */
+    background-color: var(--color-btn-admin); /* Morado */
     color: white;
     padding: 2rem;
     border-radius: 10px;
@@ -371,6 +348,8 @@ body {
     box-shadow: 0 5px 20px rgba(0,0,0,0.5);
     position: relative;
     border: 5px solid var(--color-box-yellow-border);
+    display: flex;
+    flex-direction: column;
 }
 
 .close-modal {
@@ -381,14 +360,10 @@ body {
     position: absolute;
     top: 10px;
     right: 20px;
-}
-
-.close-modal:hover,
-.close-modal:focus {
-    color: white;
-    text-decoration: none;
     cursor: pointer;
 }
+
+.close-modal:hover { color: white; }
 
 .modal-content h3 {
     margin-top: 0;
@@ -400,25 +375,31 @@ body {
     flex-direction: column;
     gap: 1rem;
 }
-.modal-content label {
-    font-weight: bold;
-}
+
+.modal-content label { font-weight: bold; }
+
 .modal-content input,
 .modal-content select {
     padding: 0.8rem;
     border-radius: 5px;
     border: none;
     font-size: 1rem;
+    color: #000;
 }
 
 .modal-botones {
     display: flex;
     justify-content: space-around;
-    margin-top: 2rem;
+    margin-top: 1.5rem;
     gap: 1rem;
 }
 
 .modal-botones button {
     width: 45%;
-    margin-top: 0;
+    color: white;
+}
+
+/* Botones específicos del modal */
+.btn-menu-admin-eliminar {
+    background-color: var(--color-btn-logout); /* Rojo */
 }

@@ -24,15 +24,20 @@
             <button type="submit" id="btn-login" class="btn btn-primary">Login</button>
         </form>
 
-        <div id="problemas-box" class="info-box-yellow">
-            <h3>Comunicarse a este número:</h3>
-            <p>XXX-XXX-XXX</p>
-            <button type="button" id="btn-problemas-volver" class="btn-primary">Login</button>
-        </div>
-
         <div id="bloqueado-box" class="info-box-red">
             <p>Se detectaron demasiados intentos de acceso.<br>
             Se ha bloqueado el acceso durante 5 minutos</p>
+        </div>
+    </div>
+
+    <div id="modal-problemas" class="modal">
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+            <span class="close-modal" id="close-modal-problemas">&times;</span>
+            <div class="info-box-yellow" style="position: relative; display: flex; border: none; padding: 0;">
+                <h3 style="color: var(--color-form); margin-bottom: 10px;">Comunicarse a este número:</h3>
+                <p style="color: var(--color-form); font-weight: bold; font-size: 1.2rem;">900278347</p>
+                <p style="color: var(--color-form); font-size: 0.9rem;">(Soporte Técnico)</p>
+            </div>
         </div>
     </div>
 
