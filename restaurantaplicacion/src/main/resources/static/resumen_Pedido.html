@@ -50,8 +50,7 @@
                         <th style="text-align:center">Acción</th>
                     </tr>
                 </thead>
-                <tbody id="detalle-tabla-body">
-                    </tbody>
+                <tbody id="detalle-tabla-body"></tbody>
             </table>
         </div>
 
@@ -68,6 +67,24 @@
             </div>
         </div>
     </div>
+
+    <div id="modal-exito" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); align-items:center; justify-content:center; z-index:1000;">
+        <div class="card-container" style="max-width: 400px; text-align: center; border: 2px solid var(--success);">
+            <div style="font-size: 4rem; margin-bottom: 10px;">🎉</div>
+            <h2 class="page-title" style="color: var(--success);">¡Venta Exitosa!</h2>
+            <p style="margin-bottom: 20px; color: var(--text-main);">El pedido se ha guardado correctamente.</p>
+            
+            <div class="actions-container" style="flex-direction: column; gap: 15px;">
+                <button id="btnImprimir" class="btn btn-primary" style="font-size: 1.1rem; padding: 15px;">
+                    🖨️ Imprimir / Descargar Boleta
+                </button>
+                <button class="btn btn-secondary" onclick="cerrarModalYSalir()">
+                    Finalizar y Salir
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script src="/js/resumen_pedido.js"></script>
 </body>
 </html>
