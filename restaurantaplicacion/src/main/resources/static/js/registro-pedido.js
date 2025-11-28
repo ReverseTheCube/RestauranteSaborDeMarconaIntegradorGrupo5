@@ -1,68 +1,69 @@
 /**
  * registro-pedido.js
- * Llama a la API REAL /api/pedidos para crear un pedido inicial de Delivery.
+ * Gestiona el inicio de pedidos (especialmente Delivery).
  */
 
-// Función llamada por el botón 'Delivery'
 async function iniciarPedido(tipoServicio) {
-    // 1. Ocultar botón
     const deliveryBtn = document.getElementById('btnDelivery');
+    
+    // 1. OBTENER ID DEL USUARIO LOGUEADO (CORREGIDO)
+    const usuarioId = localStorage.getItem('usuarioId');
+
+    if (!usuarioId) {
+        alert("Error de sesión: No se identificó al usuario. Por favor, inicie sesión nuevamente.");
+        window.location.href = "index.html";
+        return;
+    }
+
     if (deliveryBtn) {
         deliveryBtn.disabled = true;
-        deliveryBtn.textContent = 'Registrando...';
+        deliveryBtn.textContent = 'Procesando...';
     }
 
-    // 2. Crear el DTO (CrearPedidoRequest)
-    // Pedimos al usuario un "código" o referencia para el delivery
-    const codigoDelivery = prompt("Ingrese un código de referencia para el Delivery (ej. N° Teléfono o 'Rappi'):");
+    // 2. Pedir referencia para Delivery
+    const codigoDelivery = prompt("Ingrese referencia para el Delivery (Nombre Cliente / Teléfono):");
     if (!codigoDelivery) {
-        alert("Se canceló el pedido.");
-        deliveryBtn.disabled = false;
-        deliveryBtn.textContent = 'Delivery';
-        return; // No hace nada si el usuario cancela
+        if (deliveryBtn) {
+            deliveryBtn.disabled = false;
+            deliveryBtn.textContent = '🛵 DELIVERY';
+        }
+        return;
     }
 
+    // 3. Crear el objeto DTO
     const pedidoRequest = {
-        usuarioId: 7, // <-- ¡¡CAMBIA ESTO!! Usa el ID de un usuario real (ej. tu 'adm')
-        detallePlatos: [], // Se envía una lista vacía
+        usuarioId: parseInt(usuarioId), // Usamos el ID real de localStorage
+        detallePlatos: [], 
         tipoServicio: "DELIVERY",
-        infoServicio: codigoDelivery, // Guardamos la referencia
-        clienteId: null,      // (Opcional)
-        rucEmpresa: null      // (Opcional)
+        infoServicio: codigoDelivery,
+        clienteId: null,
+        rucEmpresa: null
     };
 
-    // 3. Realizar la llamada a la API
     try {
-        const response = await fetch('/api/pedidos', { // Llama a la API real
+        const response = await fetch('/api/pedidos', { 
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(pedidoRequest) // Envía el DTO
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(pedidoRequest)
         });
 
         if (!response.ok) {
-            throw new Error(`Error en el servidor: ${response.statusText}`);
+            throw new Error(`Error servidor: ${response.statusText}`);
         }
         
-        const pedidoCreado = await response.json(); // Recibe el Pedido real
+        const pedidoCreado = await response.json();
 
-        // 4. Si la API devuelve el ID del pedido exitosamente
-        console.log(`Pedido iniciado con ID: ${pedidoCreado.id}`);
-        alert(`¡Pedido de ${tipoServicio} registrado! ID Real: ${pedidoCreado.id}. Redirigiendo...`);
-        
-        // Redirigir al siguiente paso
-        window.location.href = `/seleccionar_menu.html?pedidoId=${pedidoCreado.id}`;
+        // 4. Redirigir al menú para agregar platos
+        // Pasamos el ID del pedido y el ID del delivery en la URL
+        window.location.href = `/seleccionar_menu.html?pedidoId=${pedidoCreado.id}&deliveryId=${pedidoCreado.id}`;
 
     } catch (error) {
-        // 5. Manejo de errores
-        console.error('Fallo al iniciar el pedido:', error);
-        alert('Error: No se pudo registrar el pedido inicial. ' + error.message);
-
-        // 6. Restablecer el botón
+        console.error('Fallo al iniciar:', error);
+        alert('Error al crear el pedido: ' + error.message);
+        
         if (deliveryBtn) {
             deliveryBtn.disabled = false;
-            deliveryBtn.textContent = 'Delivery';
+            deliveryBtn.textContent = '🛵 DELIVERY';
         }
     }
 }

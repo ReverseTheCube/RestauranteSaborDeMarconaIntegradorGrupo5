@@ -1,27 +1,19 @@
-// Espera a que todo el contenido del HTML esté cargado
 document.addEventListener("DOMContentLoaded", () => {
     
-    // --- Referencias a elementos del DOM ---
     const loginForm = document.getElementById("login-form");
     const usuarioInput = document.getElementById("usuario");
     const contrasenaInput = document.getElementById("contrasena");
-    
-    // Botones
-    const btnProblemas = document.getElementById("btn-problemas");
-    
-    // Cajas y Modales
     const errorMessage = document.getElementById("error-message");
     const bloqueadoBox = document.getElementById("bloqueado-box");
     
-    // Referencias del NUEVO MODAL
+    // Modal
     const modalProblemas = document.getElementById("modal-problemas");
+    const btnProblemas = document.getElementById("btn-problemas");
     const btnCerrarModal = document.getElementById("close-modal-problemas");
 
-    // --- Lógica de Login ---
     loginForm.addEventListener("submit", async (e) => {
         e.preventDefault(); 
         
-        // Ocultar mensajes previos
         errorMessage.style.display = "none";
         bloqueadoBox.style.display = "none";
 
@@ -31,17 +23,23 @@ document.addEventListener("DOMContentLoaded", () => {
         };
 
         try {
-            const response = await fetch("http://localhost:8080/api/auth/login", {
+            const response = await fetch("/api/auth/login", { // Ruta relativa es mejor
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(loginData)
             });
 
             if (response.ok) {
-                const loginResponse = await response.json();
+                const data = await response.json();
                 
+                // --- AQUÍ ESTÁ LA SOLUCIÓN: GUARDAR EN MEMORIA ---
+                localStorage.setItem('usuarioId', data.id);
+                localStorage.setItem('usuarioNombre', data.usuario);
+                localStorage.setItem('usuarioRol', data.rol);
+                // -------------------------------------------------
+
                 // Redirigir según el ROL
-                switch(loginResponse.rol) {
+                switch(data.rol) {
                     case "ADMINISTRADOR": window.location.href = "/admin.html"; break;
                     case "CAJERO": window.location.href = "/cajero.html"; break;
                     case "MESERO": window.location.href = "/mesero.html"; break;
@@ -61,29 +59,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function mostrarError(mensaje) {
         if (mensaje.includes("bloqueado")) {
-            bloqueadoBox.style.display = "flex"; // Muestra la caja roja sobre el form
+            if(bloqueadoBox) bloqueadoBox.style.display = "block"; // Corregido a block/flex
         } else {
             errorMessage.textContent = mensaje;
-            errorMessage.style.display = "block"; // Muestra texto rojo pequeño
+            errorMessage.style.display = "block";
         }
     }
 
-    // --- LÓGICA DEL MODAL DE PROBLEMAS ---
-    
-    // 1. Abrir modal al hacer clic en "¿Problemas...?"
-    btnProblemas.addEventListener("click", () => {
-        modalProblemas.style.display = "flex";
-    });
-
-    // 2. Cerrar modal al hacer clic en la "X"
-    btnCerrarModal.addEventListener("click", () => {
-        modalProblemas.style.display = "none";
-    });
-
-    // 3. Cerrar modal al hacer clic fuera del contenido (en el fondo oscuro)
+    // Lógica del Modal
+    if(btnProblemas) {
+        btnProblemas.addEventListener("click", () => modalProblemas.style.display = "flex");
+    }
+    if(btnCerrarModal) {
+        btnCerrarModal.addEventListener("click", () => modalProblemas.style.display = "none");
+    }
     window.addEventListener("click", (e) => {
-        if (e.target === modalProblemas) {
-            modalProblemas.style.display = "none";
-        }
+        if (e.target === modalProblemas) modalProblemas.style.display = "none";
     });
 });
