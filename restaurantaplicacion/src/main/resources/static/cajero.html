@@ -4,19 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Menú Cajero</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/global.css">
 </head>
 <body>
-    <div class="menu-container">
-        <div class="menu-header">
-            <h2>Bienvenido cajero</h2>
-            <a href="/" class="btn btn-logout">Log out</a>
+    <div class="card-container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--secondary); padding-bottom: 15px;">
+            <h2 class="page-title" style="margin: 0;">Panel Cajero</h2>
+            <a href="/" class="btn btn-danger" style="padding: 8px 16px; font-size: 0.9rem;">Cerrar Sesión</a>
         </div>
         
-        <div class="menu-body">
-            <a href="gestionpedidos.html" class="btn btn-menu btn-menu-cajero">Registrar pedidos</a>   
-            <a href="gestion-clientes.html" class="btn btn-menu btn-menu-cajero">Gestionar Clientes y Pensiones</a>
-            <a href="#" class="btn btn-menu btn-menu-cajero">Pedidos Registrados</a>
+        <div class="page-subtitle">Operaciones de Caja</div>
+
+        <div class="grid-menu">
+            <a href="gestionpedidos.html" class="btn btn-role-cajero" style="padding: 30px;">
+                📝 Registrar Pedidos
+            </a>
+            <a href="gestion-cliente.html" class="btn btn-role-cajero" style="padding: 30px;">
+                👥 Gestión Clientes y Pensiones
+            </a>
+            <a href="#" class="btn btn-secondary" style="padding: 30px; opacity: 0.7;">
+                📋 Pedidos Registrados
+            </a>
         </div>
     </div>
 </body>

@@ -4,39 +4,44 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Usuarios</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/global.css">
 </head>
 <body>
 
-    <div class="gestion-container">
-        <div class="gestion-header">
-            <h2>Gestión de Usuarios</h2>
-            <a href="/admin.html" class="btn-back">⬅</a>
+    <div class="card-container" style="max-width: 1000px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 class="page-title" style="margin:0;">Gestión de Usuarios</h2>
+            <a href="/admin.html" class="btn btn-secondary">⬅ Volver</a>
         </div>
 
-        <div class="gestion-form-container">
-            <form id="form-crear-usuario">
-                <h3>Crear Usuario</h3>
-                <label for="crear-rol">Rol:</label>
-                <select id="crear-rol" required>
-                    <option value="ADMINISTRADOR">ADMINISTRADOR</option>
-                    <option value="CAJERO">CAJERO</option>
-                    <option value="MESERO">MESERO</option>
-                    <option value="COCINERO">COCINERO</option>
-                </select>
-
-                <label for="crear-usuario">Usuario:</label>
-                <input type="text" id="crear-usuario" required>
-
-                <label for="crear-contrasena">Contraseña:</label>
-                <input type="password" id="crear-contrasena" required>
-
-                <button type="submit" class="btn btn-form-crear">Ingresar usuario</button>
+        <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+            <h3 style="color: var(--text-main); margin-bottom: 15px; border-bottom: 1px solid var(--secondary); padding-bottom: 5px;">Crear Nuevo Usuario</h3>
+            <form id="form-crear-usuario" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; align-items: end;">
+                <div>
+                    <label for="crear-rol">Rol:</label>
+                    <select id="crear-rol" required>
+                        <option value="ADMINISTRADOR">ADMINISTRADOR</option>
+                        <option value="CAJERO">CAJERO</option>
+                        <option value="MESERO">MESERO</option>
+                        <option value="COCINERO">COCINERO</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="crear-usuario">Usuario:</label>
+                    <input type="text" id="crear-usuario" required placeholder="Nombre de usuario">
+                </div>
+                <div>
+                    <label for="crear-contrasena">Contraseña:</label>
+                    <input type="password" id="crear-contrasena" required placeholder="******">
+                </div>
+                <div>
+                    <button type="submit" class="btn btn-success" style="width: 100%;">+ Agregar</button>
+                </div>
             </form>
         </div>
 
-        <div class="gestion-lista-container">
-            <h3>Usuarios existentes</h3>
+        <h3 style="color: var(--primary);">Usuarios Existentes</h3>
+        <div class="table-wrapper">
             <table id="tabla-usuarios">
                 <thead>
                     <tr>
@@ -44,7 +49,7 @@
                         <th>ROL</th>
                         <th>USUARIO</th>
                         <th>CONTRASEÑA</th>
-                        <th>ACCIONES</th>
+                        <th style="text-align: center;">ACCIONES</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -53,40 +58,47 @@
         </div>
     </div>
 
-    <div id="modal-editar" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" id="close-modal-editar">&times;</span>
+    <div id="modal-editar" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); align-items:center; justify-content:center; z-index:1000;">
+        <div class="card-container" style="max-width: 450px;">
+            <h3 class="page-title">Editar Usuario</h3>
             <form id="form-editar-usuario">
-                <h3>Edición de Usuario</h3>
-                <input type="hidden" id="editar-id"> <label for="editar-rol">Rol:</label>
-                <select id="editar-rol" required>
-                    <option value="ADMINISTRADOR">ADMINISTRADOR</option>
-                    <option value="CAJERO">CAJERO</option>
-                    <option value="MESERO">MESERO</option>
-                    <option value="COCINERO">COCINERO</option>
-                </select>
+                <input type="hidden" id="editar-id">
+                
+                <div class="form-group">
+                    <label for="editar-rol">Rol:</label>
+                    <select id="editar-rol" required>
+                        <option value="ADMINISTRADOR">ADMINISTRADOR</option>
+                        <option value="CAJERO">CAJERO</option>
+                        <option value="MESERO">MESERO</option>
+                        <option value="COCINERO">COCINERO</option>
+                    </select>
+                </div>
 
-                <label for="editar-usuario">Usuario:</label>
-                <input type="text" id="editar-usuario" required>
+                <div class="form-group">
+                    <label for="editar-usuario">Usuario:</label>
+                    <input type="text" id="editar-usuario" required>
+                </div>
 
-                <label for="editar-contrasena">Contraseña:</label>
-                <input type="password" id="editar-contrasena" placeholder="(Dejar en blanco para no cambiar)">
+                <div class="form-group">
+                    <label for="editar-contrasena">Nueva Contraseña (Opcional):</label>
+                    <input type="password" id="editar-contrasena" placeholder="Dejar vacío para no cambiar">
+                </div>
 
-                <div class="modal-botones">
-                    <button type="button" id="btn-descartar" class="btn btn-menu-admin-eliminar">Descartar cambios</button>
-                    <button type="submit" class="btn btn-form-crear">Confirmar cambios</button>
+                <div class="actions-container">
+                    <button type="button" id="btn-descartar" class="btn btn-secondary">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Guardar Cambios</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <div id="modal-eliminar" class="modal">
-        <div class="modal-content">
-            <h3>¿Está seguro de eliminar al usuario?</h3>
-            <p id="eliminar-texto-usuario"></p>
-            <div class="modal-botones">
-                <button type="button" id="btn-eliminar-no" class="btn btn-form-crear">No</button>
-                <button type="button" id="btn-eliminar-si" class="btn btn-menu-admin-eliminar">Sí</button>
+    <div id="modal-eliminar" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); align-items:center; justify-content:center; z-index:1000;">
+        <div class="card-container" style="max-width: 400px; text-align: center;">
+            <h3 class="page-title" style="color: var(--danger);">¿Eliminar Usuario?</h3>
+            <p id="eliminar-texto-usuario" style="margin: 20px 0; color: var(--text-main);"></p>
+            <div class="actions-container">
+                <button type="button" id="btn-eliminar-no" class="btn btn-secondary">Cancelar</button>
+                <button type="button" id="btn-eliminar-si" class="btn btn-danger">Sí, Eliminar</button>
             </div>
         </div>
     </div>

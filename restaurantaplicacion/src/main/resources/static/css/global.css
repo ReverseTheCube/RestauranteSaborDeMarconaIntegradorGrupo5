@@ -1,0 +1,288 @@
+/* =========================================
+   1. VARIABLES GLOBALES (PALETA DE COLORES)
+   ========================================= */
+:root {
+    /* Colores Principales (Tema Sabor de Marcona) */
+    --primary: #ff9b1a;         /* Naranja principal */
+    --primary-hover: #e68900;   /* Naranja oscuro (hover) */
+    --secondary: #2a4a5f;       /* Azul grisáceo (bordes/separadores) */
+    
+    /* Fondos */
+    --bg-body: #041a2e;         /* Fondo general (Azul muy oscuro) */
+    --bg-card: #0f2330;         /* Fondo de tarjetas/paneles */
+    --bg-input: #1a3243;        /* Fondo de inputs */
+    
+    /* Textos */
+    --text-main: #dde7f3;       /* Texto principal (Blanco suave) */
+    --text-muted: #a0aec0;      /* Texto secundario (Gris) */
+    --text-dark: #0b2a3f;       /* Texto oscuro (para usar sobre naranja) */
+
+    /* Estados */
+    --danger: #e74c3c;          /* Rojo (Eliminar/Cancelar) */
+    --success: #2ecc71;         /* Verde (Confirmar/Guardar) */
+    --warning: #f1c40f;         /* Amarillo (Alertas) */
+
+    /* Roles (Rescatados de tu style.css) */
+    --role-admin: #9b59b6;      /* Morado */
+    --role-cajero: #2ecc71;     /* Verde */
+    --role-mesero: #3498db;     /* Azul */
+    --role-cocinero: #e91e63;   /* Rosa */
+
+    /* Propiedades UI */
+    --radius: 12px;             /* Redondeo estándar */
+    --radius-pill: 50px;        /* Redondeo tipo píldora */
+    --shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+}
+
+/* =========================================
+   2. ESTILOS BASE
+   ========================================= */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-body);
+    color: var(--text-main);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    line-height: 1.6;
+}
+
+/* =========================================
+   3. CONTENEDOR PRINCIPAL (CARD UNIFICADA)
+   Reemplaza a: .panel, .stage, .login-container
+   ========================================= */
+.card-container {
+    background-color: var(--bg-card);
+    border-radius: var(--radius);
+    padding: 40px;
+    width: 100%;
+    max-width: 900px; /* Ancho máximo para que no se estire demasiado */
+    box-shadow: var(--shadow);
+    border: 1px solid var(--secondary);
+    position: relative;
+    overflow: hidden; /* Para contener bordes decorativos */
+}
+
+/* Decoración opcional (borde naranja brillante) */
+.card-container::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 4px;
+    background: linear-gradient(90deg, var(--primary), var(--danger));
+}
+
+/* Títulos de Página */
+.page-title {
+    color: var(--primary);
+    font-size: 2rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 10px;
+    font-style: italic;
+}
+
+.page-subtitle {
+    color: var(--text-main);
+    font-size: 1.2rem;
+    text-align: center;
+    margin-bottom: 30px;
+    opacity: 0.9;
+}
+
+/* =========================================
+   4. FORMULARIOS (INPUTS Y LABELS)
+   ========================================= */
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--primary);
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+/* Estilo unificado para todos los inputs */
+input[type="text"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+select,
+textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border-radius: 8px;
+    border: 1px solid var(--secondary);
+    background-color: var(--bg-input);
+    color: var(--text-main);
+    font-size: 1rem;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    outline: none;
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(255, 155, 26, 0.2);
+}
+
+/* =========================================
+   5. BOTONES MAESTROS
+   ========================================= */
+.btn {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    padding: 12px 24px;
+    border: none;
+    border-radius: var(--radius-pill);
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform 0.2s, filter 0.2s, box-shadow 0.2s;
+    text-align: center;
+    gap: 8px; /* Espacio si pones íconos */
+}
+
+.btn:active {
+    transform: scale(0.98);
+}
+
+/* Botón Primario (Naranja) - Para acciones principales */
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(255, 155, 26, 0.4);
+}
+.btn-primary:hover {
+    filter: brightness(1.1);
+    transform: translateY(-2px);
+}
+
+/* Botón Secundario (Gris/Azul) - Para "Atrás" o "Cancelar" */
+.btn-secondary {
+    background-color: var(--secondary);
+    color: #fff;
+}
+.btn-secondary:hover {
+    background-color: #3b607a;
+}
+
+/* Botón Peligro (Rojo) - Para "Eliminar" o "Logout" */
+.btn-danger {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: #fff;
+}
+.btn-danger:hover {
+    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+}
+
+/* Botón Éxito (Verde) - Para "Guardar cambios" */
+.btn-success {
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    color: #fff;
+}
+
+/* Botones de Roles Específicos (para el menú principal) */
+.btn-role-admin { background-color: var(--role-admin); color: white; }
+.btn-role-cajero { background-color: var(--role-cajero); color: #000; }
+.btn-role-mesero { background-color: var(--role-mesero); color: white; }
+.btn-role-cocinero { background-color: var(--role-cocinero); color: white; }
+
+/* Contenedor de botones (para alinearlos) */
+.actions-container {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 30px;
+    flex-wrap: wrap;
+}
+
+/* =========================================
+   6. TABLAS MODERNAS
+   ========================================= */
+.table-wrapper {
+    overflow-x: auto; /* Scroll horizontal si la tabla es muy ancha */
+    margin-top: 20px;
+    border-radius: 8px;
+    border: 1px solid var(--secondary);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--bg-card);
+}
+
+th {
+    background-color: #0b1a24; /* Encabezado más oscuro */
+    color: var(--primary);
+    padding: 15px;
+    text-align: left;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    border-bottom: 2px solid var(--secondary);
+}
+
+td {
+    padding: 12px 15px;
+    border-bottom: 1px solid var(--secondary);
+    color: var(--text-main);
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+tr:hover td {
+    background-color: rgba(255, 155, 26, 0.05); /* Sutil brillo naranja al pasar mouse */
+}
+
+/* =========================================
+   7. UTILIDADES EXTRA
+   ========================================= */
+/* Grid responsiva (útil para menús o tarjetas) */
+.grid-menu {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+/* Texto de error */
+.text-error {
+    color: var(--danger);
+    font-size: 0.9rem;
+    margin-top: 5px;
+    display: block;
+}
+
+/* Media Query para móviles */
+@media (max-width: 600px) {
+    .card-container {
+        padding: 20px;
+    }
+    
+    .page-title {
+        font-size: 1.5rem;
+    }
+    
+    .actions-container {
+        flex-direction: column;
+    }
+    
+    .btn {
+        width: 100%; /* Botones ancho completo en móvil */
+    }
+}

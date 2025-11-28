@@ -2,39 +2,35 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Asignación</title>
-  <link rel="stylesheet" href="css/style-asignar.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Asignación de Saldo</title>
+  <link rel="stylesheet" href="/css/global.css">
 </head>
 <body>
-  <div class="container">
-    <h2>ASIGNACIÓN:</h2>
+  <div class="card-container" style="max-width: 500px;">
+    <h2 class="page-title">Asignar Crédito</h2>
+    <div class="page-subtitle">Vincula Trabajador a Empresa</div>
 
-    <div class="field">
-      <label>• RUC:</label>
-      <select id="ruc">
-        <option value="">Seleccione</option>
-      </select>
+    <div class="form-group">
+      <label>Empresa (RUC):</label>
+      <select id="ruc"><option value="">Cargando...</option></select>
     </div>
 
-    <div class="field">
-      <label>• Trabajador:</label>
-      <select id="trabajador">
-        <option value="">Seleccione</option>
-      </select>
+    <div class="form-group">
+      <label>Trabajador:</label>
+      <select id="trabajador"><option value="">Cargando...</option></select>
     </div>
 
-    <div class="field">
-      <label>• Saldo:</label>
-      <input type="number" id="saldo" placeholder="Ingrese saldo">
+    <div class="form-group">
+      <label>Saldo Inicial (S/.):</label>
+      <input type="number" id="saldo" placeholder="0.00">
     </div>
 
-    <div class="buttons">
-      <button class="cerrar" onclick="cerrarVentana()">CERRAR</button>
-      <button class="guardar" onclick="guardarDatos()">GUARDAR</button>
+    <div class="actions-container">
+      <button class="btn btn-secondary" onclick="cerrarVentana()">Cancelar</button>
+      <button class="btn btn-success" onclick="guardarDatos()">Guardar Asignación</button>
     </div>
   </div>
-
   <script src="js/gestion-asignar.js"></script>
 </body>
 </html>

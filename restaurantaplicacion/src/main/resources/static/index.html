@@ -4,40 +4,46 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Sabor de Marcona</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/global.css">
 </head>
 <body>
 
-    <div class="login-container">
+    <div class="card-container" style="max-width: 400px;">
         <form id="login-form">
-            <h2>"Bienvenido al Restaurant<br>El Sabor de Marcona"</h2>
+            <h2 class="page-title">Bienvenido</h2>
+            <div class="page-subtitle">El Sabor de Marcona</div>
             
-            <label for="usuario">Usuario:</label>
-            <input type="text" id="usuario" name="usuario" required>
+            <div class="form-group">
+                <label for="usuario">Usuario:</label>
+                <input type="text" id="usuario" name="usuario" required placeholder="Ingresa tu usuario">
+            </div>
             
-            <label for="contrasena">Contraseña:</label>
-            <input type="password" id="contrasena" name="contrasena" required>
+            <div class="form-group">
+                <label for="contrasena">Contraseña:</label>
+                <input type="password" id="contrasena" name="contrasena" required placeholder="Ingresa tu contraseña">
+            </div>
 
-            <div id="error-message" class="error-text">Usuario o contraseña incorrecto</div>
+            <div id="error-message" class="text-error" style="display: none; text-align: center; margin-bottom: 15px;">
+                Usuario o contraseña incorrecto
+            </div>
             
-            <button type="button" id="btn-problemas" class="btn btn-secondary">¿Problemas con iniciar sesión?</button>
-            <button type="submit" id="btn-login" class="btn btn-primary">Login</button>
+            <div class="actions-container" style="flex-direction: column;">
+                <button type="submit" id="btn-login" class="btn btn-primary">Iniciar Sesión</button>
+                <button type="button" id="btn-problemas" class="btn btn-secondary">¿Problemas para entrar?</button>
+            </div>
         </form>
 
-        <div id="bloqueado-box" class="info-box-red">
-            <p>Se detectaron demasiados intentos de acceso.<br>
-            Se ha bloqueado el acceso durante 5 minutos</p>
+        <div id="bloqueado-box" style="display: none; background: var(--danger); color: white; padding: 15px; margin-top: 15px; border-radius: 8px; text-align: center;">
+            <p><strong>¡Cuenta Bloqueada!</strong><br>Demasiados intentos fallidos. Espere 5 minutos.</p>
         </div>
     </div>
 
-    <div id="modal-problemas" class="modal">
-        <div class="modal-content" style="max-width: 400px; text-align: center;">
-            <span class="close-modal" id="close-modal-problemas">&times;</span>
-            <div class="info-box-yellow" style="position: relative; display: flex; border: none; padding: 0;">
-                <h3 style="color: var(--color-form); margin-bottom: 10px;">Comunicarse a este número:</h3>
-                <p style="color: var(--color-form); font-weight: bold; font-size: 1.2rem;">900278347</p>
-                <p style="color: var(--color-form); font-size: 0.9rem;">(Soporte Técnico)</p>
-            </div>
+    <div id="modal-problemas" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); align-items:center; justify-content:center; z-index:999;">
+        <div class="card-container" style="max-width: 350px; text-align: center;">
+            <span id="close-modal-problemas" style="position: absolute; top: 10px; right: 15px; cursor: pointer; font-size: 1.5rem; color: var(--text-muted);">&times;</span>
+            <h3 style="color: var(--primary);">Soporte Técnico</h3>
+            <p style="margin: 15px 0;">Comunícate al número:</p>
+            <p style="font-size: 1.5rem; font-weight: bold; color: var(--text-main);">900 278 347</p>
         </div>
     </div>
 

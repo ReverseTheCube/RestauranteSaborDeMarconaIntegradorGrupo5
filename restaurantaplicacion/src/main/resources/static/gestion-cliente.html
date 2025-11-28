@@ -3,75 +3,105 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gestión de Clientes y Empresas</title>
-  <link rel="stylesheet" href="/css/style-cliente.css">
+  <title>Gestión de Clientes</title>
+  <link rel="stylesheet" href="/css/global.css">
+  <style>
+      /* Estilos específicos para las pestañas de esta página */
+      .tabs-container {
+          display: flex;
+          gap: 10px;
+          margin-bottom: 20px;
+          border-bottom: 1px solid var(--secondary);
+          padding-bottom: 15px;
+          justify-content: center;
+      }
+      /* La clase .active la pone tu JS actual */
+      .tab-btn {
+          opacity: 0.6;
+          transition: all 0.3s;
+      }
+      .tab-btn.active {
+          opacity: 1;
+          background: var(--primary);
+          color: white;
+          transform: scale(1.05);
+      }
+      .hidden { display: none; }
+  </style>
 </head>
 <body>
 
-  <div class="panel">
-    <div class="tabs">
-      <div id="tabClientes" class="tab active" onclick="mostrarSeccion('clientes')">CLIENTES</div>
-      <div id="tabEmpresas" class="tab" onclick="mostrarSeccion('empresas')">EMPRESAS</div>
-      <div id="tabPensionados" class="tab" onclick="mostrarSeccion('pensionados')">PENSIONADOS</div>
+  <div class="card-container" style="max-width: 1000px;">
+    <h2 class="page-title">Gestión Corporativa</h2>
+    
+    <div class="tabs-container">
+      <button id="tabClientes" class="btn btn-secondary tab-btn active" onclick="mostrarSeccion('clientes')">Clientes</button>
+      <button id="tabEmpresas" class="btn btn-secondary tab-btn" onclick="mostrarSeccion('empresas')">Empresas</button>
+      <button id="tabPensionados" class="btn btn-secondary tab-btn" onclick="mostrarSeccion('pensionados')">Pensionados</button>
     </div>
 
-    <div id="clientes" class="container">
-      <h3>REGISTRO:</h3>
-      <label>• Tipo documento:</label>
-      <select id="tipoDocumento">
-        <option value="">Seleccionar</option>
-        <option value="DNI">DNI</option>
-      </select>
+    <div id="clientes">
+      <h3 style="color: var(--primary); margin-bottom: 15px;">Registro de Cliente</h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; align-items: end; margin-bottom: 30px;">
+          <div class="form-group" style="margin:0;">
+              <label>Tipo Doc:</label>
+              <select id="tipoDocumento">
+                <option value="">Seleccionar</option>
+                <option value="DNI">DNI</option>
+              </select>
+          </div>
+          <div class="form-group" style="margin:0;">
+              <label>Número:</label>
+              <input type="text" id="numeroDocumento" maxlength="15" placeholder="Ej. 12345678">
+          </div>
+          <div class="form-group" style="margin:0;">
+              <label>Nombres:</label>
+              <input type="text" id="nombresApellidos" placeholder="Nombre completo">
+          </div>
+          <button class="btn btn-success" onclick="registrarCliente()">Registrar</button>
+      </div>
 
-      <label>• Número Documento:</label>
-      <input type="text" id="numeroDocumento" maxlength="15">
+      <h3 style="color: var(--primary); border-top: 1px solid var(--secondary); padding-top: 20px;">Búsqueda</h3>
+      <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+          <input type="text" id="buscarCliente" placeholder="Buscar por DNI o Nombre..." oninput="buscarCliente(this.value)">
+          <button class="btn btn-secondary" onclick="buscarCliente('')">Ver Todo</button>
+      </div>
 
-      <label>• Nombres y Apellidos:</label>
-      <input type="text" id="nombresApellidos">
-
-      <button onclick="registrarCliente()">REGISTRAR</button>
-
-      <h3>BUSQUEDA DE CLIENTES:</h3>
-      <label>Número de Documento o Nombre:</label>
-      <input type="text" id="buscarCliente" oninput="buscarCliente(this.value)">
-      <button onclick="buscarCliente('')">MOSTRAR TODO</button>
-
-      <div class="table-scroll-wrapper">
+      <div class="table-wrapper" style="max-height: 300px; overflow-y: auto;">
         <table id="tablaClientes">
           <thead>
             <tr>
-              <th>Tipo Documento</th>
-              <th>Número Documento</th>
-              <th>Nombres y Apellidos</th>
+              <th>Tipo</th>
+              <th>Documento</th>
+              <th>Nombres</th>
             </tr>
           </thead>
-          <tbody>
-              <tr><td colspan="3" style="text-align: center;">Pulse BUSCAR o escriba un filtro para cargar datos.</td></tr>
-          </tbody>
+          <tbody></tbody>
         </table>
-      </div>
-
-      <div class="actions">
-        <button onclick="retroceder()">ANTERIOR</button>
       </div>
     </div>
 
-    <div id="empresas" class="container hidden">
-      <h3>REGISTRO:</h3>
-      <label>• RUC:</label>
-      <input type="text" id="ruc" maxlength="11">
+    <div id="empresas" class="hidden">
+      <h3 style="color: var(--primary);">Registro de Empresa</h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; align-items: end; margin-bottom: 30px;">
+          <div class="form-group" style="margin:0;">
+              <label>RUC:</label>
+              <input type="text" id="ruc" maxlength="11" placeholder="11 dígitos">
+          </div>
+          <div class="form-group" style="margin:0;">
+              <label>Razón Social:</label>
+              <input type="text" id="razonSocial" placeholder="Nombre de la empresa">
+          </div>
+          <button class="btn btn-success" onclick="registrarEmpresa()">Registrar</button>
+      </div>
 
-      <label>• Razón Social:</label>
-      <input type="text" id="razonSocial">
+      <h3 style="color: var(--primary); border-top: 1px solid var(--secondary); padding-top: 20px;">Búsqueda</h3>
+      <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+          <input type="text" id="buscarEmpresa" placeholder="Buscar RUC o Razón Social..." oninput="buscarEmpresa(this.value)">
+          <button class="btn btn-secondary" onclick="buscarEmpresa('')">Ver Todo</button>
+      </div>
 
-      <button onclick="registrarEmpresa()">REGISTRAR</button>
-
-      <h3>BUSQUEDA:</h3>
-      <label>RUC o Razón Social:</label>
-      <input type="text" id="buscarEmpresa" oninput="buscarEmpresa(this.value)">
-      <button onclick="buscarEmpresa('')">MOSTRAR TODO</button>
-
-      <div class="table-scroll-wrapper">
+      <div class="table-wrapper" style="max-height: 300px; overflow-y: auto;">
         <table id="tablaEmpresas">
           <thead>
             <tr>
@@ -79,47 +109,45 @@
               <th>Razón Social</th>
             </tr>
           </thead>
-          <tbody>
-              <tr><td colspan="2" style="text-align: center;">Pulse BUSCAR o escriba un filtro para cargar datos.</td></tr>
-          </tbody>
+          <tbody></tbody>
         </table>
       </div>
-
-      <div class="actions">
-        <button onclick="retroceder()">ANTERIOR</button>
-        <button onclick="window.location.href = '/gestion-asignar-empresa.html'">ASIGNAR TRABAJADOR</button>
+      
+      <div style="margin-top: 20px; text-align: right;">
+          <button class="btn btn-primary" onclick="window.location.href = '/gestion-asignar-empresa.html'">Asignar Trabajador a Empresa</button>
       </div>
     </div>
     
-    <div id="pensionados" class="container hidden">
-      <h3>BUSQUEDA DE PENSIONADOS:</h3>
+    <div id="pensionados" class="hidden">
+      <h3 style="color: var(--primary);">Control de Pensionados</h3>
+      <div style="display: flex; gap: 10px; margin-bottom: 20px; align-items: end;">
+          <div style="flex-grow: 1;">
+              <label>Buscar por RUC Empresa:</label>
+              <input type="text" id="buscarPensionado" placeholder="Ingrese RUC de la empresa">
+          </div>
+          <button class="btn btn-primary" onclick="buscarPensionado()">Buscar</button>
+      </div>
       
-      <label>Digite Numero RUC:</label>
-      <input type="text" id="buscarPensionado">
-      <button onclick="buscarPensionado()">BUSCAR</button>
-      
-      <div class="table-scroll-wrapper">
+      <div class="table-wrapper">
         <table id="tablaPensionados">
           <thead>
             <tr>
-              <th>ID Asignación</th>
+              <th>ID</th>
               <th>RUC Empresa</th>
-              <th>DNI/Cliente</th>
-              <th>Saldo Actual</th>
+              <th>Pensionista</th>
+              <th>Saldo</th>
               <th>Acciones</th> 
             </tr>
           </thead>
-          <tbody>
-            <tr><td colspan="5" style="text-align: center;">Presione BUSCAR para ver el listado.</td></tr>
-          </tbody>
+          <tbody></tbody>
         </table>
       </div>
+    </div>
 
-      <div class="actions">
-        <button onclick="retroceder()">ANTERIOR</button>
-      </div>
+    <div style="margin-top: 30px; text-align: center;">
+        <button class="btn btn-secondary" onclick="retroceder()">⬅ Volver al Menú</button>
     </div>
-    </div>
+  </div>
 
   <script src="/js/gestion-clientes.js"></script>
 </body>

@@ -4,17 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Menú Mesero</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/global.css">
 </head>
 <body>
-    <div class="menu-container">
-        <div class="menu-header">
-            <h2>Bienvenido mesero</h2>
-            <a href="/" class="btn btn-logout">Log out</a>
+    <div class="card-container" style="max-width: 600px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--secondary); padding-bottom: 15px;">
+            <h2 class="page-title" style="margin: 0;">Panel Mesero</h2>
+            <a href="/" class="btn btn-danger" style="padding: 8px 16px; font-size: 0.9rem;">Cerrar Sesión</a>
         </div>
         
-        <div class="menu-body">
-        <a href="gestionpedidos.html" class="btn btn-menu btn-menu-mesero">Registrar pedidos</a>        </div>
+        <div class="page-subtitle">Servicio de Mesa</div>
+
+        <div class="grid-menu" style="grid-template-columns: 1fr;">
+            <a href="gestionpedidos.html" class="btn btn-role-mesero" style="padding: 40px; font-size: 1.2rem;">
+                🍽️ Registrar Pedido / Mesa
+            </a>
+        </div>
     </div>
 </body>
 </html>

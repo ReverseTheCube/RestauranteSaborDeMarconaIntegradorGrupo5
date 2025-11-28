@@ -3,24 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>El Sabor de Marcona</title>
-    <link rel="stylesheet" href="css/menu-style.css"> 
+    <title>El Sabor de Marcona - Menú</title>
+    <link rel="stylesheet" href="/css/global.css">
 </head>
 <body>
-    <div class="panel-wrap">
-        <div class="panel">
-            <div class="welcome-title">"Bienvenido al Restaurant</div>
-            <div class="restaurant-name">El Sabor de Marcona"</div>
-            <div class="Opcion">Gestión y Actualización de Menú</div>
-            
-            <div class="menu-buttons">
-                <button class="menu-button crear" onclick="crear()">Crear</button>
-                <button class="menu-button editar" onclick="editar()">Editar</button>
-                <button class="menu-button eliminar" onclick="eliminar()">Eliminar</button>
-                <br>
-                <hr>
-                <button class="menu-button atras" onclick="atras()">Atras</button>
-            </div>
+    <div class="card-container" style="max-width: 500px;">
+        <h2 class="page-title">Gestión de Menú</h2>
+        <div class="page-subtitle">"El Sabor de Marcona"</div>
+        
+        <p style="text-align: center; margin-bottom: 30px; color: var(--text-muted);">Seleccione una acción:</p>
+        
+        <div style="display: flex; flex-direction: column; gap: 15px;">
+            <button class="btn btn-primary" onclick="crear()">➕ Crear Nuevo Plato</button>
+            <button class="btn btn-primary" onclick="editar()">✏️ Editar Plato</button>
+            <button class="btn btn-danger" onclick="eliminar()">🗑️ Eliminar/Inactivar Plato</button>
+        </div>
+
+        <div style="margin-top: 40px; border-top: 1px solid var(--secondary); padding-top: 20px;">
+            <button class="btn btn-secondary" onclick="atras()" style="width: 100%;">⬅ Volver al Menú Principal</button>
         </div>
     </div>
     <script src="js/menu-navegacion.js"></script> 
