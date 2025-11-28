@@ -84,6 +84,23 @@
             </div>
         </div>
     </div>
+<div id="modal-editar-cantidad" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); align-items:center; justify-content:center; z-index:1001;">
+        <div class="card-container" style="max-width: 350px; text-align: center; border: 2px solid var(--primary);">
+            <h3 class="page-title" style="font-size: 1.5rem;">Editar Cantidad</h3>
+            
+            <p id="nombre-plato-editar" style="color: var(--text-main); font-weight: bold; margin-bottom: 15px;">...</p>
+            
+            <div class="form-group">
+                <label for="nueva-cantidad">Nueva Cantidad:</label>
+                <input type="number" id="nueva-cantidad" min="1" style="text-align: center; font-size: 1.2rem; width: 100px;">
+            </div>
+
+            <div class="actions-container">
+                <button class="btn btn-secondary" onclick="cerrarModalEditar()">Cancelar</button>
+                <button class="btn btn-primary" onclick="guardarNuevaCantidad()">Guardar</button>
+            </div>
+        </div>
+    </div>
 
     <script src="/js/resumen_pedido.js"></script>
 </body>

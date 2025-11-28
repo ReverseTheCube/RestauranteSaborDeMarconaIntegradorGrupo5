@@ -2,10 +2,9 @@
 const API_URL_CLIENTES = "/api/clientes"; 
 const API_URL_EMPRESAS = "/api/empresas"; 
 
-// Variables globales para pasar datos al modal
-let ultimoPedidoGuardado = null;
-let ultimoDetallePedido = [];
-let ultimoClienteInfo = {};
+// Variables globales para el modal de edición
+let idPlatoEnEdicion = null;
+let precioPlatoEnEdicion = 0;
 
 document.addEventListener('DOMContentLoaded', () => {
     cargarDatosDelPedido();
@@ -42,11 +41,18 @@ function popularTabla(platos) {
         tablaBody.innerHTML += `
             <tr>
                 <td>${plato.nombre}</td>
-                <td style="text-align:center">${plato.cantidad}</td>
+                <td style="text-align:center; font-weight:bold; font-size: 1.1rem;">${plato.cantidad}</td>
                 <td style="text-align:right">S/ ${plato.precioUnitario.toFixed(2)}</td>
                 <td style="text-align:right">S/ ${plato.subtotal.toFixed(2)}</td>
                 <td style="text-align:center">
-                    <button class="btn btn-danger" style="padding: 5px 10px; font-size: 0.8rem;" onclick="eliminarItem(${plato.platoId})">🗑️</button>
+                    <button class="btn btn-secondary" style="padding: 5px 10px; font-size: 0.8rem; margin-right: 5px; background-color: #3498db; border-color: #2980b9;" 
+                        onclick="abrirModalEditar(${plato.platoId}, '${plato.nombre}', ${plato.cantidad}, ${plato.precioUnitario})">
+                        ✏️
+                    </button>
+                    <button class="btn btn-danger" style="padding: 5px 10px; font-size: 0.8rem;" 
+                        onclick="eliminarItem(${plato.platoId})">
+                        🗑️
+                    </button>
                 </td>
             </tr>`;
     });
@@ -57,11 +63,71 @@ function calcularTotal(platos) {
     document.getElementById('total-general').innerText = `TOTAL: S/ ${total.toFixed(2)}`;
 }
 
-// --- EVENTOS ---
+// --- LÓGICA DEL MODAL DE EDICIÓN (NUEVO) ---
+
+function abrirModalEditar(id, nombre, cantidad, precio) {
+    // Guardamos datos en variables globales temporales
+    idPlatoEnEdicion = id;
+    precioPlatoEnEdicion = precio;
+
+    // Llenamos el modal
+    document.getElementById('nombre-plato-editar').innerText = nombre;
+    document.getElementById('nueva-cantidad').value = cantidad;
+
+    // Mostramos el modal
+    document.getElementById('modal-editar-cantidad').style.display = 'flex';
+    document.getElementById('nueva-cantidad').focus();
+}
+
+function cerrarModalEditar() {
+    document.getElementById('modal-editar-cantidad').style.display = 'none';
+    idPlatoEnEdicion = null;
+}
+
+function guardarNuevaCantidad() {
+    const inputCantidad = document.getElementById('nueva-cantidad');
+    const nuevaCant = parseInt(inputCantidad.value);
+
+    if (!nuevaCant || nuevaCant <= 0) {
+        alert("La cantidad debe ser mayor a 0");
+        return;
+    }
+
+    // 1. Obtener lista actual
+    let platos = JSON.parse(localStorage.getItem('detallePedido')) || [];
+    
+    // 2. Buscar y actualizar el plato
+    const indice = platos.findIndex(p => p.platoId === idPlatoEnEdicion);
+    if (indice !== -1) {
+        platos[indice].cantidad = nuevaCant;
+        platos[indice].subtotal = nuevaCant * platos[indice].precioUnitario;
+        
+        // 3. Guardar en localStorage
+        localStorage.setItem('detallePedido', JSON.stringify(platos));
+        
+        // 4. Refrescar la tabla
+        cargarDatosDelPedido();
+        cerrarModalEditar();
+    }
+}
+
+// --- FUNCIONES EXISTENTES --- (El resto sigue igual)
+
+function eliminarItem(platoId) {
+    if(!confirm("¿Eliminar este plato del pedido?")) return;
+    
+    let platos = JSON.parse(localStorage.getItem('detallePedido')) || [];
+    platos = platos.filter(p => p.platoId !== platoId);
+    localStorage.setItem('detallePedido', JSON.stringify(platos));
+    cargarDatosDelPedido();
+}
+
+// --- EVENTOS Y AUTOCOMPLETADO ---
 function setupEventListeners() {
     const tipoDoc = document.getElementById('tipoDocumento');
     if(tipoDoc) tipoDoc.addEventListener('change', (e) => toggleDocumentType(e.target.value));
 
+    // DNI Listener
     const inputDNI = document.getElementById('numeroDocumentoDNI');
     if(inputDNI) {
         inputDNI.addEventListener('input', async (e) => {
@@ -84,6 +150,7 @@ function setupEventListeners() {
         });
     }
 
+    // RUC Listener
     const inputRUC = document.getElementById('numeroDocumentoRUC');
     if(inputRUC) {
         inputRUC.addEventListener('input', async (e) => {
@@ -107,11 +174,6 @@ function setupEventListeners() {
             } else { empresaInput.value = ""; }
         });
     }
-    
-    // Evento del botón imprimir del modal
-    document.getElementById('btnImprimir').addEventListener('click', () => {
-        generarBoletaHTML();
-    });
 }
 
 function toggleDocumentType(tipo) {
@@ -141,14 +203,7 @@ function cargarEmpleadoLogueado() {
     if(miNombre) document.getElementById('registradoPor').innerText = miNombre;
 }
 
-function eliminarItem(platoId) {
-    let platos = JSON.parse(localStorage.getItem('detallePedido')) || [];
-    platos = platos.filter(p => p.platoId !== platoId);
-    localStorage.setItem('detallePedido', JSON.stringify(platos));
-    cargarDatosDelPedido();
-}
-
-// --- FINALIZAR PEDIDO (CORREGIDO) ---
+// --- FINALIZAR PEDIDO (Con Modal de Éxito) ---
 async function finalizarPedido() {
     const infoPedido = JSON.parse(localStorage.getItem('infoPedido'));
     const detallePedido = JSON.parse(localStorage.getItem('detallePedido'));
@@ -161,7 +216,13 @@ async function finalizarPedido() {
     const tipoDoc = document.getElementById('tipoDocumento').value;
     const esDni = tipoDoc === 'DNI';
     const numDoc = esDni ? document.getElementById('numeroDocumentoDNI').value : document.getElementById('numeroDocumentoRUC').value;
-    const nombreCl = esDni ? document.getElementById('nombreCliente').value : document.getElementById('empresaCliente').value;
+    
+    // Variables globales para usarlas en la impresión luego
+    window.ultimoClienteInfo = { 
+        nombre: esDni ? document.getElementById('nombreCliente').value : document.getElementById('empresaCliente').value,
+        doc: numDoc, 
+        tipoDoc: tipoDoc 
+    };
 
     const requestData = {
         pedidoId: infoPedido.pedidoId,
@@ -185,13 +246,20 @@ async function finalizarPedido() {
 
         if (!response.ok) throw new Error(await response.text());
 
-        // Guardamos datos para la impresión
-        ultimoPedidoGuardado = await response.json();
-        ultimoDetallePedido = detallePedido;
-        ultimoClienteInfo = { nombre: nombreCl, doc: numDoc, tipoDoc: tipoDoc };
+        // Guardar respuesta para impresión
+        window.ultimoPedidoGuardado = await response.json();
+        window.ultimoDetallePedido = detallePedido;
 
-        // MOSTRAR MODAL DE ÉXITO (En lugar de abrir ventana directamente)
-        document.getElementById('modal-exito').style.display = 'flex';
+        // Mostrar Modal Éxito
+        const modalExito = document.getElementById('modal-exito');
+        if(modalExito) modalExito.style.display = 'flex';
+        else alert("Venta Exitosa"); // Fallback
+
+        // Setup botón imprimir del modal
+        const btnPrint = document.getElementById('btnImprimir');
+        if(btnPrint) {
+            btnPrint.onclick = () => generarBoletaHTML();
+        }
 
     } catch (error) {
         console.error(error);
@@ -201,13 +269,11 @@ async function finalizarPedido() {
     }
 }
 
-// --- NUEVAS FUNCIONES PARA EL MODAL ---
-
+// --- GENERAR BOLETA ---
 function generarBoletaHTML() {
-    const pedido = ultimoPedidoGuardado;
-    const items = ultimoDetallePedido;
-    const { nombre, doc, tipoDoc } = ultimoClienteInfo;
-    
+    const pedido = window.ultimoPedidoGuardado;
+    const items = window.ultimoDetallePedido;
+    const { nombre, doc, tipoDoc } = window.ultimoClienteInfo;
     const fecha = new Date().toLocaleString();
     const cajero = localStorage.getItem('usuarioNombre') || 'Cajero';
     
@@ -215,63 +281,25 @@ function generarBoletaHTML() {
     let filasHTML = '';
     items.forEach(item => {
         total += item.subtotal;
-        filasHTML += `
-            <tr>
-                <td style="padding:5px; border-bottom:1px dashed #ccc;">${item.nombre}</td>
-                <td style="padding:5px; text-align:center; border-bottom:1px dashed #ccc;">${item.cantidad}</td>
-                <td style="padding:5px; text-align:right; border-bottom:1px dashed #ccc;">S/ ${item.precioUnitario.toFixed(2)}</td>
-                <td style="padding:5px; text-align:right; border-bottom:1px dashed #ccc;">S/ ${item.subtotal.toFixed(2)}</td>
-            </tr>`;
+        filasHTML += `<tr>
+            <td style="padding:5px; border-bottom:1px dashed #ccc;">${item.nombre}</td>
+            <td style="padding:5px; text-align:center; border-bottom:1px dashed #ccc;">${item.cantidad}</td>
+            <td style="padding:5px; text-align:right; border-bottom:1px dashed #ccc;">S/ ${item.precioUnitario.toFixed(2)}</td>
+            <td style="padding:5px; text-align:right; border-bottom:1px dashed #ccc;">S/ ${item.subtotal.toFixed(2)}</td>
+        </tr>`;
     });
 
     const ventana = window.open('', 'PRINT', 'height=600,width=400');
-    
-    if (ventana) {
-        ventana.document.write(`
-            <html>
-            <head>
-                <title>Boleta #${pedido.id}</title>
-                <style>
-                    body { font-family: 'Courier New', monospace; padding: 20px; color: #000; }
-                    .ticket { width: 100%; max-width: 300px; margin: 0 auto; text-align: center; }
-                    h2, p { margin: 5px 0; }
-                    .line { border-top: 1px dashed #000; margin: 10px 0; }
-                    table { width: 100%; font-size: 12px; border-collapse: collapse; }
-                    .total { font-size: 18px; font-weight: bold; margin-top: 10px; text-align: right; }
-                    @media print { .no-print { display: none; } }
-                </style>
-            </head>
-            <body>
-                <div class="ticket">
-                    <h2>EL SABOR DE MARCONA</h2>
-                    <p>RUC: 20123456789</p>
-                    <p>Av. Principal 123, Marcona</p>
-                    <div class="line"></div>
-                    <p style="text-align:left;"><strong>BOLETA ELECTRÓNICA</strong></p>
-                    <p style="text-align:left;">ID: ${pedido.id} | Fecha: ${fecha}</p>
-                    <p style="text-align:left;">Cajero: ${cajero}</p>
-                    <div class="line"></div>
-                    <p style="text-align:left;">CLIENTE: ${tipoDoc} ${doc || 'S/N'}</p>
-                    <p style="text-align:left;">${nombre || 'Cliente General'}</p>
-                    <div class="line"></div>
-                    <table>
-                        <thead><tr><th style="text-align:left;">Desc</th><th>Cant</th><th>P.U.</th><th style="text-align:right;">Total</th></tr></thead>
-                        <tbody>${filasHTML}</tbody>
-                    </table>
-                    <div class="line"></div>
-                    <div class="total">TOTAL: S/ ${total.toFixed(2)}</div>
-                    <div class="line"></div>
-                    <p>¡Gracias por su compra!</p>
-                    <br>
-                    <button class="no-print" onclick="window.print()" style="padding:10px; font-size:16px; cursor:pointer;">🖨️ IMPRIMIR</button>
-                </div>
-            </body>
-            </html>
-        `);
+    if(ventana) {
+        ventana.document.write(`<html><head><title>Boleta #${pedido.id}</title><style>body{font-family:'Courier New',monospace;padding:20px;text-align:center}table{width:100%;font-size:12px}.total{font-size:18px;font-weight:bold;text-align:right;margin-top:10px}</style></head><body>
+            <h2>EL SABOR DE MARCONA</h2><p>RUC: 20123456789</p><hr>
+            <p style="text-align:left">ID: ${pedido.id} <br> Fecha: ${fecha} <br> Cajero: ${cajero}</p>
+            <p style="text-align:left">Cliente: ${nombre} <br> ${tipoDoc}: ${doc}</p><hr>
+            <table><thead><tr><th align="left">Desc</th><th>Cant</th><th>P.U.</th><th align="right">Total</th></tr></thead><tbody>${filasHTML}</tbody></table>
+            <hr><div class="total">TOTAL: S/ ${total.toFixed(2)}</div><hr><p>¡Gracias!</p>
+            <button onclick="window.print()" style="padding:10px;margin-top:20px">🖨️ IMPRIMIR</button>
+        </body></html>`);
         ventana.document.close();
-        ventana.focus();
-    } else {
-        alert("El navegador bloqueó la ventana. Por favor permita popups para este sitio.");
     }
 }
 
