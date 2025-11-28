@@ -1,85 +1,73 @@
 <!doctype html>
 <html lang="es">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Resumen del Pedido</title>
-    <link rel="stylesheet" href="/css/pedidos.css"> 
+    <link rel="stylesheet" href="/css/global.css">
 </head>
 <body>
-    <main class="stage stage-flex" role="main">
-        <div class="topbar">
-            <h1 class="title">Resumen del Pedido</h1>
-            <h2 class="title-mesa" id="info-pedido-titulo">Cargando...</h2> 
-            <button class="back back-top-right" onclick="window.location.href = 'seleccionar_menu.html';" aria-label="Volver">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
-            </button>
+    <div class="card-container" style="max-width: 900px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--secondary); padding-bottom: 15px;">
+            <h2 class="page-title" style="margin:0;">Resumen del Pedido</h2>
+            <h3 id="info-pedido-titulo" style="color: var(--primary); margin:0; font-size: 1.2rem;">...</h3>
         </div>
 
-        <div class="form-row"> 
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 25px; background: rgba(255,255,255,0.03); padding: 20px; border-radius: 8px;">
             
-            <div class="form-group">
-                <label class="form-label-static" for="tipoDocumento">Tipo de Documento:</label>
-                <select id="tipoDocumento" class="form-select">
-                    <option value="DNI" selected>DNI</option>
-                    <option value="RUC">RUC</option>
-                </select>
+            <div class="form-group" style="margin:0;">
+                <label>Tipo de Documento:</label>
+                <div style="display: flex; gap: 10px;">
+                    <select id="tipoDocumento" style="width: 100px;">
+                        <option value="DNI">DNI</option>
+                        <option value="RUC">RUC</option>
+                    </select>
+                    <input type="text" id="numeroDocumentoDNI" placeholder="Ingrese DNI" maxlength="8">
+                    <input type="text" id="numeroDocumentoRUC" placeholder="Ingrese RUC" maxlength="11" style="display: none;">
+                </div>
+            </div>
+
+            <div class="form-group" style="margin:0;">
+                <label>Cliente / Razón Social:</label>
+                <input type="text" id="nombreCliente" readonly placeholder="Se autocompleta..." style="background: rgba(0,0,0,0.2); border: 1px dashed var(--secondary);">
+                <input type="text" id="empresaCliente" readonly placeholder="Empresa..." style="display: none; background: rgba(0,0,0,0.2); border: 1px dashed var(--secondary);">
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 30px; margin-bottom: 15px; font-size: 0.9rem; color: var(--text-muted); padding-left: 10px;">
+            <span>ID Usuario: <strong id="dniUsuario" style="color: var(--text-main);">--</strong></span>
+            <span>Atendido por: <strong id="registradoPor" style="color: var(--text-main);">--</strong></span>
+        </div>
+
+        <div class="table-wrapper" style="max-height: 300px; overflow-y: auto;">
+            <table class="detalle-tabla">
+                <thead>
+                    <tr>
+                        <th style="width: 40%;">Descripción</th>
+                        <th style="text-align:center">Cant.</th>
+                        <th style="text-align:right">Precio U.</th>
+                        <th style="text-align:right">Subtotal</th>
+                        <th style="text-align:center">Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="detalle-tabla-body">
+                    </tbody>
+            </table>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 30px; padding-top: 20px; border-top: 2px solid var(--secondary);">
+            <div style="font-size: 2rem; color: var(--success); font-weight: 800;">
+                <span id="total-general">TOTAL: S/ 0.00</span>
             </div>
             
-            <div class="form-group">
-                <label class="form-label-static" for="numeroDocumento">Número de Documento:</label>
-                <input type="text" id="numeroDocumentoDNI" class="form-input" placeholder="Buscar DNI..." maxlength="8" style="display: block;">
-                <input type="text" id="numeroDocumentoRUC" class="form-input" placeholder="Buscar RUC..." maxlength="11" style="display: none;">
-            </div>
-
-            <div class="form-group">
-                <label class="form-label-static" for="nombreCliente">Cliente / Empresa:</label>
-                <input type="text" id="nombreCliente" class="form-input-static" placeholder="Cargado por DNI..." readonly style="display: block;">
-                <input type="text" id="empresaCliente" class="form-input-static" placeholder="Cargado por RUC..." readonly style="display: none;">
+            <div style="display: flex; gap: 15px;">
+                <button class="btn btn-secondary" onclick="window.location.href='seleccionar_menu.html'">⬅ Modificar</button>
+                <button class="btn btn-success" style="padding: 12px 30px; font-size: 1.1rem;" onclick="finalizarPedido()">
+                    ✅ Finalizar Pedido
+                </button>
             </div>
         </div>
-
-        <div style="display: flex; gap: 20px; max-width: 650px; margin-top: 20px; margin-left: 20px;">
-            
-            <div class="form-group" style="flex: 1;">
-                <label class="form-label-static" for="dniUsuario">DNI del Usuario:</label>
-                <input type="text" id="dniUsuario" class="form-input-static" placeholder="Cargando..." readonly>
-            </div>
-            
-            <div class="form-group" style="flex: 1;">
-                <label class="form-label-static" for="registradoPor">Registrado por:</label>
-                <input type="text" id="registradoPor" class="form-input-static" placeholder="Cargando Empleado..." readonly>
-            </div>
-        </div>
-
-        <div class="detalle-container" style="flex-grow: 1; display: flex; flex-direction: column;">
-            <h2 class="title" style="color: var(--border-2);">Detalle:</h2>
-            <div class="scroll-container" style="flex-grow: 1;">
-                <table class="detalle-tabla">
-                    <thead>
-                        <tr>
-                            <th class="col-desc">Descripción</th>
-                            <th class="col-cant">Cant.</th>
-                            <th class="col-pu">P/U</th>
-                            <th class="col-sub">Subtotal</th>
-                            <th class="col-accion">Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody id="detalle-tabla-body">
-                         </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div class="total-footer">
-            <h2 class="total-display" id="total-general">TOTAL: S/ 0.00</h2>
-        </div>
-        
-        <div class="final-buttons">
-            <button class="btn-final btn-volver" onclick="window.location.href='seleccionar_menu.html'">Volver al Menú</button>
-            <button class="btn-final btn-finalizar" onclick="finalizarPedido()">Finalizar Pedido</button>
-        </div>
-    </main>
+    </div>
     <script src="/js/resumen_pedido.js"></script>
 </body>
 </html>
