@@ -7,6 +7,11 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
@@ -20,76 +25,70 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            // 1. Deshabilitar CSRF
+            // 1. Deshabilitar CSRF (Crítico para que el POST de login funcione sin tokens extra)
             .csrf(csrf -> csrf.disable())
+            
+            // 2. Habilitar CORS (Para evitar problemas si el front y el back se consideran orígenes distintos)
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-            // 2. Configurar las reglas de autorización
+            // 3. Reglas de Autorización
             .authorizeHttpRequests(authz -> authz
+                // --- REGLAS PÚBLICAS (Permitir a todos) ---
+                
+                // A. La API de Login (¡Muy Importante!)
+                .requestMatchers("/api/auth/login").permitAll()
+                
+                // B. Recursos estáticos (CSS, JS, Imágenes)
+                .requestMatchers("/css/**", "/js/**", "/complementos/**", "/images/**").permitAll()
+                
+                // C. Páginas HTML públicas (Login, Cambio de Pass)
+                .requestMatchers("/", "/index.html", "/cambiar-password.html").permitAll()
+                
+                // D. Scripts específicos públicos
+                .requestMatchers("/js/login.js", "/js/cambiar-password.js").permitAll()
+                .requestMatchers("/api/usuarios/cambiar-contrasena").authenticated() // Esta requiere estar logueado
 
-                // 3. Permitir acceso PÚBLICO a páginas estáticas y sus recursos
-                .requestMatchers(
-                    // Login y Generales
-                    "/", "/index.html",
-                    "/css/style.css", "/js/login.js",
-                    // Menús de Rol
-                    "/admin.html", "/cajero.html", "/mesero.html", "/cocinero.html",
-                    // Gestión Usuarios
-                    "/gestion-usuarios.html", "/js/gestion-usuarios.js",
-                    // Gestión Clientes
-                    "/gestion-cliente.html", "/css/style-cliente.css", "/js/gestion-clientes.js",
-                    "/gestion-asignar-empresa.html",
-                    "/js/gestion-asignar.js",
-                    // Gestión Menú (Platos)
-                    "/menu.html",
-                    "/menu-crear.html",
-                    "/menu-editar.html",
-                    "/menu-eliminar.html",
-                    "/css/menu-style.css",
-                    "/js/menu-navegacion.js",
-                    "/js/menu-crear.js",
-                    "/js/menu-editar.js",
-                    "/js/menu-eliminar.js",
-                    // Historial/Reportes
-                    "/busquedafiltro.html",
-                    "/ventaehistorial.html",
-                    "/ventaehistorialA.html",
-                    "/ventaehistorialB.html",
-                    "/css/historial-style.css",
-                    "/js/historial-busqueda.js",
-                    "/js/historial-venta.js",
-                    "/js/historial-ventaA.js",
-                    "/js/historial-ventaB.js",
+                // --- REGLAS POR ROL (Seguridad Real) ---
+                
+                // Administrador
+                .requestMatchers("/admin.html", "/gestion-usuarios.html").hasAuthority("ADMINISTRADOR")
+                .requestMatchers("/api/usuarios/**").hasAuthority("ADMINISTRADOR")
 
-                    //Gestión Pedidos
-                    "/registrarpedido.html", "/Local_mesa.html","/gestionpedidos.html","/seleccionar_menu.html","/resumen_pedido.html",
-                    //Pedido_Cocina"
-                    "/pedido_cocina.html",
-                    "/js/resumen_pedido.js",
-                    // Rutas para los recursos estáticos (CSS, JS, Imágenes)
-                    "/css/**", 
-                    "/js/**", 
-                    "/complementos/imagenes/**"
+                // Cajero
+                .requestMatchers("/cajero.html").hasAuthority("CAJERO")
+                
+                // Mesero
+                .requestMatchers("/mesero.html").hasAuthority("MESERO")
+                
+                // Cocinero
+                .requestMatchers("/cocinero.html").hasAuthority("COCINERO")
 
-                ).permitAll() // Permite acceso a todo lo listado arriba
-
-                // 4. Permitir acceso PÚBLICO (o autenticado, si prefieres) a las APIs
-                .requestMatchers("/api/auth/login").permitAll()      // API Login
-                .requestMatchers("/api/usuarios/**").permitAll()   // API Usuarios
-                .requestMatchers("/api/platos/**").permitAll()     // API Platos
-                .requestMatchers("/api/pedidos/**").permitAll()    // API Pedidos
-                .requestMatchers("/api/reportes/**").permitAll()   // API Reportes
-                .requestMatchers("/api/clientes/**").permitAll()   // API Clientes
-                .requestMatchers("/api/empresas/**").permitAll()   // API Empresas
-                .requestMatchers("/api/asignaciones/**").permitAll() // NUEVA LÍNEA: API Asignaciones
-
-                // 5. Para CUALQUIER OTRA petición, se debe estar autenticado
+                // --- CUALQUIER OTRA COSA: BLOQUEADA ---
                 .anyRequest().authenticated()
             )
-
-            // 6. Deshabilitar formulario de login por defecto
-            .formLogin(form -> form.disable())
-            .httpBasic(basic -> basic.disable());
+            
+            // 4. Configuración de Logout
+            .logout(logout -> logout
+                .logoutUrl("/logout")
+                .logoutSuccessUrl("/")
+                .invalidateHttpSession(true)
+                .deleteCookies("JSESSIONID")
+            );
 
         return http.build();
+    }
+
+    // Configuración CORS para permitir peticiones desde el mismo servidor (y otros si fuera necesario)
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:8080")); // Permitir origen local
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowCredentials(true);
+        
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 }

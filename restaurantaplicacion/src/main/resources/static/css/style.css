@@ -1,405 +1,285 @@
-/* Paleta de colores basada en tu Figma */
+/* =========================================
+   1. VARIABLES GLOBALES (Coherencia Visual)
+   ========================================= */
 :root {
-    --color-fondo: #e89f41; /* Naranja/Ocre de fondo */
-    --color-form: #1a2a40;   /* Azul oscuro/Negro del formulario */
-    --color-texto: #ffffff;  /* Texto principal blanco */
-    --color-input: #ffffff;  /* Fondo de inputs */
-    --color-btn-primary: #8a4d1d; /* Marrón del botón Login */
-    --color-btn-secondary: #d4a770; /* Beige/Dorado botón "Problemas" */
-    --color-error: #ff0000;   /* Rojo para errores */
-    --color-box-red: #d9534f; /* Rojo del cuadro de bloqueo */
-    --color-box-yellow: #f0ad4e; /* Amarillo/Tan del cuadro "Problemas" */
-    --color-box-yellow-border: #eea236;
+    /* -- COLORES BASE (Ajustar según 'historial-style.css') -- */
+    --bg-body: #f4f6f9;       /* Fondo gris suave (estándar en sistemas de ventas) */
+    --bg-card: #ffffff;       /* Blanco para contenedores */
+    --text-main: #333333;     /* Texto principal */
+    --text-muted: #666666;    /* Texto secundario */
+    --border-color: #dee2e6;  /* Bordes suaves */
 
-    /* Nuevos colores de botones del menú */
-    --color-btn-logout: #d9534f; /* Rojo */
-    --color-btn-admin: #9b59b6;  /* Morado */
-    --color-btn-cajero: #2ecc71; /* Verde */
-    --color-btn-mesero: #3498db; /* Azul */
-    --color-btn-cocinero: #e91e63; /* Rosa */
+    /* -- IDENTIDAD DE MARCA (Login) -- */
+    --brand-primary: #e89f41; /* Naranja Marcona */
+    --brand-dark: #1a2a40;    /* Azul Oscuro */
+
+    /* -- COLORES DE ROLES (Tus colores personalizados) -- */
+    --role-admin: #9b59b6;    /* Morado */
+    --role-cajero: #2ecc71;   /* Verde */
+    --role-mesero: #3498db;   /* Azul */
+    --role-cocinero: #e91e63; /* Rosa */
+    --btn-danger: #dc3545;    /* Rojo para Salir/Eliminar */
 }
 
+/* =========================================
+   2. ESTILOS GENERALES (Reset)
+   ========================================= */
 body {
-    font-family: Arial, sans-serif;
-    background-color: var(--color-fondo);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-body);
+    color: var(--text-main);
     margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centra todo el contenido horizontalmente */
 }
 
-/* --- ESTILOS LOGIN --- */
+a { text-decoration: none; }
+
+/* Clase base para botones */
+.btn {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+/* =========================================
+   3. ESTILOS DEL LOGIN (Corregido)
+   ========================================= */
+/* Fondo específico para la página de login */
+.fondo-login {
+    background-image: url('../complementos/imagenes/marcona.png'); /* Tu imagen */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    /* Capa oscura para que el texto resalte */
+    box-shadow: inset 0 0 0 2000px rgba(0, 0, 0, 0.5); 
+    justify-content: center; /* Centra verticalmente solo en el login */
+}
 
 .login-container {
-    background-color: var(--color-form);
-    padding: 2.5rem;
-    border-radius: 10px;
-    color: var(--color-texto);
-    width: 350px;
+    background-color: var(--brand-dark); /* Fondo azul oscuro */
+    color: #ffffff; /* Texto blanco */
+    padding: 3rem;
+    border-radius: 15px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    border: 2px solid var(--brand-primary); /* Borde naranja */
     text-align: center;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    position: relative; /* Para posicionar los cuadros de error */
-    overflow: hidden; /* Para ocultar los cuadros */
 }
 
 .login-container h2 {
-    font-size: 1.2rem;
-    margin-bottom: 2rem;
-    line-height: 1.5;
+    color: var(--brand-primary); /* Título naranja */
+    margin-bottom: 1.5rem;
 }
 
-.login-container form {
-    display: flex;
-    flex-direction: column;
+.logo-login {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 3px solid var(--brand-primary);
+    margin: 0 auto 1.5rem;
+    display: block;
+    background: white;
 }
 
+/* Inputs del Login */
 .login-container label {
+    display: block;
     text-align: left;
     margin-bottom: 0.5rem;
-    font-size: 0.9rem;
+    color: #ccc;
 }
 
-.login-container input[type="text"],
-.login-container input[type="password"] {
-    background-color: var(--color-input);
+.login-container input {
+    width: 100%;
+    padding: 0.8rem;
+    margin-bottom: 1.2rem;
     border: none;
     border-radius: 5px;
-    padding: 0.8rem;
-    margin-bottom: 1rem;
-    font-size: 1rem;
+    background: #ffffff;
+    color: #333;
+    box-sizing: border-box; /* Evita que el padding rompa el ancho */
 }
 
-/* Mensajes de error (inicialmente ocultos) */
-.error-text {
-    color: var(--color-error);
-    font-size: 0.9rem;
-    margin-bottom: 1rem;
-    display: none; /* Oculto por defecto */
-}
-
-/* Cajas de info/error (como en figma) */
-.info-box-red,
-.info-box-yellow {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    padding: 2rem;
-    display: none; /* Oculto por defecto */
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-}
-
-.info-box-red {
-    background-color: var(--color-box-red);
-    color: white;
-}
-
-.info-box-yellow {
-    background-color: var(--color-box-yellow);
-    color: var(--color-form);
-    border: 10px solid var(--color-box-yellow-border);
-}
-
-.info-box-yellow h3 {
-    margin-top: 0;
-}
-
-
-/* --- BOTONES GENERALES --- */
-/* Corrección aplicada: Se quitó el "color: white" global */
-.btn {
-    border: none;
-    border-radius: 5px;
-    padding: 0.8rem;
-    font-size: 1rem;
-    cursor: pointer;
-    margin-top: 0.5rem;
-    text-decoration: none;
-    text-align: center;
-}
-
+/* Botones del Login */
 .btn-primary {
-    background-color: var(--color-btn-primary);
+    background-color: var(--brand-primary);
     color: white;
-    font-weight: bold;
+    width: 100%;
+    margin-top: 10px;
+}
+.btn-primary:hover {
+    background-color: #d68a30; /* Naranja más oscuro */
 }
 
 .btn-secondary {
-    background-color: var(--color-btn-secondary);
-    color: var(--color-form); /* Texto oscuro para contraste */
-    font-weight: bold;
+    background-color: transparent;
+    border: 1px solid var(--brand-primary);
+    color: var(--brand-primary);
+    width: 100%;
+    margin-top: 5px;
+}
+.btn-secondary:hover {
+    background-color: rgba(232, 159, 65, 0.1);
 }
 
-/* --- ESTILOS MENÚS (Admin, Cajero, etc.) --- */
+/* Mensajes de error */
+.error-text {
+    color: #ff6b6b;
+    margin-bottom: 1rem;
+    display: none;
+    font-size: 0.9rem;
+}
 
+.info-box-red {
+    background-color: #e74c3c;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    display: none; /* Oculto por defecto */
+    margin-top: 10px;
+}
+
+/* =========================================
+   4. ESTILOS DE LOS MENÚS (Por Roles)
+   ========================================= */
+/* Contenedor estilo tarjeta limpia */
 .menu-container {
-    background-color: var(--color-form);
+    background-color: var(--bg-card);
+    width: 90%;
+    max-width: 800px;
+    margin-top: 50px;
     padding: 2rem;
     border-radius: 10px;
-    color: var(--color-texto);
-    width: 600px;
-    min-height: 400px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    display: flex;
-    flex-direction: column;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05); /* Sombra muy suave */
+    border: 1px solid var(--border-color);
 }
 
 .menu-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 2px solid var(--color-fondo);
-    padding-bottom: 1rem;
-    margin-bottom: 1.5rem;
+    border-bottom: 2px solid var(--bg-body);
+    padding-bottom: 1.5rem;
+    margin-bottom: 2rem;
 }
 
 .menu-header h2 {
     margin: 0;
-    font-size: 1.5rem;
+    color: var(--text-main);
 }
 
+/* Botón Salir */
 .btn-logout {
-    background-color: var(--color-btn-logout);
+    background-color: var(--btn-danger);
     color: white;
     padding: 0.5rem 1rem;
+    border-radius: 5px;
     font-size: 0.9rem;
-    margin: 0;
+    font-weight: bold;
 }
+.btn-logout:hover { background-color: #c82333; }
 
+/* Grid de botones del menú */
 .menu-body {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Responsivo */
+    gap: 1.5rem;
 }
 
+/* Estilo base de los botones de menú */
 .btn-menu {
-    padding: 1.5rem;
+    padding: 2rem 1rem;
     font-size: 1.2rem;
-    font-weight: bold;
     color: white;
-    display: block; /* Para que ocupen todo el ancho si son <a> */
-}
-
-/* Colores de botones por rol */
-.btn-menu-admin { background-color: var(--color-btn-admin); }
-.btn-menu-cajero { background-color: var(--color-btn-cajero); }
-.btn-menu-mesero { background-color: var(--color-btn-mesero); }
-.btn-menu-cocinero { background-color: var(--color-btn-cocinero); }
-
-
-/* --- ESTILOS GESTIÓN DE USUARIOS --- */
-
-/* Contenedor principal de la página */
-.gestion-container {
-    background-color: var(--color-form);
-    padding: 2rem;
-    border-radius: 10px;
-    color: var(--color-texto);
-    width: 90%; 
-    max-width: 1200px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    display: grid; /* Usamos Grid para las columnas */
-    grid-template-columns: 300px 1fr; /* Columna 1 fija, Columna 2 flexible */
-    grid-template-rows: auto 1fr; /* Fila 1 auto, Fila 2 flexible */
-    grid-template-areas:
-        "header header"
-        "form   lista";
-    gap: 2rem;
-    max-height: 90vh; /* Para que no se salga de la pantalla */
-}
-
-/* Encabezado */
-.gestion-header {
-    grid-area: header;
+    border-radius: 8px;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    border-bottom: 2px solid var(--color-fondo);
-    padding-bottom: 1rem;
-}
-
-.gestion-header h2 {
-    margin: 0;
-    font-size: 1.5rem;
-}
-
-.btn-back {
-    font-size: 2rem;
-    text-decoration: none;
-    color: white;
-    padding: 0 1rem;
-}
-
-/* Columna Izquierda (Formulario) */
-.gestion-form-container {
-    grid-area: form;
-    background-color: var(--color-btn-admin); /* Fondo morado */
-    padding: 1.5rem;
-    border-radius: 8px;
-    height: fit-content;
-}
-
-.gestion-form-container form {
-    display: flex;
-    flex-direction: column;
-    gap: 0.8rem;
-}
-
-.gestion-form-container h3 {
-    margin-top: 0;
-    text-align: center;
-    border-bottom: 1px solid rgba(255,255,255,0.5);
-    padding-bottom: 0.5rem;
-}
-
-.gestion-form-container label {
-    font-weight: bold;
-}
-
-.gestion-form-container input,
-.gestion-form-container select {
-    padding: 0.6rem;
-    border-radius: 5px;
-    border: none;
-    font-size: 1rem;
-}
-
-.btn-form-crear {
-    background-color: var(--color-btn-cajero); /* Verde */
-    color: white;
-    margin-top: 1rem;
-    font-weight: bold;
-}
-
-/* Columna Derecha (Tabla) */
-.gestion-lista-container {
-    grid-area: lista;
-    background-color: #34495e; /* Azul grisáceo */
-    padding: 1.5rem;
-    border-radius: 8px;
-    overflow-y: auto; /* Scroll si hay muchos usuarios */
-}
-
-.gestion-lista-container h3 {
-    margin-top: 0;
-    text-align: center;
-}
-
-#tabla-usuarios {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-#tabla-usuarios th,
-#tabla-usuarios td {
-    padding: 0.8rem;
-    text-align: left;
-    border-bottom: 1px solid #7f8c8d;
-}
-
-#tabla-usuarios th {
-    background-color: var(--color-fondo);
-    color: var(--color-form);
-}
-
-.acciones {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.btn-accion-editar,
-.btn-accion-eliminar {
-    padding: 0.4rem 0.8rem;
-    border-radius: 5px;
-    color: white;
-    font-size: 0.9rem;
-    cursor: pointer;
-}
-.btn-accion-editar { background-color: var(--color-btn-mesero); }
-.btn-accion-eliminar { background-color: var(--color-btn-logout); }
-
-/* --- ESTILOS MODALES (Pop-ups) --- */
-.modal {
-    display: none; /* Oculto por defecto */
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0, 0, 0, 0.6);
     justify-content: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+.btn-menu:hover {
+    transform: translateY(-5px); /* Efecto elevación */
+    opacity: 0.95;
+    color: white;
+}
+
+/* --- COLORES ESPECÍFICOS POR ROL --- */
+
+/* Administrador (Morado) */
+.btn-menu-admin {
+    background-color: var(--role-admin);
+    border-bottom: 4px solid #8e44ad; /* Borde inferior 3D */
+}
+
+/* Cajero (Verde) */
+.btn-menu-cajero {
+    background-color: var(--role-cajero);
+    border-bottom: 4px solid #27ae60;
+}
+
+/* Mesero (Azul) */
+.btn-menu-mesero {
+    background-color: var(--role-mesero);
+    border-bottom: 4px solid #2980b9;
+}
+
+/* Cocinero (Rosa) */
+.btn-menu-cocinero {
+    background-color: var(--role-cocinero);
+    border-bottom: 4px solid #c2185b;
+}
+
+/* =========================================
+   5. MODALES (Pop-ups)
+   ========================================= */
+.modal {
+    display: none; 
+    position: fixed; 
+    z-index: 9999; 
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.6);
     align-items: center;
+    justify-content: center;
 }
 
 .modal-content {
-    background-color: var(--color-btn-admin); /* Morado */
-    color: white;
+    background-color: white;
     padding: 2rem;
-    border-radius: 10px;
+    border-radius: 8px;
     width: 90%;
-    max-width: 450px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+    max-width: 400px;
+    text-align: center;
     position: relative;
-    border: 5px solid var(--color-box-yellow-border);
-    display: flex;
-    flex-direction: column;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
 }
 
 .close-modal {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
     position: absolute;
-    top: 10px;
-    right: 20px;
+    top: 10px; right: 15px;
+    font-size: 24px;
     cursor: pointer;
+    color: #999;
 }
+.close-modal:hover { color: #333; }
 
-.close-modal:hover { color: white; }
-
-.modal-content h3 {
-    margin-top: 0;
-    text-align: center;
-}
-
-.modal-content form {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.modal-content label { font-weight: bold; }
-
-.modal-content input,
-.modal-content select {
-    padding: 0.8rem;
+.info-box-yellow {
+    background-color: #fff3cd;
+    color: #856404;
+    padding: 1rem;
     border-radius: 5px;
-    border: none;
-    font-size: 1rem;
-    color: #000;
-}
-
-.modal-botones {
-    display: flex;
-    justify-content: space-around;
-    margin-top: 1.5rem;
-    gap: 1rem;
-}
-
-.modal-botones button {
-    width: 45%;
-    color: white;
-}
-
-/* Botones específicos del modal */
-.btn-menu-admin-eliminar {
-    background-color: var(--color-btn-logout); /* Rojo */
+    border: 1px solid #ffeeba;
 }

@@ -9,7 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import com.restaurant.restaurantaplicacion.dto.CambiarPasswordRequest;
+import org.springframework.security.core.Authentication;
 import java.util.List;
 
 @RestController
@@ -81,6 +82,23 @@ public class UsuarioController {
             return ResponseEntity.noContent().build(); // 204 No Content (éxito)
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("/usuarios/cambiar-contrasena")
+    public ResponseEntity<?> cambiarContrasena(@RequestBody CambiarPasswordRequest request, Authentication authentication) {
+        try {
+            // Obtenemos el usuario que está logueado actualmente
+            String nombreUsuario = authentication.getName();
+            Usuario usuario = usuarioService.obtenerTodosLosUsuarios().stream()
+                    .filter(u -> u.getUsuario().equals(nombreUsuario))
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+            usuarioService.cambiarContrasena(usuario.getId(), request.getNuevaContrasena());
+            return ResponseEntity.ok("Contraseña actualizada correctamente");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 }

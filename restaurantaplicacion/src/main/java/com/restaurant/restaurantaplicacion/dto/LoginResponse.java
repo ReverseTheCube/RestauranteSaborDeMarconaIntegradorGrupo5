@@ -12,4 +12,5 @@ public class LoginResponse {
     private String usuario;
     private Rol rol;
     private String mensaje;
+    private boolean cambioPasswordObligatorio;
 }

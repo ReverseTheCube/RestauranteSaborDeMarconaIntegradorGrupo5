@@ -27,4 +27,7 @@ public class Usuario {
     private int intentosFallidos = 0;
     private boolean cuentaBloqueada = false;
     private LocalDateTime tiempoBloqueo;
+
+    @Column(nullable = false)
+    private boolean cambioPasswordObligatorio = true;
 }

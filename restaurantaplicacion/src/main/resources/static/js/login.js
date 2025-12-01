@@ -23,23 +23,30 @@ document.addEventListener("DOMContentLoaded", () => {
         };
 
         try {
-            const response = await fetch("/api/auth/login", { // Ruta relativa es mejor
+            const response = await fetch("/api/auth/login", { 
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(loginData)
             });
 
             if (response.ok) {
-                const data = await response.json();
+                const loginResponse = await response.json();
                 
-                // --- AQUÍ ESTÁ LA SOLUCIÓN: GUARDAR EN MEMORIA ---
-                localStorage.setItem('usuarioId', data.id);
-                localStorage.setItem('usuarioNombre', data.usuario);
-                localStorage.setItem('usuarioRol', data.rol);
-                // -------------------------------------------------
+                // Guardar en memoria
+                localStorage.setItem('usuarioId', loginResponse.id);
+                localStorage.setItem('usuarioNombre', loginResponse.usuario);
+                localStorage.setItem('usuarioRol', loginResponse.rol);
+
+                // --- NUEVO: VERIFICACIÓN DE CAMBIO DE CONTRASEÑA ---
+                if (loginResponse.cambioPasswordObligatorio) {
+                    // Si es true, lo mandamos a cambiar la contraseña
+                    window.location.href = "/cambiar-password.html";
+                    return; // Detenemos la ejecución aquí para que no siga al menú
+                }
+                // ---------------------------------------------------
 
                 // Redirigir según el ROL
-                switch(data.rol) {
+                switch(loginResponse.rol) {
                     case "ADMINISTRADOR": window.location.href = "/admin.html"; break;
                     case "CAJERO": window.location.href = "/cajero.html"; break;
                     case "MESERO": window.location.href = "/mesero.html"; break;
@@ -59,7 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function mostrarError(mensaje) {
         if (mensaje.includes("bloqueado")) {
-            if(bloqueadoBox) bloqueadoBox.style.display = "block"; // Corregido a block/flex
+            if(bloqueadoBox) bloqueadoBox.style.display = "block";
         } else {
             errorMessage.textContent = mensaje;
             errorMessage.style.display = "block";

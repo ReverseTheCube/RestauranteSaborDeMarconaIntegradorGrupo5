@@ -1,5 +1,5 @@
 // --- CONSTANTES Y REFERENCIAS DEL DOM ---
-const API_URL = "http://localhost:8080/api/usuarios";
+const API_URL = "/api/usuarios"; // Ruta relativa es más segura
 
 // Tabla
 const tablaUsuariosBody = document.querySelector("#tabla-usuarios tbody");
@@ -10,7 +10,7 @@ const crearRol = document.getElementById("crear-rol");
 const crearUsuario = document.getElementById("crear-usuario");
 const crearContrasena = document.getElementById("crear-contrasena");
 
-// Modal de Editar
+// --- REFERENCIAS MODAL EDITAR ---
 const modalEditar = document.getElementById("modal-editar");
 const formEditarUsuario = document.getElementById("form-editar-usuario");
 const editarId = document.getElementById("editar-id");
@@ -18,69 +18,107 @@ const editarRol = document.getElementById("editar-rol");
 const editarUsuario = document.getElementById("editar-usuario");
 const editarContrasena = document.getElementById("editar-contrasena");
 const btnCloseModalEditar = document.getElementById("close-modal-editar");
-const btnDescartarCambios = document.getElementById("btn-descartar");
+const btnDescartarCambios = document.getElementById("btn-descartar"); // ¡Ojo con este ID!
 
-// Modal de Eliminar
+// --- REFERENCIAS MODAL ELIMINAR ---
 const modalEliminar = document.getElementById("modal-eliminar");
 const eliminarTextoUsuario = document.getElementById("eliminar-texto-usuario");
-const btnEliminarNo = document.getElementById("btn-eliminar-no");
-const btnEliminarSi = document.getElementById("btn-eliminar-si");
+const btnEliminarNo = document.getElementById("btn-eliminar-no"); // ¡Ojo con este ID!
+const btnEliminarSi = document.getElementById("btn-eliminar-si"); // ¡Ojo con este ID!
 
 // Variable para guardar el ID del usuario a eliminar
 let idUsuarioAEliminar = null;
 
-
 // --- EVENTO PRINCIPAL: Cargar todo al iniciar ---
 document.addEventListener("DOMContentLoaded", () => {
+    console.log("Iniciando gestión de usuarios...");
     cargarUsuarios();
 
-    // --- Listeners de formularios y modales ---
-    formCrearUsuario.addEventListener("submit", manejarCrearUsuario);
-    formEditarUsuario.addEventListener("submit", manejarEditarUsuario);
+    // 1. Listeners para CREAR
+    if (formCrearUsuario) {
+        formCrearUsuario.addEventListener("submit", manejarCrearUsuario);
+    }
+
+    // 2. Listeners para EDITAR
+    if (formEditarUsuario) {
+        formEditarUsuario.addEventListener("submit", manejarEditarUsuario);
+    }
     
-    // Listeners para cerrar modales
-    btnCloseModalEditar.addEventListener("click", () => modalEditar.style.display = "none");
-    btnDescartarCambios.addEventListener("click", () => modalEditar.style.display = "none");
-    btnEliminarNo.addEventListener("click", () => modalEliminar.style.display = "none");
+    // Botón "X" de cerrar editar
+    if (btnCloseModalEditar) {
+        btnCloseModalEditar.addEventListener("click", () => {
+            modalEditar.style.display = "none";
+        });
+    }
     
-    // Listener para confirmar eliminación
-    btnEliminarSi.addEventListener("click", confirmarEliminarUsuario);
+    // Botón "Descartar cambios" (Cancelar editar)
+    if (btnDescartarCambios) {
+        btnDescartarCambios.addEventListener("click", () => {
+            console.log("Cancelando edición...");
+            modalEditar.style.display = "none";
+        });
+    } else {
+        console.error("ERROR: No se encontró el botón con id='btn-descartar'");
+    }
+
+    // 3. Listeners para ELIMINAR
+    
+    // Botón "No" (Cancelar eliminar)
+    if (btnEliminarNo) {
+        btnEliminarNo.addEventListener("click", () => {
+            console.log("Cancelando eliminación...");
+            modalEliminar.style.display = "none";
+            idUsuarioAEliminar = null;
+        });
+    } else {
+        console.error("ERROR: No se encontró el botón con id='btn-eliminar-no'");
+    }
+
+    // Botón "Sí" (Confirmar eliminar)
+    if (btnEliminarSi) {
+        btnEliminarSi.addEventListener("click", confirmarEliminarUsuario);
+    } else {
+        console.error("ERROR: No se encontró el botón con id='btn-eliminar-si'");
+    }
+
+    // Cerrar modales al hacer clic fuera
+    window.addEventListener("click", (e) => {
+        if (e.target === modalEditar) modalEditar.style.display = "none";
+        if (e.target === modalEliminar) modalEliminar.style.display = "none";
+    });
 });
 
-// --- FUNCIÓN 1: Cargar y mostrar todos los usuarios ---
+// --- FUNCIONES ---
+
 async function cargarUsuarios() {
     try {
         const response = await fetch(API_URL);
         if (!response.ok) throw new Error("Error al cargar usuarios");
         const usuarios = await response.json();
 
-        // Limpiar tabla
         tablaUsuariosBody.innerHTML = "";
 
-        // Llenar tabla
         usuarios.forEach(user => {
             const tr = document.createElement("tr");
             tr.innerHTML = `
                 <td>${user.id}</td>
                 <td>${user.rol}</td>
                 <td>${user.usuario}</td>
-                <td>********</td> <td class="acciones">
+                <td>********</td>
+                <td class="acciones">
                     <button class="btn btn-accion-editar" onclick="mostrarModalEditar(${user.id}, '${user.rol}', '${user.usuario}')">Editar</button>
                     <button class="btn btn-accion-eliminar" onclick="mostrarModalEliminar(${user.id}, '${user.usuario}')">Eliminar</button>
                 </td>
             `;
             tablaUsuariosBody.appendChild(tr);
         });
-
     } catch (error) {
-        console.error("Error en cargarUsuarios:", error);
+        console.error("Error:", error);
     }
 }
 
-// --- FUNCIÓN 2: Crear un nuevo usuario ---
 async function manejarCrearUsuario(e) {
-    e.preventDefault(); // Evitar recarga de página
-
+    e.preventDefault();
     const nuevoUsuario = {
         rol: crearRol.value,
         usuario: crearUsuario.value,
@@ -96,45 +134,36 @@ async function manejarCrearUsuario(e) {
 
         if (response.ok) {
             alert("Usuario creado exitosamente");
-            formCrearUsuario.reset(); // Limpiar formulario
-            cargarUsuarios(); // Recargar la tabla
+            formCrearUsuario.reset();
+            cargarUsuarios();
         } else {
-            const error = await response.text();
-            alert(`Error al crear usuario: ${error}`);
+            alert("Error al crear usuario");
         }
     } catch (error) {
-        console.error("Error en manejarCrearUsuario:", error);
+        console.error(error);
     }
 }
 
-// --- FUNCIÓN 3: Mostrar el modal para Editar ---
-function mostrarModalEditar(id, rol, usuario) {
-    // Llenar el formulario del modal con los datos actuales
-    editarId.value = id;
-    editarRol.value = rol;
-    editarUsuario.value = usuario;
-    editarContrasena.value = ""; // Limpiar campo de contraseña
+// Funciones globales para que el onclick del HTML las encuentre
+window.mostrarModalEditar = function(id, rol, usuario) {
+    console.log("Editando usuario:", id);
+    if(editarId) editarId.value = id;
+    if(editarRol) editarRol.value = rol;
+    if(editarUsuario) editarUsuario.value = usuario;
+    if(editarContrasena) editarContrasena.value = "";
+    if(modalEditar) modalEditar.style.display = "flex";
+};
 
-    // Mostrar el modal
-    modalEditar.style.display = "flex";
-}
-
-// --- FUNCIÓN 4: Actualizar (Editar) un usuario ---
 async function manejarEditarUsuario(e) {
     e.preventDefault();
-
     const id = editarId.value;
     const datosActualizados = {
         rol: editarRol.value,
         usuario: editarUsuario.value,
-        contrasena: editarContrasena.value // Enviar contraseña (vacía o nueva)
+        contrasena: editarContrasena.value
     };
     
-    // Si la contraseña está vacía, la quitamos del objeto
-    // para que el backend no la actualice
-    if (datosActualizados.contrasena === "") {
-        delete datosActualizados.contrasena;
-    }
+    if (datosActualizados.contrasena === "") delete datosActualizados.contrasena;
 
     try {
         const response = await fetch(`${API_URL}/${id}`, {
@@ -144,30 +173,26 @@ async function manejarEditarUsuario(e) {
         });
 
         if (response.ok) {
-            alert("Usuario actualizado exitosamente");
-            modalEditar.style.display = "none"; // Ocultar modal
-            cargarUsuarios(); // Recargar tabla
+            alert("Usuario actualizado");
+            modalEditar.style.display = "none";
+            cargarUsuarios();
         } else {
-            const error = await response.text();
-            alert(`Error al actualizar usuario: ${error}`);
+            alert("Error al actualizar");
         }
     } catch (error) {
-        console.error("Error en manejarEditarUsuario:", error);
+        console.error(error);
     }
 }
 
-// --- FUNCIÓN 5: Mostrar modal de confirmación para Eliminar ---
-function mostrarModalEliminar(id, usuario) {
-    // Guardar el ID para usarlo si confirman
+window.mostrarModalEliminar = function(id, usuario) {
+    console.log("Preparando eliminación de:", id);
     idUsuarioAEliminar = id;
-    // Mostrar nombre de usuario en el modal
-    eliminarTextoUsuario.textContent = `Usuario: ${usuario} (ID: ${id})`;
-    // Mostrar el modal
-    modalEliminar.style.display = "flex";
-}
+    if(eliminarTextoUsuario) eliminarTextoUsuario.textContent = `Usuario: ${usuario} (ID: ${id})`;
+    if(modalEliminar) modalEliminar.style.display = "flex";
+};
 
-// --- FUNCIÓN 6: Eliminar un usuario ---
 async function confirmarEliminarUsuario() {
+    console.log("Confirmando eliminación de ID:", idUsuarioAEliminar);
     if (!idUsuarioAEliminar) return;
 
     try {
@@ -176,15 +201,14 @@ async function confirmarEliminarUsuario() {
         });
 
         if (response.ok) {
-            alert("Usuario eliminado exitosamente");
+            alert("Usuario eliminado");
             modalEliminar.style.display = "none";
-            cargarUsuarios(); // Recargar tabla
+            cargarUsuarios();
         } else {
-            const error = await response.text();
-            alert(`Error al eliminar usuario: ${error}`);
+            alert("Error al eliminar");
         }
-        idUsuarioAEliminar = null; // Limpiar ID
+        idUsuarioAEliminar = null;
     } catch (error) {
-        console.error("Error en confirmarEliminarUsuario:", error);
+        console.error(error);
     }
 }
