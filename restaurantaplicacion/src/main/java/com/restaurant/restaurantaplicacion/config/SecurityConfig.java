@@ -52,7 +52,7 @@ public class SecurityConfig {
                 
                 // Administrador
                 .requestMatchers("/admin.html", "/gestion-usuarios.html").hasAuthority("ADMINISTRADOR")
-                .requestMatchers("/api/usuarios/**").hasAuthority("ADMINISTRADOR")
+                .requestMatchers("/api/usuarios/**").permitAll()
 
                 // Cajero
                 .requestMatchers("/cajero.html").hasAuthority("CAJERO")

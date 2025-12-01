@@ -25,14 +25,24 @@ function obtenerInfoPedido() {
     const tituloEl = document.getElementById("mesa-titulo");
     
     // Almacenar el contexto del pedido para pasarlo al resumen
-    if (mesaNro) {
-        tituloEl.innerText = `Mesa N° ${mesaNro}`;
-        pedidoInfo = { pedidoId: pedidoId, mesa: mesaNro, tipo: 'LOCAL' };
-    } else if (deliveryId) {
-        tituloEl.innerText = `Delivery Pedido N° ${deliveryId}`;
-        pedidoInfo = { pedidoId: deliveryId, tipo: 'DELIVERY' };
+if (!pedidoId && localStorage.getItem('infoPedido')) {
+        pedidoInfo = JSON.parse(localStorage.getItem('infoPedido'));
+        if (pedidoInfo.tipo === 'LOCAL') {
+            tituloEl.innerText = `Mesa N° ${pedidoInfo.mesa}`;
+        } else {
+            tituloEl.innerText = `Delivery N° ${pedidoInfo.pedidoId}`;
+        }
     } else {
-        tituloEl.innerText = "Seleccione Pedido";
+        // Lógica normal de inicio
+        if (mesaNro) {
+            tituloEl.innerText = `Mesa N° ${mesaNro}`;
+            pedidoInfo = { pedidoId: pedidoId, mesa: mesaNro, tipo: 'LOCAL' };
+        } else if (deliveryId) {
+            tituloEl.innerText = `Delivery Pedido N° ${deliveryId}`;
+            pedidoInfo = { pedidoId: deliveryId, tipo: 'DELIVERY' };
+        } else {
+            tituloEl.innerText = "Seleccione Pedido";
+        }
     }
 }
 
@@ -42,30 +52,26 @@ function fetchYcargarMenu() {
     
     fetch(API_URL_PLATOS) 
         .then(response => {
-            if (!response.ok) {
-                throw new Error('Error al cargar platos. Status: ' + response.status);
-            }
+            if (!response.ok) throw new Error('Error al cargar platos.');
             return response.json();
         })
         .then(platos => {
             platosList = platos.filter(p => p.activo);
             cargarMenu(platosList); 
+            
+            // --- NUEVO: RESTAURAR SELECCIÓN PREVIA ---
+            restaurarSeleccionPrevia();
+            // -----------------------------------------
         })
         .catch(error => {
-            console.error("Error en fetchYcargarMenu:", error);
-            menuContainer.innerHTML = '<div class="error">No se pudieron cargar los platos.</div>';
+            console.error("Error:", error);
+            menuContainer.innerHTML = '<div class="error">Error al cargar menú.</div>';
         });
 }
-
 
 function cargarMenu(platos) {
     const menuContainer = document.getElementById('menu');
     menuContainer.innerHTML = ''; 
-
-    if (!platos || platos.length === 0) {
-        menuContainer.innerHTML = '<div class="error">No hay platos disponibles o activos.</div>';
-        return;
-    }
 
     platos.forEach(plato => {
         const itemHTML = `
@@ -81,19 +87,31 @@ function cargarMenu(platos) {
         menuContainer.innerHTML += itemHTML;
     });
 }
+function restaurarSeleccionPrevia() {
+    const platosGuardados = JSON.parse(localStorage.getItem('detallePedido'));
+    
+    if (platosGuardados && platosGuardados.length > 0) {
+        platosGuardados.forEach(item => {
+            const qtyElement = document.getElementById(`qty-${item.platoId}`);
+            if (qtyElement) {
+                // Restauramos la cantidad visualmente
+                qtyElement.textContent = item.cantidad;
+            }
+        });
+        // Opcional: Mostrar un aviso visual
+        console.log("Selección previa restaurada.");
+    }
+}
 
 function updateQuantity(platoId, delta) {
     const qtyElement = document.getElementById(`qty-${platoId}`);
     let currentQty = parseInt(qtyElement.textContent);
     
     let newQty;
-    if (delta === -1 && currentQty > 0) {
-        newQty = currentQty - 1;
-    } else if (delta === 1) {
-        newQty = currentQty + 1;
-    } else {
-        return;
-    }
+    if (delta === -1 && currentQty > 0) newQty = currentQty - 1;
+    else if (delta === 1) newQty = currentQty + 1;
+    else return;
+    
     qtyElement.textContent = newQty;
 }
 
@@ -103,9 +121,7 @@ function confirmarPedido() {
     platosList.forEach(plato => {
         const qtyElement = document.getElementById(`qty-${plato.id}`);
         if (qtyElement) { 
-            // LECTURA ROBUSTA DE LA CANTIDAD: 
             const cantidad = parseInt(qtyElement.textContent.trim()); 
-            
             if (cantidad > 0) {
                 platosSeleccionados.push({
                     platoId: plato.id,
@@ -123,10 +139,12 @@ function confirmarPedido() {
         return;
     }
 
-    // --- GUARDADO DE DATOS EN LOCAL STORAGE Y REDIRECCIÓN ---
+    // Sobreescribimos con la NUEVA lista completa (fusión visual hecha por el usuario)
     localStorage.setItem('detallePedido', JSON.stringify(platosSeleccionados));
-    localStorage.setItem('infoPedido', JSON.stringify(pedidoInfo));
+    // Actualizamos infoPedido solo si no existía o cambió (usualmente se mantiene)
+    if(pedidoInfo.pedidoId) {
+        localStorage.setItem('infoPedido', JSON.stringify(pedidoInfo));
+    }
     
-    // Redirigir al resumen
     window.location.href = 'resumen_pedido.html';
 }

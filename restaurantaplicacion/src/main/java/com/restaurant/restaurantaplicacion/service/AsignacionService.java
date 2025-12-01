@@ -106,25 +106,24 @@ asignacionPensionRepository.deleteById(asignacionId);
     // NUEVA LÓGICA DE VALIDACIÓN PENSIONADO (USADA POR CLIENTECONTROLLER)
     // =========================================================================
     @Transactional(readOnly = true)
-    public Cliente buscarClienteYValidarPension(String dni, String ruc) {
+    public Cliente buscarClienteYValidarPension(String dni) { 
+        
         // 1. Verificar si el cliente existe (DNI)
         Optional<Cliente> optCliente = clienteRepository.findByNumeroDocumento(dni);
         
         if (optCliente.isEmpty()) {
-            // Lanza una excepción si el DNI no está registrado
             throw new RuntimeException("El DNI ingresado no corresponde a un cliente registrado."); 
         }
         
-        // 2. Si hay RUC, verificar la asignación
-        if (ruc != null && !ruc.isEmpty()) {
-            Optional<AsignacionPension> optAsignacion = asignacionPensionRepository
-                .findByClienteNumeroDocumentoAndEmpresaRuc(dni, ruc);
-            
-            if (optAsignacion.isEmpty()) {
-                // Lanza una excepción si el vínculo NO existe
-                throw new RuntimeException("El cliente no tiene pensión asignada a esta empresa (RUC).");
-            }
-        }
+        // 2. Verificar si es pensionado (Busca en asignaciones solo por DNI)
+        Optional<AsignacionPension> optAsignacion = asignacionPensionRepository
+            .findByClienteNumeroDocumento(dni);
+        
+        // OJO: Si tu lógica es que el pedido NO procede si no es pensionado, deja esto.
+        // Si permites clientes normales, quita este bloque if.
+        // if (optAsignacion.isEmpty()) {
+        //    throw new RuntimeException("El cliente con este DNI no es pensionado.");
+        // }
         
         return optCliente.get();
     }

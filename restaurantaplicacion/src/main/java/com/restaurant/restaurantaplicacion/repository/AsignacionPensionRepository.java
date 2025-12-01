@@ -13,6 +13,5 @@ public interface AsignacionPensionRepository extends JpaRepository<AsignacionPen
     // Busca asignaciones por el RUC de la empresa relacionada
     List<AsignacionPension> findByEmpresaRuc(String ruc);
     // En AsignacionPensionRepository.java (dentro de la interfaz)
-    Optional<AsignacionPension> findByClienteNumeroDocumentoAndEmpresaRuc(String numeroDocumento, String ruc);
-
+Optional<AsignacionPension> findByClienteNumeroDocumento(String numeroDocumento);
 }

@@ -529,40 +529,34 @@ border: 2px solid #e53e3e !important;
 }
 .action-buttons {
 display: flex; /* Los pone uno al lado del otro */
-gap: 5px;/* Espacio entre los botones */
+gap: 8px;/* Espacio entre los botones */
 justify-content:center; /* Centra los botones dentro de la celda */
-align-items: center;
 }
 
 .btn-tabla-editar, .btn-tabla-eliminar {
-padding: 6px 10px;
-border-radius: var(--border-radius-sm);
-font-size: 0.85em;
-cursor: pointer;
-white-space: nowrap; /* Evita que el texto se rompa */
-transition: background-color 0.2s ease;
+padding: 6px 12px;
+font-size: 13px;
+    font-weight: 600;
+    border-radius: 4px;
+    cursor: pointer;
+    border: none;
+    color: white;
+    transition: background 0.3s;
 }
 
 .btn-tabla-editar {
-    /* Color de fondo: Azul (Asegúrate de que este color exista en :root o defínelo) */
     background-color: #3498db; 
-    color: white;
-    border: 1px solid #2980b9;
-    transition: background-color 0.2s ease;
 }
 .btn-tabla-editar:hover {
-    background-color: #2980b9; /* Se oscurece al pasar el mouse */
+    background-color: #2980b9;
 }
 
+/* Color Rojo para Eliminar */
 .btn-tabla-eliminar {
-    /* Color de fondo: Rojo */
-    background-color: var(--danger); /* Usamos la variable --danger */
-    color: white;
-    border: 1px solid #c0392b;
-    transition: background-color 0.2s ease;
+    background-color: #e74c3c; 
 }
 .btn-tabla-eliminar:hover {
-    background-color: #c0392b; /* Se oscurece al pasar el mouse */
+    background-color: #c0392b;
 }
 
 /* Regla para el contenedor de botones (Alineación) */

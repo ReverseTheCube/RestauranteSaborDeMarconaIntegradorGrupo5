@@ -26,6 +26,7 @@ public class PedidoService {
     @Autowired private UsuarioRepository usuarioRepository;
     @Autowired private ClienteRepository clienteRepository;
     @Autowired private EmpresaRepository empresaRepository;
+    @Autowired private AsignacionPensionRepository asignacionPensionRepository;
 
     public List<Pedido> obtenerTodosLosPedidos() {
         return pedidoRepository.findAll();
@@ -70,21 +71,15 @@ public class PedidoService {
     }
 
     // --- AQUÍ ESTÁ LA MAGIA DEL TOTAL ---
+
+    // 2. ACTUALIZA EL MÉTODO finalizarPeddo
     @Transactional
     public Pedido finalizarPedido(Long pedidoId, FinalizarPedidoRequest request) {
         Pedido pedido = pedidoRepository.findById(pedidoId)
                 .orElseThrow(() -> new RuntimeException("Pedido no encontrado: " + pedidoId));
 
-        if (request.getNumeroDocumento() != null && !request.getNumeroDocumento().isEmpty()) {
-            clienteRepository.findByNumeroDocumento(request.getNumeroDocumento())
-                .ifPresent(pedido::setCliente);
-        }
-        if (request.getRucEmpresa() != null && !request.getRucEmpresa().isEmpty()) {
-            empresaRepository.findByRuc(request.getRucEmpresa())
-                .ifPresent(pedido::setEmpresa);
-        }
-
-        double totalCalculado = 0.0;
+        // Calcular Total del Pedido
+        double total = 0.0;
         List<PedidoPlato> detalles = new ArrayList<>();
         
         if (request.getDetallePlatos() != null) {
@@ -96,17 +91,46 @@ public class PedidoService {
                 detalle.setPedido(pedido);
                 detalle.setPlato(plato);
                 detalle.setCantidad(item.getCantidad());
-                detalle.setPrecioUnitario(plato.getPrecio()); // Usamos el precio actual del plato
+                detalle.setPrecioUnitario(plato.getPrecio());
                 
                 detalles.add(detalle);
-                // SUMA AL TOTAL
-                totalCalculado += (plato.getPrecio() * item.getCantidad());
+                total += (plato.getPrecio() * item.getCantidad());
             }
         }
+        
+        // --- LÓGICA DE PENSIONADO (DESCUENTO DE SALDO) ---
+        // Si el pedido tiene un DNI asociado, verificamos si es pensionado
+        if (request.getNumeroDocumento() != null && !request.getNumeroDocumento().isEmpty()) {
+            
+            // 1. Asignar Cliente al Pedido
+            Cliente cliente = clienteRepository.findByNumeroDocumento(request.getNumeroDocumento()).orElse(null);
+            pedido.setCliente(cliente);
 
-        // Guardamos los detalles y el total
+            // 2. Buscar si tiene Asignación (Pensión)
+            Optional<AsignacionPension> asignacionOpt = asignacionPensionRepository
+                    .findByClienteNumeroDocumento(request.getNumeroDocumento());
+
+            if (asignacionOpt.isPresent()) {
+                AsignacionPension asignacion = asignacionOpt.get();
+                
+                // Asignar la empresa automáticamente
+                pedido.setEmpresa(asignacion.getEmpresa());
+
+                // VERIFICAR SALDO
+                if (asignacion.getSaldo() >= total) {
+                    // DESCONTAR SALDO
+                    double nuevoSaldo = asignacion.getSaldo() - total;
+                    asignacion.setSaldo(nuevoSaldo);
+                    asignacionPensionRepository.save(asignacion); // Guardar nuevo saldo
+                    System.out.println("Cobro a pensionado exitoso. Nuevo saldo: " + nuevoSaldo);
+                } else {
+                throw new RuntimeException("Saldo insuficiente. Su saldo es S/ " + asignacion.getSaldo() + " y el pedido es S/ " + total);                }
+            }
+        }
+        // ------------------------------------------------
+
         pedido.setDetallePlatos(detalles);
-        pedido.setTotal(totalCalculado); // <--- AQUÍ SE GUARDA EL MONTO
+        pedido.setTotal(total);
         pedido.setEstado(EstadoPedido.PAGADO);
 
         return pedidoRepository.save(pedido);

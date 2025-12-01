@@ -10,6 +10,7 @@ import org.springframework.format.annotation.DateTimeFormat; // <--- IMPORTANTE
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.Collections;
 
 import java.time.LocalDate; // <--- IMPORTANTE
 import java.util.List;
@@ -57,14 +58,17 @@ public class PedidoController {
 
     // --- 3. FINALIZAR PEDIDO (Calcula totales y cierra mesa) ---
     @PutMapping("/finalizar")
-    public ResponseEntity<Pedido> finalizarPedido(@RequestBody FinalizarPedidoRequest request) {
-        try {
-            Pedido pedidoActualizado = pedidoService.finalizarPedido(request.getPedidoId(), request);
-            return ResponseEntity.ok(pedidoActualizado);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(null);
-        }
+public ResponseEntity<?> finalizarPedido(@RequestBody FinalizarPedidoRequest request) {
+    try {
+        Pedido pedidoActualizado = pedidoService.finalizarPedido(request.getPedidoId(), request);
+        return ResponseEntity.ok(pedidoActualizado);
+    } catch (RuntimeException e) {
+        // 2. Aquí capturamos el mensaje "Saldo insuficiente..." y lo enviamos en un JSON
+        return ResponseEntity
+                .badRequest()
+                .body(Collections.singletonMap("message", e.getMessage()));
     }
+}
 
     // --- 4. OBTENER HISTORIAL COMPLETO ---
     @GetMapping

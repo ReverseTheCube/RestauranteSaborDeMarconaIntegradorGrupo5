@@ -33,8 +33,8 @@ function popularTabla(platos) {
     tablaBody.innerHTML = ''; 
     
     if (platos.length === 0) {
-        tablaBody.innerHTML = `<tr><td colspan="5" style="text-align: center;">Agregue platos.</td></tr>`;
-        return;
+    tablaBody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 20px;">No hay platos seleccionados.</td></tr>`;        
+    return;
     }
     
     platos.forEach(plato => {
@@ -130,49 +130,58 @@ function setupEventListeners() {
     // DNI Listener
     const inputDNI = document.getElementById('numeroDocumentoDNI');
     if(inputDNI) {
-        inputDNI.addEventListener('input', async (e) => {
-            const dni = e.target.value;
-            const nombreInput = document.getElementById('nombreCliente');
-            if (dni.length === 8) {
-                nombreInput.value = "Buscando...";
-                try {
-                    const response = await fetch(`${API_URL_CLIENTES}/buscar-dni/${dni}`);
-                    if (response.ok) {
-                        const cliente = await response.json();
-                        nombreInput.value = cliente.nombresApellidos;
-                        nombreInput.style.color = "var(--success)";
-                    } else {
-                        nombreInput.value = "Cliente Nuevo";
-                        nombreInput.style.color = "var(--warning)";
-                    }
-                } catch (error) { nombreInput.value = "Error"; }
-            } else { nombreInput.value = ""; }
-        });
-    }
+        inputDNI.addEventListener('blur', (e) => buscarClientePorDNI(e.target.value));
+            }
 
-    // RUC Listener
-    const inputRUC = document.getElementById('numeroDocumentoRUC');
-    if(inputRUC) {
-        inputRUC.addEventListener('input', async (e) => {
-            const ruc = e.target.value;
-            const empresaInput = document.getElementById('empresaCliente');
-            if (ruc.length === 11) {
-                empresaInput.value = "Buscando...";
-                try {
-                    const response = await fetch(`${API_URL_EMPRESAS}?filtro=${ruc}`);
-                    if (response.ok) {
-                        const lista = await response.json();
-                        if (lista && lista.length > 0) {
-                            empresaInput.value = lista[0].razonSocial;
-                            empresaInput.style.color = "var(--success)";
-                        } else {
-                            empresaInput.value = "Empresa no encontrada";
-                            empresaInput.style.color = "var(--warning)";
-                        }
-                    } else { empresaInput.value = "Error"; }
-                } catch (error) { empresaInput.value = "Error conex."; }
-            } else { empresaInput.value = ""; }
-        });
+            // LISTENER RUC
+            const inputRUC = document.getElementById('numeroDocumentoRUC');
+            if(inputRUC) {
+                inputRUC.addEventListener('blur', (e) => buscarEmpresaPorRUC(e.target.value));
+            }
+        }
+
+        // --- FUNCIÓN CLAVE PARA PENSIONADOS ---
+async function buscarClientePorDNI(dni) {
+    const nombreClienteInput = document.getElementById('nombreCliente');
+    const empresaClienteInput = document.getElementById('empresaCliente'); 
+    
+    nombreClienteInput.value = 'Buscando...'; 
+
+    if (dni.length !== 8) {
+        nombreClienteInput.value = '';
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${API_URL_CLIENTES}/buscar-dni/${dni}`);
+        
+        if (response.ok) {
+            const data = await response.json();
+            
+            // 1. Llenar nombre
+            nombreClienteInput.value = data.nombresApellidos; 
+            nombreClienteInput.style.color = "#ffffff"; // Color texto normal
+
+            // 2. SI ES PENSIONADO: Mostrar Empresa y Saldo
+            if (data.esPensionado) {
+                empresaClienteInput.value = `${data.razonSocial} (Saldo: S/ ${data.saldoActual})`;
+                empresaClienteInput.style.display = "block"; 
+                empresaClienteInput.style.color = "#2ecc71"; // Verde
+            } else {
+                // Si NO es pensionado, indicarlo o dejar vacío
+                empresaClienteInput.value = "Cliente Particular";
+                empresaClienteInput.style.display = "block";
+                empresaClienteInput.style.color = "#ffffff";
+            }
+            
+        } else if (response.status === 404) {
+            nombreClienteInput.value = "Cliente no registrado";
+            nombreClienteInput.style.color = "#ef4444"; // Rojo
+            empresaClienteInput.value = "";
+        }
+    } catch (error) {
+        console.error(error);
+        nombreClienteInput.value = "Error de conexión";
     }
 }
 
@@ -204,6 +213,8 @@ function cargarEmpleadoLogueado() {
 }
 
 // --- FINALIZAR PEDIDO (Con Modal de Éxito) ---
+// En resumen_pedido.js
+
 async function finalizarPedido() {
     const infoPedido = JSON.parse(localStorage.getItem('infoPedido'));
     const detallePedido = JSON.parse(localStorage.getItem('detallePedido'));
@@ -217,7 +228,6 @@ async function finalizarPedido() {
     const esDni = tipoDoc === 'DNI';
     const numDoc = esDni ? document.getElementById('numeroDocumentoDNI').value : document.getElementById('numeroDocumentoRUC').value;
     
-    // Variables globales para usarlas en la impresión luego
     window.ultimoClienteInfo = { 
         nombre: esDni ? document.getElementById('nombreCliente').value : document.getElementById('empresaCliente').value,
         doc: numDoc, 
@@ -232,10 +242,13 @@ async function finalizarPedido() {
         rucEmpresa: !esDni ? numDoc : null
     };
 
-    const btn = document.querySelector('.btn-success');
-    const textoOriginal = btn.innerText;
-    btn.disabled = true; 
-    btn.innerText = "Procesando...";
+    const btn = document.querySelector('.btn-finalizar');
+    let textoOriginal = "Finalizar Pedido";
+    if(btn) {
+        textoOriginal = btn.innerText;
+        btn.disabled = true; 
+        btn.innerText = "Procesando...";
+    }
 
     try {
         const response = await fetch('/api/pedidos/finalizar', {
@@ -244,28 +257,53 @@ async function finalizarPedido() {
             body: JSON.stringify(requestData)
         });
 
-        if (!response.ok) throw new Error(await response.text());
+        // 1. LEEMOS LA RESPUESTA COMO TEXTO PRIMERO (Para ver qué llegó)
+        const responseText = await response.text();
 
-        // Guardar respuesta para impresión
-        window.ultimoPedidoGuardado = await response.json();
+        if (!response.ok) {
+            console.error("Error del servidor (RAW):", responseText);
+            
+            // Intentamos extraer el mensaje útil
+            let mensajeError = "Error desconocido del servidor.";
+            
+            try {
+                // Si es JSON (formato de error de Spring Boot)
+                const errorJson = JSON.parse(responseText);
+                if (errorJson.message) mensajeError = errorJson.message;
+                else if (errorJson.error) mensajeError = errorJson.error;
+            } catch (e) {
+                // Si no es JSON, es texto plano (nuestro mensaje directo)
+                if (responseText && responseText.trim().length > 0) {
+                    mensajeError = responseText;
+                }
+            }
+
+            throw new Error(mensajeError);
+        }
+
+        // Si es éxito, parseamos el JSON del pedido
+        window.ultimoPedidoGuardado = JSON.parse(responseText);
         window.ultimoDetallePedido = detallePedido;
 
-        // Mostrar Modal Éxito
         const modalExito = document.getElementById('modal-exito');
         if(modalExito) modalExito.style.display = 'flex';
-        else alert("Venta Exitosa"); // Fallback
-
-        // Setup botón imprimir del modal
-        const btnPrint = document.getElementById('btnImprimir');
-        if(btnPrint) {
-            btnPrint.onclick = () => generarBoletaHTML();
+        else {
+            alert("Venta Exitosa");
+            cerrarModalYSalir();
         }
+
+        const btnPrint = document.getElementById('btnImprimir');
+        if(btnPrint) btnPrint.onclick = () => generarBoletaHTML();
 
     } catch (error) {
         console.error(error);
-        alert("Error: " + error.message);
-        btn.disabled = false;
-        btn.innerText = textoOriginal;
+        // Mostramos el mensaje exacto que recuperamos
+        alert("⚠️ NO SE PUDO PROCESAR:\n" + error.message);
+        
+        if(btn) {
+            btn.disabled = false;
+            btn.innerText = textoOriginal;
+        }
     }
 }
 
