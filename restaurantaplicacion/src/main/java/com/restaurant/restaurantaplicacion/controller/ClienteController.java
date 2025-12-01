@@ -3,7 +3,8 @@ package com.restaurant.restaurantaplicacion.controller;
 import com.restaurant.restaurantaplicacion.dto.ClienteRequest;
 import com.restaurant.restaurantaplicacion.model.Cliente;
 import com.restaurant.restaurantaplicacion.model.AsignacionPension; 
-import com.restaurant.restaurantaplicacion.repository.AsignacionPensionRepository; 
+import com.restaurant.restaurantaplicacion.repository.AsignacionPensionRepository;
+import com.restaurant.restaurantaplicacion.repository.ClienteRepository;
 import com.restaurant.restaurantaplicacion.service.ClienteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,6 +28,9 @@ public class ClienteController {
     @Autowired
     private AsignacionPensionRepository asignacionRepo;
 
+    @Autowired
+    private ClienteRepository clienteRepository;
+
     // --- REGISTRAR CLIENTE ---
     @PostMapping
     public ResponseEntity<?> registrarCliente(@RequestBody ClienteRequest request) {
@@ -37,6 +41,12 @@ public class ClienteController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
+    // ClienteController.java
+        @PostMapping ("/simple")
+        public ResponseEntity<Cliente> crearCliente(@RequestBody Cliente cliente) {
+            Cliente nuevo = clienteRepository.save(cliente);
+            return ResponseEntity.ok(nuevo);
+        }
 
     // --- OBTENER TODOS LOS CLIENTES (Con filtro opcional) ---
     @GetMapping
@@ -81,4 +91,5 @@ public class ClienteController {
             return ResponseEntity.notFound().build(); 
         }
     }
+    
 }

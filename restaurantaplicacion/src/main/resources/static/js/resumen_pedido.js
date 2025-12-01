@@ -145,7 +145,13 @@ async function buscarClientePorDNI(dni) {
     const nombreClienteInput = document.getElementById('nombreCliente');
     const empresaClienteInput = document.getElementById('empresaCliente'); 
     
+    // 1. NUEVO: Obtenemos referencia al botón
+    const btnRegistrar = document.getElementById('btnRegistrarCliente'); 
+    
     nombreClienteInput.value = 'Buscando...'; 
+
+    // 2. NUEVO: Ocultamos el botón siempre al empezar a buscar (por si estaba visible antes)
+    if(btnRegistrar) btnRegistrar.style.display = 'none';
 
     if (dni.length !== 8) {
         nombreClienteInput.value = '';
@@ -158,17 +164,19 @@ async function buscarClientePorDNI(dni) {
         if (response.ok) {
             const data = await response.json();
             
-            // 1. Llenar nombre
-            nombreClienteInput.value = data.nombresApellidos; 
-            nombreClienteInput.style.color = "#ffffff"; // Color texto normal
+            // 3. NUEVO: Si encontramos al cliente, nos aseguramos que el botón siga oculto
+            if(btnRegistrar) btnRegistrar.style.display = 'none';
 
-            // 2. SI ES PENSIONADO: Mostrar Empresa y Saldo
+            // Llenar nombre
+            nombreClienteInput.value = data.nombresApellidos; 
+            nombreClienteInput.style.color = "#ffffff"; 
+
+            // SI ES PENSIONADO: Mostrar Empresa y Saldo
             if (data.esPensionado) {
                 empresaClienteInput.value = `${data.razonSocial} (Saldo: S/ ${data.saldoActual})`;
                 empresaClienteInput.style.display = "block"; 
-                empresaClienteInput.style.color = "#2ecc71"; // Verde
+                empresaClienteInput.style.color = "#2ecc71"; 
             } else {
-                // Si NO es pensionado, indicarlo o dejar vacío
                 empresaClienteInput.value = "Cliente Particular";
                 empresaClienteInput.style.display = "block";
                 empresaClienteInput.style.color = "#ffffff";
@@ -176,12 +184,76 @@ async function buscarClientePorDNI(dni) {
             
         } else if (response.status === 404) {
             nombreClienteInput.value = "Cliente no registrado";
-            nombreClienteInput.style.color = "#ef4444"; // Rojo
+            nombreClienteInput.style.color = "#ef4444"; 
             empresaClienteInput.value = "";
+            
+            // 4. NUEVO: Aquí es donde mostramos el botón para que pueda registrarlo
+            if(btnRegistrar) btnRegistrar.style.display = 'block'; 
         }
     } catch (error) {
         console.error(error);
         nombreClienteInput.value = "Error de conexión";
+    }
+}
+
+function abrirModalRegistro() {
+    // Obtener valores actuales de la búsqueda para pre-llenar el modal
+    const tipo = document.getElementById('tipoDocumento').value;
+    const numero = tipo === 'DNI' 
+        ? document.getElementById('numeroDocumentoDNI').value 
+        : document.getElementById('numeroDocumentoRUC').value;
+
+    document.getElementById('modalTipoDoc').value = tipo;
+    document.getElementById('modalNumeroDoc').value = numero;
+    document.getElementById('modalNombre').value = ""; // Limpiar nombre anterior
+
+    document.getElementById('modalRegistroCliente').style.display = 'flex';
+    document.getElementById('modalNombre').focus();
+}
+
+function cerrarModalRegistro() {
+    document.getElementById('modalRegistroCliente').style.display = 'none';
+}
+
+async function guardarClienteRapido() {
+    const tipo = document.getElementById('modalTipoDoc').value;
+    const numero = document.getElementById('modalNumeroDoc').value;
+    const nombre = document.getElementById('modalNombre').value;
+
+    if (!nombre.trim()) return alert("El nombre es obligatorio");
+
+    const nuevoCliente = {
+        tipoDocumento: tipo,
+        numeroDocumento: numero,
+        nombresApellidos: nombre// Asegúrate que este campo coincida con tu entidad Java (nombres o razonSocial)
+    };
+
+    try {
+        const response = await fetch('/api/clientes', { // Tu ruta POST de clientes
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(nuevoCliente)
+        });
+
+        if (response.ok) {
+            // ÉXITO
+            const clienteGuardado = await response.json();
+            alert("Cliente registrado correctamente");
+            
+            // Cerrar modal
+            cerrarModalRegistro();
+
+            // Actualizar la interfaz principal automáticamente
+            document.getElementById('nombreCliente').value = clienteGuardado.nombres;
+            document.getElementById('nombreCliente').style.color = "white";
+            document.getElementById('btnRegistrarCliente').style.display = 'none';
+
+        } else {
+            alert("Error al guardar cliente");
+        }
+    } catch (e) {
+        console.error(e);
+        alert("Error de conexión");
     }
 }
 
@@ -221,7 +293,22 @@ async function finalizarPedido() {
 
     if (!infoPedido || !infoPedido.pedidoId) return alert("Error: Falta información.");
     if (!detallePedido || detallePedido.length === 0) return alert("Pedido vacío.");
+            const tipoDocVal = document.getElementById('tipoDocumento').value;
+            const esDniVal = tipoDocVal === 'DNI';
+                
+                // 2. Leemos qué dice el campo de nombre actualmente
+                const nombreClienteTexto = esDniVal 
+                    ? document.getElementById('nombreCliente').value 
+                    : document.getElementById('empresaCliente').value;
 
+                // 3. Si dice "Cliente no registrado", está vacío o dice error, NO dejamos pasar
+                if (nombreClienteTexto === "Cliente no registrado" || 
+                    nombreClienteTexto === "Buscando..." || 
+                    nombreClienteTexto === "Error de conexión" ||
+                    nombreClienteTexto.trim() === "") {
+                    
+                    return alert("⚠️ ACCIÓN REQUERIDA:\nEl cliente no está registrado en el sistema.\n\nPor favor, haga clic en el botón 'Registrar' antes de finalizar la venta.");
+                }
     if (!confirm("¿Confirma finalizar la venta?")) return;
 
     const tipoDoc = document.getElementById('tipoDocumento').value;
@@ -344,5 +431,6 @@ function generarBoletaHTML() {
 function cerrarModalYSalir() {
     localStorage.removeItem('detallePedido');
     localStorage.removeItem('infoPedido');
-    window.location.href = 'gestionpedidos.html';
+    window.location.href = 'registrarpedido.html';
 }
+
