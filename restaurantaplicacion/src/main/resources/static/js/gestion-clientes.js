@@ -248,87 +248,25 @@ function limpiarCamposEmpresas() {
   document.getElementById("razonSocial").value = "";
 }
 
-// --- FUNCIONALIDAD PENSIONADOS ---
+// --- FUNCIÓN MODIFICADA: Ahora solo maneja el AJUSTE TOTAL (✏️) ---
+async function ajustarSaldo(asignacionId, tipo) {
+    if (tipo !== 1) { // Solo procesamos el tipo 1 (Edición/Establecer Saldo)
+        return; 
+    }
 
-// Función principal de búsqueda de pensionados
-async function buscarPensionado() {
-    const input = document.getElementById('buscarPensionado');
-    const ruc = input.value.trim();
-
-    // 1. Validación (11 dígitos numéricos)
-    const rucRegex = /^\d{11}$/;
-    if (!rucRegex.test(ruc)) {
-        alert("Datos incorrectos. Debe ingresar exactamente 11 dígitos numéricos (RUC).");
-        actualizarTablaPensionados([]);
+    let montoString = prompt(`Ingrese el NUEVO SALDO TOTAL:`);
+    
+    if (montoString === null || montoString.trim() === '') return;
+    
+    const montoTotal = parseFloat(montoString);
+    if (isNaN(montoTotal) || montoTotal < 0) {
+        alert("Monto inválido. Debe ser un número no negativo.");
         return;
     }
 
-    try {
-        // 2. Búsqueda por RUC (Endpoint: /api/asignaciones/buscar?ruc={ruc})
-        const urlBusqueda = `${API_ASIGNACIONES}/buscar?ruc=${ruc}`; 
-        
-        const response = await fetch(urlBusqueda);
-        const asignaciones = await response.json(); 
-
-        if (!response.ok) {
-            throw new Error(`Error en el servidor: ${response.status}`);
-        }
-        
-        if (asignaciones.length === 0) {
-             alert("RUC no registrada o no tiene pensionados asignados.");
-             actualizarTablaPensionados([]);
-             return;
-        }
-
-        // 4. Mostrar datos en la tabla
-        actualizarTablaPensionados(asignaciones);
-
-    } catch (error) {
-        console.error("Error buscando asignaciones:", error);
-        alert(`Error de red o servidor al buscar asignaciones: ${error.message}`);
-        actualizarTablaPensionados([]);
-    }
-}
-
-
-// MODIFICADO: Lógica para el botón (+). Ahora pide el SALDO TOTAL.
-async function ajustarSaldo(asignacionId, tipo) {
-    if (tipo === -1) {
-        // Lógica de resta (sin cambios, usa el endpoint /saldo)
-        let montoString = prompt(`Ingrese el MONTO A RESTAR (EGRESO) para la Asignación ID ${asignacionId}:`);
-        
-        if (montoString === null || montoString.trim() === '') return;
-        
-        const montoDelta = parseFloat(montoString);
-        if (isNaN(montoDelta) || montoDelta <= 0) {
-            alert("Monto inválido. Debe ser un número positivo.");
-            return;
-        }
-
-        const requestData = { montoAjuste: -montoDelta }; // Envía delta negativo
-        var endpointUrl = `${API_ASIGNACIONES}/${asignacionId}/saldo`;
-
-    } else if (tipo === 1) {
-        // LÓGICA DE EDICIÓN DIRECTA: Pide el nuevo saldo TOTAL (usa el endpoint /saldo-total)
-        let montoString = prompt(`Ingrese el NUEVO SALDO TOTAL`);
-        
-        if (montoString === null || montoString.trim() === '') return;
-        
-        const montoTotal = parseFloat(montoString);
-        if (isNaN(montoTotal) || montoTotal < 0) {
-            alert("Monto inválido. Debe ser un número no negativo.");
-            return;
-        }
-
-        // 💡 CRÍTICO: Envía el valor total como 'montoAjuste' al nuevo endpoint
-        var endpointUrl = `${API_ASIGNACIONES}/${asignacionId}/saldo-total`; 
-        var requestData = { montoAjuste: montoTotal }; 
-        
-    } else {
-        return; // Caso desconocido
-    }
+    const endpointUrl = `${API_ASIGNACIONES}/${asignacionId}/saldo-total`; 
+    const requestData = { montoAjuste: montoTotal }; 
     
-    // Ejecución de la petición PUT
     try {
         const response = await fetch(endpointUrl, {
             method: "PUT",
@@ -350,19 +288,19 @@ async function ajustarSaldo(asignacionId, tipo) {
     }
 }
 
-
-// Función para confirmar y ejecutar el DELETE
+// FUNCIÓN NUEVA: Confirma y ejecuta el DELETE de la asignación (Botón 🗑️)
 async function confirmarEliminarAsignacion(asignacionId) {
-    if (!confirm(`¿Está seguro de que desea ELIMINAR la Asignación?`)) {
+    if (!confirm(`¿Está seguro de que desea ELIMINAR la Asignación.`)) {
         return;
     }
     
     try {
+        // Llama al endpoint DELETE /api/asignaciones/{id}
         const response = await fetch(`${API_ASIGNACIONES}/${asignacionId}`, {
             method: "DELETE", 
         });
 
-        if (response.status === 204) {
+        if (response.status === 204) { // 204 No Content (Éxito en DELETE)
             alert(`Asignación eliminada exitosamente.`);
             await buscarPensionado();
         } else if (response.status === 404) {
@@ -378,7 +316,50 @@ async function confirmarEliminarAsignacion(asignacionId) {
     }
 }
 
-// Función auxiliar para dibujar la tabla de asignaciones
+
+// Función principal de búsqueda de pensionados (MODIFICADA: AHORA BUSCA POR DNI)
+async function buscarPensionado() {
+    const input = document.getElementById('buscarPensionado');
+    const dni = input.value.trim(); // Cambiado de 'ruc' a 'dni'
+
+    // 1. Validación (Ahora 8 dígitos numéricos para DNI)
+    const dniRegex = /^\d{8}$/; // DNI validation (asumiendo 8 dígitos)
+    if (!dniRegex.test(dni)) {
+        alert("Datos incorrectos. Debe ingresar exactamente 8 dígitos numéricos (DNI).");
+        actualizarTablaPensionados([]);
+        return;
+    }
+
+    try {
+        // 2. Búsqueda por DNI (Endpoint modificado: /api/asignaciones/buscar?dni={dni})
+        const urlBusqueda = `${API_ASIGNACIONES}/buscar?dni=${dni}`; 
+        
+        const response = await fetch(urlBusqueda);
+        const asignaciones = await response.json(); 
+
+        if (!response.ok) {
+            throw new Error(`Error en el servidor: ${response.status}`);
+        }
+        
+        // El resultado siempre será una lista de 0 o 1 asignación, ya que el DNI es único.
+        if (asignaciones.length === 0) {
+             alert(`Cliente con DNI ${dni} no encontrado o no tiene asignación de pensión.`); // Mensaje ajustado
+             actualizarTablaPensionados([]);
+             return;
+        }
+
+        // 4. Mostrar datos en la tabla
+        actualizarTablaPensionados(asignaciones);
+
+    } catch (error) {
+        console.error("Error buscando asignaciones:", error);
+        alert(`Error de red o servidor al buscar asignaciones: ${error.message}`);
+        actualizarTablaPensionados([]);
+    }
+}
+
+
+// Función auxiliar para dibujar la tabla de asignaciones (CON ICONOS ✏️ y 🗑️)
 function actualizarTablaPensionados(lista) {
     const tbody = document.querySelector("#tablaPensionados tbody");
     tbody.innerHTML = "";
@@ -399,9 +380,9 @@ function actualizarTablaPensionados(lista) {
                 <td>${clienteInfo}</td>
                 <td>${saldoFormateado}</td>
                 <td>
-                    <button class="icon-button" style="background-color: #2ecc71; color: white; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; margin-right: 5px; font-weight: bold;" onclick="ajustarSaldo(${asignacion.id}, 1)">+</button>
+                    <button class="icon-button" style="background-color: #2ecc71; color: white; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; margin-right: 5px; font-weight: bold;" onclick="ajustarSaldo(${asignacion.id}, 1)">✏️</button>
                     
-                    <button class="icon-button" style="background-color: #e74c3c; color: white; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-weight: bold;" onclick="ajustarSaldo(${asignacion.id}, -1)">-</button>
+                    <button class="icon-button" style="background-color: #e74c3c; color: white; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-weight: bold;" onclick="confirmarEliminarAsignacion(${asignacion.id})">🗑️</button>
                 </td>
             </tr>
         `;
