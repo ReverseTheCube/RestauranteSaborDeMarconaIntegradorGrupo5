@@ -390,7 +390,19 @@ function actualizarTablaPensionados(lista) {
     });
 }
 
-// --- FUNCIÓN ATRÁS ---
 function retroceder() {
-  window.location.href = 'admin.html';
+    // 1. Recuperamos el rol guardado en el Login
+    const rolUsuario = localStorage.getItem('usuarioRol');
+
+    // 2. Decidimos a dónde ir según el rol
+    if (rolUsuario === 'ADMINISTRADOR') {
+        window.location.href = '/admin.html';
+    } else if (rolUsuario === 'CAJERO') {
+        window.location.href = '/cajero.html';
+    } else {
+        // Por si acaso no hay rol o es otro, lo mandamos al login
+        // o a una página por defecto segura.
+        console.warn("Rol no reconocido o no logueado, redirigiendo al inicio.");
+        window.location.href = '/'; 
+    }
 }
