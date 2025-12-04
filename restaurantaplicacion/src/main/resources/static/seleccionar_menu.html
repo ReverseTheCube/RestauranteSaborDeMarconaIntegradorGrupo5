@@ -1,30 +1,141 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Pantalla · Selección de Pedido</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/pedidos.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selección de Pedido</title>
+    
+    <!-- 1. IMPORTANTE: Usamos tu estilo global -->
+    <link rel="stylesheet" href="/css/global.css">
+    <!-- FontAwesome para los iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
+    <style>
+        /* --- ESTILOS PARA LOS PLATOS (GENERADOS POR TU JS) --- */
+        /* Esto asegura que lo que tu JS inyecta se vea bonito y oscuro */
+
+        /* El contenedor de la lista */
+        #menu {
+            max-height: 60vh; /* Altura máxima con scroll */
+            overflow-y: auto;
+            padding-right: 5px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* Cada tarjeta de plato (div generado por JS) */
+        #menu > div {
+            background-color: var(--bg-input);
+            border: 1px solid var(--secondary);
+            border-radius: var(--radius);
+            padding: 15px;
+            display: flex;
+            justify-content: space-between; /* Texto a la izq, botones a la der */
+            align-items: center;
+            transition: border-color 0.3s;
+        }
+
+        #menu > div:hover {
+            border-color: var(--primary); /* Naranja al pasar el mouse */
+        }
+
+        /* Textos dentro del plato */
+        #menu > div h3, 
+        #menu > div h4, 
+        #menu > div strong {
+            color: var(--text-main);
+            margin: 0;
+            font-size: 1.1rem;
+        }
+        
+        #menu > div span {
+            color: var(--primary); /* Precio en naranja */
+            font-weight: bold;
+        }
+
+        /* Botones de cantidad (+ y -) */
+        #menu button {
+            background-color: var(--secondary);
+            color: white;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%; /* Redondos */
+            font-weight: bold;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 5px;
+            transition: background 0.2s;
+        }
+
+        #menu button:hover {
+            background-color: var(--primary);
+            color: #000;
+        }
+
+        /* Input de cantidad */
+        #menu input[type="number"] {
+            width: 50px !important;
+            text-align: center;
+            background: transparent;
+            border: 1px solid var(--secondary);
+            border-radius: 4px;
+            color: white;
+            font-weight: bold;
+            padding: 5px;
+        }
+
+        /* Scrollbar personalizado */
+        #menu::-webkit-scrollbar { width: 8px; }
+        #menu::-webkit-scrollbar-thumb { background: var(--secondary); border-radius: 4px; }
+        #menu::-webkit-scrollbar-track { background: var(--bg-card); }
+    </style>
 </head>
 <body>
-  <main class="stage stage-flex" role="main">
-    <div class="topbar">
-      <h1 class="title-mesa" id="mesa-titulo">Selecciona el pedido</h1> 
-      <button class="back back-mesa" onclick="window.location.href = 'Local_mesa.html';" aria-label="Volver">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
-      </button>
-    </div>
-    <h2 class="title-mesa" style="font-size: 18px; opacity: 0.9;">Platos</h2>
-    <div class="scroll-container" id="menu">
-    </div>
 
-    <button class="confirm-btn" onclick="confirmarPedido()">Confirmar</button>
-  </main>
+    <!-- 2. ESTRUCTURA: Usamos card-container para el fondo azul y bordes -->
+    <div class="card-container" style="max-width: 800px; height: 90vh; display: flex; flex-direction: column;">
+        
+        <!-- CABECERA -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid var(--secondary); padding-bottom: 15px;">
+            <div>
+                <h2 class="page-title" style="text-align: left; margin: 0; font-size: 1.8rem;">Selecciona el pedido</h2>
+                
+                <!-- ID MANTENIDO: Aquí tu JS pondrá "Mesa X" -->
+                <p id="mesa-titulo" style="color: var(--primary); margin: 0; font-weight: bold; font-size: 1.1rem;">Cargando mesa...</p>
+            </div>
+            
+            <!-- Botón Volver (Estilo global) -->
+            <button class="btn btn-secondary" onclick="window.location.href = 'Local_mesa.html';" aria-label="Volver">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+        </div>
 
-  <script src="/js/seleccionar-menu.js"></script>
+        <h3 style="color: var(--text-muted); margin-bottom: 15px; font-size: 1rem;">Carta disponible</h3>
+
+        <!-- 3. CONTENEDOR DEL MENÚ (ID MANTENIDO) -->
+        <!-- Tu JS inyectará aquí los platos. El CSS de arriba se encargará de que se vean bien. -->
+        <div id="menu">
+            <p style="text-align: center; color: var(--text-muted);">Cargando platos...</p>
+        </div>
+
+        <!-- 4. BARRA INFERIOR -->
+        <div style="margin-top: auto; padding-top: 20px; border-top: 2px solid var(--secondary); display: flex; justify-content: flex-end;">
+            <!-- Función confirmarPedido() MANTENIDA -->
+            <button class="btn btn-success" style="width: 100%; max-width: 250px; font-size: 1.2rem;" onclick="confirmarPedido()">
+                Confirmar <i class="fas fa-check" style="margin-left: 10px;"></i>
+            </button>
+        </div>
+
+    </div>
+
+    <!-- TU SCRIPT ORIGINAL (No cambiamos nada aquí) -->
+    <script src="/js/seleccionar-menu.js"></script>
+
 </body>
 </html>

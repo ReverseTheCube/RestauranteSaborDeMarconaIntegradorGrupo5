@@ -1,86 +1,167 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Pantalla · Selección de mesa</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/pedidos.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selección de Mesa</title>
+    
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        /* Estilo base de la tarjeta */
+        .table-card {
+            background-color: var(--bg-input);
+            border: 2px solid var(--secondary);
+            border-radius: var(--radius);
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 140px; 
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .table-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 5px 15px rgba(255, 155, 26, 0.2);
+        }
+
+        /* --- ESTILO PARA TU IMAGEN DE MESA --- */
+        .table-img {
+            width: 64px; 
+            height: auto;
+            margin-bottom: 10px;
+            transition: transform 0.3s;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+
+        .table-card:hover .table-img {
+            transform: scale(1.1); 
+        }
+
+        /* Texto */
+        .table-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .table-status {
+            font-size: 0.8rem;
+            margin-top: 5px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.1);
+        }
+
+        /* --- COLORES DE ESTADO --- */
+        
+        /* Ocupada Ajena (Rojo) */
+        .table-card.ocupada-ajena {
+            border-color: var(--danger);
+            background-color: rgba(231, 76, 60, 0.1);
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        .table-card.ocupada-ajena .table-status { background-color: var(--danger); color: white; }
+
+        /* Tu Pedido (Verde) */
+        .table-card.mi-mesa {
+            border-color: var(--success);
+            background-color: rgba(46, 204, 113, 0.1);
+            box-shadow: 0 0 10px rgba(46, 204, 113, 0.3);
+        }
+        .table-card.mi-mesa .table-status { background-color: var(--success); color: white; }
+
+        /* En Caja (Plomo) */
+        .table-card.en-caja {
+            border-color: #95a5a6;
+            border-style: dashed;
+            background-color: rgba(149, 165, 166, 0.1);
+        }
+        .table-card.en-caja .table-status { background-color: #7f8c8d; color: white; }
+        .table-card.en-caja .table-img { filter: grayscale(100%); } 
+
+        .table-card.selected {
+            background-color: var(--primary);
+            border-color: var(--primary-hover);
+        }
+        .table-card.selected * { color: #000 !important; }
+    </style>
 </head>
 <body>
 
-  <main class="stage stage-flex" role="main">
-    <div class="topbar">
-      <h1 class="title title-mesa">Selecciona N° de Mesa</h1>
+    <div class="card-container">
+        
+        <h2 class="page-title">Salón Principal</h2>
+        <p class="page-subtitle">Seleccione una mesa para continuar</p>
 
-      <button class="back back-mesa" aria-label="Volver" onclick="window.location.href = 'registrarpedido.html';">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
-      </button>
+        <div class="grid-menu" id="contenedor-mesas">
+            
+            <div class="table-card" onclick="selectMesa(this)" data-mesa="1">
+                <img src="/complementos/imagenes/mesa.png" alt="Mesa" class="table-img">
+                <span class="table-title">Mesa 1</span>
+                <span class="table-status badge">LIBRE</span>
+            </div>
+
+            <div class="table-card" onclick="selectMesa(this)" data-mesa="2">
+                <img src="/complementos/imagenes/mesa.png" alt="Mesa" class="table-img">
+                <span class="table-title">Mesa 2</span>
+                <span class="table-status badge">LIBRE</span>
+            </div>
+
+            <div class="table-card" onclick="selectMesa(this)" data-mesa="3">
+                <img src="/complementos/imagenes/mesa.png" alt="Mesa" class="table-img">
+                <span class="table-title">Mesa 3</span>
+                <span class="table-status badge">LIBRE</span>
+            </div>
+
+            <div class="table-card" onclick="selectMesa(this)" data-mesa="4">
+                <img src="/complementos/imagenes/mesa.png" alt="Mesa" class="table-img">
+                <span class="table-title">Mesa 4</span>
+                <span class="table-status badge">LIBRE</span>
+            </div>
+
+            <div class="table-card" onclick="selectMesa(this)" data-mesa="5">
+                <img src="/complementos/imagenes/mesa.png" alt="Mesa" class="table-img">
+                <span class="table-title">Mesa 5</span>
+                <span class="table-status badge">LIBRE</span>
+            </div>
+
+            <div class="table-card" onclick="selectMesa(this)" data-mesa="6">
+                <img src="/complementos/imagenes/mesa.png" alt="Mesa" class="table-img">
+                <span class="table-title">Mesa 6</span>
+                <span class="table-status badge">LIBRE</span>
+            </div>
+
+            <div class="table-card" onclick="selectMesa(this)" data-mesa="7">
+                <img src="/complementos/imagenes/mesa.png" alt="Mesa" class="table-img">
+                <span class="table-title">Mesa 7</span>
+                <span class="table-status badge">LIBRE</span>
+            </div>
+
+            <div class="table-card" onclick="selectMesa(this)" data-mesa="8">
+                <img src="/complementos/imagenes/mesa.png" alt="Mesa" class="table-img">
+                <span class="table-title">Mesa 8</span>
+                <span class="table-status badge">LIBRE</span>
+            </div>
+
+        </div>
+
+        <div class="actions-container">
+            <button class="btn btn-danger" onclick="window.location.href='registrarpedido.html'">
+                <i class="fas fa-arrow-left"></i> Volver
+            </button>
+        </div>
+
     </div>
 
-    <section class="grid" id="grid">
+    <script src="/js/mesa-selector.js"></script> 
 
-      <button class="table-card" data-mesa="1" onclick="selectMesa(this)">
-        <span class="badge">Mesa N° 1</span>
-        <div class="icon" aria-hidden="true">
-          <img src="/complementos/imagenes/mesa_1.png" alt="Mesa N° 1" />
-        </div>
-      </button>
-
-      <button class="table-card" data-mesa="2" onclick="selectMesa(this)">
-        <span class="badge">Mesa N° 2</span>
-        <div class="icon" aria-hidden="true">
-          <img src="/complementos/imagenes/mesa_1.png" alt="Mesa N° 2" />
-        </div>
-      </button>
-      <button class="table-card" data-mesa="3" onclick="selectMesa(this)">
-        <span class="badge">Mesa N° 3</span>
-        <div class="icon" aria-hidden="true">
-          <img src="/complementos/imagenes/mesa_1.png" alt="Mesa N° 3" />
-        </div>
-      </button>
-      <button class="table-card" data-mesa="4" onclick="selectMesa(this)">
-        <span class="badge">Mesa N° 4</span>
-        <div class="icon" aria-hidden="true">
-          <img src="/complementos/imagenes/mesa_1.png" alt="Mesa N° 4" />
-        </div>
-      </button>
-      <button class="table-card" data-mesa="5" onclick="selectMesa(this)">
-        <span class="badge">Mesa N° 5</span>
-        <div class="icon" aria-hidden="true">
-          <img src="/complementos/imagenes/mesa_1.png" alt="Mesa N° 5" />
-        </div>
-      </button>
-      <button class="table-card" data-mesa="6" onclick="selectMesa(this)">
-        <span class="badge">Mesa N° 6</span>
-        <div class="icon" aria-hidden="true">
-          <img src="/complementos/imagenes/mesa_1.png" alt="Mesa N° 6" />
-        </div>
-      </button>
-      <button class="table-card" data-mesa="7" onclick="selectMesa(this)">
-        <span class="badge">Mesa N° 7</span>
-        <div class="icon" aria-hidden="true">
-          <img src="/complementos/imagenes/mesa_1.png" alt="Mesa N° 7" />
-        </div>
-      </button>
-      <button class="table-card" data-mesa="8" onclick="selectMesa(this)">
-        <span class="badge">Mesa N° 8</span>
-        <div class="icon" aria-hidden="true">
-          <img src="/complementos/imagenes/mesa_1.png" alt="Mesa N° 8" />
-        </div>
-      </button>
-      <button class="table-card" data-mesa="9" onclick="selectMesa(this)">
-        <span class="badge">Mesa N° 9</span>
-        <div class="icon" aria-hidden="true">
-          <img src="/complementos/imagenes/mesa_1.png" alt="Mesa N° 9" />
-        </div>
-      </button>
-    </section>
-  </main>
-
-  <script src="/js/mesa-selector.js"></script>
 </body>
 </html>
-
