@@ -9,9 +9,12 @@ document.addEventListener('DOMContentLoaded', () => {
     cargarFiltrosDinamicos();
     
     // Configurar cierre del modal al hacer clic fuera
-    document.getElementById('downloadModal').addEventListener('click', function(e) {
-        if (e.target === this) cerrarModal();
-    });
+    const modal = document.getElementById('downloadModal');
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) cerrarModal();
+        });
+    }
 });
 
 function establecerFechasPorDefecto() {
@@ -20,8 +23,11 @@ function establecerFechasPorDefecto() {
     hace7Dias.setDate(hoy.getDate() - 7);
     
     // Formato YYYY-MM-DD
-    document.getElementById('fechaDesde').value = hace7Dias.toISOString().split('T')[0];
-    document.getElementById('fechaHasta').value = hoy.toISOString().split('T')[0];
+    const fDesde = document.getElementById('fechaDesde');
+    const fHasta = document.getElementById('fechaHasta');
+    
+    if (fDesde) fDesde.value = hace7Dias.toISOString().split('T')[0];
+    if (fHasta) fHasta.value = hoy.toISOString().split('T')[0];
 }
 
 async function cargarFiltrosDinamicos() {
@@ -31,24 +37,31 @@ async function cargarFiltrosDinamicos() {
         if (respEmp.ok) {
             const empresas = await respEmp.json();
             const selectEmp = document.getElementById('empresa');
-            empresas.forEach(e => {
-                const opt = document.createElement('option');
-                opt.value = e.ruc;
-                opt.textContent = e.razonSocial;
-                selectEmp.appendChild(opt);
-            });
+            // Limpiar opciones previas excepto la primera
+            if (selectEmp) {
+                selectEmp.innerHTML = '<option value="">Seleccionar</option>';
+                empresas.forEach(e => {
+                    const opt = document.createElement('option');
+                    opt.value = e.ruc;
+                    opt.textContent = e.razonSocial;
+                    selectEmp.appendChild(opt);
+                });
+            }
         }
         // Clientes
         const respCli = await fetch(API_CLIENTES);
         if (respCli.ok) {
             const clientes = await respCli.json();
             const selectCli = document.getElementById('cliente');
-            clientes.forEach(c => {
-                const opt = document.createElement('option');
-                opt.value = c.id;
-                opt.textContent = c.nombresApellidos;
-                selectCli.appendChild(opt);
-            });
+            if (selectCli) {
+                selectCli.innerHTML = '<option value="">Seleccionar</option>';
+                clientes.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c.id;
+                    opt.textContent = c.nombresApellidos;
+                    selectCli.appendChild(opt);
+                });
+            }
         }
     } catch (error) {
         console.error("Error filtros:", error);
@@ -58,9 +71,13 @@ async function cargarFiltrosDinamicos() {
 // --- BUSCAR ---
 async function buscar() {
     const btn = document.querySelector('.action-button.search');
-    const textoOriginal = btn.textContent;
-    btn.disabled = true;
-    btn.textContent = "Buscando...";
+    let textoOriginal = "Buscar";
+    
+    if (btn) {
+        textoOriginal = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = "Buscando...";
+    }
 
     const params = new URLSearchParams();
     
@@ -114,15 +131,24 @@ async function buscar() {
         }
 
         // Mostrar panel resultados
-        document.getElementById('resultadosSection').style.display = 'block';
+        const resultadosSection = document.getElementById('resultadosSection');
+        if (resultadosSection) resultadosSection.style.display = 'block';
+        
         document.getElementById('numRegistros').textContent = pedidos.length;
         document.getElementById('rangoFechas').textContent = `${fDesde} al ${fHasta}`;
+        
+        // Hacer scroll hacia los resultados
+        if (resultadosSection) {
+            resultadosSection.scrollIntoView({ behavior: 'smooth' });
+        }
 
     } catch (error) {
         alert("Error: " + error.message);
     } finally {
-        btn.disabled = false;
-        btn.textContent = textoOriginal;
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = textoOriginal;
+        }
     }
 }
 
@@ -132,7 +158,10 @@ function limpiarFiltros() {
     document.getElementById('local').value = "";
     document.getElementById('delivery').value = "";
     establecerFechasPorDefecto();
-    document.getElementById('resultadosSection').style.display = 'none';
+    
+    // Ocultar la sección de resultados al limpiar
+    const resultadosSection = document.getElementById('resultadosSection');
+    if (resultadosSection) resultadosSection.style.display = 'none';
 }
 
 function volverAtras() {
@@ -146,8 +175,12 @@ function mostrarOpcionesDescarga() {
     // Reiniciar estado
     formatoSeleccionado = null;
     document.querySelectorAll('.download-option').forEach(el => el.classList.remove('selected'));
-    document.getElementById('watermarkOption').style.display = 'none';
-    document.getElementById('btnDescargar').disabled = true;
+    
+    const watermarkOption = document.getElementById('watermarkOption');
+    if (watermarkOption) watermarkOption.style.display = 'none';
+    
+    const btnDescargar = document.getElementById('btnDescargar');
+    if (btnDescargar) btnDescargar.disabled = true;
     
     // Mostrar modal
     document.getElementById('downloadModal').style.display = 'flex';
@@ -162,18 +195,23 @@ function seleccionarFormato(fmt) {
     
     // Estilos visuales de selección
     document.querySelectorAll('.download-option').forEach(el => el.classList.remove('selected'));
-    // El evento click viene del div .download-option
-    // Nota: en el HTML asegúrate de pasar 'pdf' o 'excel' como string
-    // y que el onclick sea onclick="seleccionarFormato('pdf')" etc.
     
-    // Truco para resaltar el div clickeado:
+    // Resaltar el div clickeado (buscando por el onclick en el HTML o por índice si es consistente)
+    // Nota: Esta lógica asume el orden del HTML. 
     const options = document.querySelectorAll('.download-option');
-    if(fmt === 'pdf') options[0].classList.add('selected');
-    if(fmt === 'excel') options[1].classList.add('selected');
+    if (options.length >= 2) {
+        if(fmt === 'pdf') options[0].classList.add('selected');
+        if(fmt === 'excel') options[1].classList.add('selected');
+    }
 
     // Mostrar opción marca de agua solo para PDF
-    document.getElementById('watermarkOption').style.display = (fmt === 'pdf') ? 'flex' : 'none';
-    document.getElementById('btnDescargar').disabled = false;
+    const watermarkOption = document.getElementById('watermarkOption');
+    if (watermarkOption) {
+        watermarkOption.style.display = (fmt === 'pdf') ? 'flex' : 'none';
+    }
+    
+    const btnDescargar = document.getElementById('btnDescargar');
+    if (btnDescargar) btnDescargar.disabled = false;
 }
 
 function descargarResultados() {
@@ -203,7 +241,6 @@ function descargarResultados() {
     params.append('formato', formatoSeleccionado);
 
     // 3. Iniciar descarga directa
-    // Usamos window.location.href para que el navegador maneje la descarga del archivo
     const urlDescarga = `/api/reportes/busqueda/descargar?${params.toString()}`;
     
     console.log("Descargando desde:", urlDescarga);
@@ -211,4 +248,20 @@ function descargarResultados() {
 
     // Cerrar modal
     cerrarModal();
+}
+
+// --- FUNCIÓN NUEVA BÚSQUEDA ---
+// Esta función resetea la pantalla: oculta resultados y limpia filtros
+function nuevaBusqueda() {
+    // 1. Ocultar la sección de resultados
+    const resultadosSection = document.getElementById('resultadosSection');
+    if (resultadosSection) {
+        resultadosSection.style.display = 'none';
+    }
+
+    // 2. Limpiar los filtros para una nueva consulta
+    limpiarFiltros();
+
+    // 3. Subir el scroll al inicio para ver los filtros limpios
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
