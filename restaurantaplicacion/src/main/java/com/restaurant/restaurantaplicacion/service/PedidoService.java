@@ -27,9 +27,15 @@ public class PedidoService {
     @Autowired private ClienteRepository clienteRepository;
     @Autowired private EmpresaRepository empresaRepository;
     @Autowired private AsignacionPensionRepository asignacionPensionRepository;
-
+    @Autowired private MesaRepository mesaRepository;   
+    
     public List<Pedido> obtenerTodosLosPedidos() {
         return pedidoRepository.findAll();
+    }
+
+    // --- Search by ID (New) ---
+    public Optional<Pedido> findById(Long id) {
+        return pedidoRepository.findById(id);
     }
 
     @Transactional
@@ -39,6 +45,7 @@ public class PedidoService {
 
         if ("LOCAL".equals(tipoServicio) && numeroMesa != null) {
             String mesaStr = String.valueOf(numeroMesa);
+            // Searches for PENDING orders to avoid duplication
             Optional<Pedido> pedidoExistente = pedidoRepository
                 .findByInfoServicioAndEstadoAndTipoServicio(mesaStr, EstadoPedido.PENDIENTE, "LOCAL");
             
@@ -70,106 +77,147 @@ public class PedidoService {
             request.getUsuarioId());
     }
 
-    // --- AQUÍ ESTÁ LA MAGIA DEL TOTAL ---
-
-    // 2. ACTUALIZA EL MÉTODO finalizarPeddo
-    @Transactional
+@Transactional
     public Pedido finalizarPedido(Long pedidoId, FinalizarPedidoRequest request) {
         Pedido pedido = pedidoRepository.findById(pedidoId)
                 .orElseThrow(() -> new RuntimeException("Pedido no encontrado: " + pedidoId));
 
-        // Calcular Total del Pedido
+        // 1. Limpieza de Datos
+        String rol = request.getRolUsuario();
+        if (rol != null) rol = rol.trim().toUpperCase();
+        
+        String numDoc = request.getNumeroDocumento();
+        if (numDoc != null) numDoc = numDoc.trim();
+
+        System.out.println(">>> INICIO FINALIZAR PEDIDO #" + pedidoId);
+        System.out.println(">>> ROL: " + rol);
+        System.out.println(">>> CLIENTE DOC: " + numDoc);
+
+        // 2. Calcular Total
         double total = 0.0;
         List<PedidoPlato> detalles = new ArrayList<>();
-        
         if (request.getDetallePlatos() != null) {
             for (PedidoPlatoRequest item : request.getDetallePlatos()) {
-                Plato plato = platoRepository.findById(item.getPlatoId())
-                        .orElseThrow(() -> new RuntimeException("Plato no encontrado ID: " + item.getPlatoId()));
-
+                Plato plato = platoRepository.findById(item.getPlatoId()).orElseThrow();
                 PedidoPlato detalle = new PedidoPlato();
-                detalle.setPedido(pedido);
-                detalle.setPlato(plato);
-                detalle.setCantidad(item.getCantidad());
-                detalle.setPrecioUnitario(plato.getPrecio());
-                
+                detalle.setPedido(pedido); detalle.setPlato(plato);
+                detalle.setCantidad(item.getCantidad()); detalle.setPrecioUnitario(plato.getPrecio());
                 detalles.add(detalle);
                 total += (plato.getPrecio() * item.getCantidad());
             }
         }
-        
-        // --- LÓGICA DE PENSIONADO (DESCUENTO DE SALDO) ---
-        // Si el pedido tiene un DNI asociado, verificamos si es pensionado
-        if (request.getNumeroDocumento() != null && !request.getNumeroDocumento().isEmpty()) {
-            
-            // 1. Asignar Cliente al Pedido
-            Cliente cliente = clienteRepository.findByNumeroDocumento(request.getNumeroDocumento()).orElse(null);
-            pedido.setCliente(cliente);
-
-            // 2. Buscar si tiene Asignación (Pensión)
-            Optional<AsignacionPension> asignacionOpt = asignacionPensionRepository
-                    .findByClienteNumeroDocumento(request.getNumeroDocumento());
-
-            if (asignacionOpt.isPresent()) {
-                AsignacionPension asignacion = asignacionOpt.get();
-                
-                // Asignar la empresa automáticamente
-                pedido.setEmpresa(asignacion.getEmpresa());
-
-                // VERIFICAR SALDO
-                if (asignacion.getSaldo() >= total) {
-                    // DESCONTAR SALDO
-                    double nuevoSaldo = asignacion.getSaldo() - total;
-                    asignacion.setSaldo(nuevoSaldo);
-                    asignacionPensionRepository.save(asignacion); // Guardar nuevo saldo
-                    System.out.println("Cobro a pensionado exitoso. Nuevo saldo: " + nuevoSaldo);
-                } else {
-                throw new RuntimeException("Saldo insuficiente. Su saldo es S/ " + asignacion.getSaldo() + " y el pedido es S/ " + total);                }
-            }
-        }
-        // ------------------------------------------------
-
         pedido.setDetallePlatos(detalles);
         pedido.setTotal(total);
-        pedido.setEstado(EstadoPedido.PAGADO);
+        System.out.println(">>> TOTAL CALCULADO: S/ " + total);
+
+        // Asignar Cliente al Pedido
+        if (numDoc != null && !numDoc.isEmpty()) {
+             pedido.setCliente(clienteRepository.findByNumeroDocumento(numDoc).orElse(null));
+        }
+
+        // --- CASO MESERO ---
+        if ("MESERO".equals(rol)) {
+            pedido.setEstado(EstadoPedido.POR_PAGAR);
+            return pedidoRepository.save(pedido); 
+        }
+
+        // --- CASO CAJERO ---
+        if ("CAJERO".equals(rol) || "ADMINISTRADOR".equals(rol)) {
+            
+            // LÓGICA DE COBRO (Aquí está el problema, vamos a ver qué pasa)
+            if (numDoc != null && !numDoc.isEmpty()) {
+                System.out.println(">>> Buscando si el DNI " + numDoc + " es pensionado...");
+                
+                Optional<AsignacionPension> asignacionOpt = asignacionPensionRepository
+                        .findByClienteNumeroDocumento(numDoc);
+
+                if (asignacionOpt.isPresent()) {
+                    AsignacionPension asignacion = asignacionOpt.get();
+                    System.out.println(">>> ¡ES PENSIONADO! Saldo Actual: S/ " + asignacion.getSaldo());
+                    
+                    // Asignamos la empresa para el registro
+                    pedido.setEmpresa(asignacion.getEmpresa());
+
+                    if (asignacion.getSaldo() >= total) {
+                        double saldoAnterior = asignacion.getSaldo();
+                        double nuevoSaldo = saldoAnterior - total;
+                        
+                        asignacion.setSaldo(nuevoSaldo);
+                        asignacionPensionRepository.save(asignacion); // <--- AQUÍ SE GUARDA LA RESTA
+                        
+                        System.out.println(">>> ✅ RESTA EXITOSA. Antes: " + saldoAnterior + " | Ahora: " + nuevoSaldo);
+                    } else {
+                        System.out.println(">>> ❌ ERROR: Saldo insuficiente.");
+                        throw new RuntimeException("Saldo insuficiente. Su saldo es S/ " + asignacion.getSaldo() + " y el pedido es S/ " + total);
+                    }
+                } else {
+                    System.out.println(">>> ⚠️ AVISO: El cliente existe pero NO tiene asignación de pensión activa.");
+                }
+            } else {
+                System.out.println(">>> ℹ️ No hay documento de cliente, se cobra como anónimo.");
+            }
+
+            // Finalizar y Liberar
+            pedido.setEstado(EstadoPedido.PAGADO);
+            Pedido pedidoGuardado = pedidoRepository.save(pedido);
+
+            if ("LOCAL".equals(pedido.getTipoServicio()) && pedido.getInfoServicio() != null) {
+                try {
+                    Long mesaId = Long.parseLong(pedido.getInfoServicio());
+                    Optional<Mesa> mesaOpt = mesaRepository.findById(mesaId);
+                    if (mesaOpt.isPresent()) {
+                        Mesa mesa = mesaOpt.get();
+                        mesa.setEstado(EstadoMesa.LIBRE);
+                        mesaRepository.save(mesa);
+                        System.out.println(">>> MESA LIBERADA.");
+                    }
+                } catch (Exception e) {}
+            }
+            return pedidoGuardado;
+        }
 
         return pedidoRepository.save(pedido);
     }
 
+    // --- FOR TABLE MAP (SEMAPHORE) ---
     public List<Map<String, Object>> obtenerMesasOcupadas() {
+        // Ensure PedidoRepository returns 3 columns in the query
         List<Object[]> resultados = pedidoRepository.findMesasOcupadasConUsuario();
         List<Map<String, Object>> lista = new ArrayList<>();
+        
         for (Object[] fila : resultados) {
             Map<String, Object> mapa = new HashMap<>();
-            mapa.put("mesa", fila[0]);      
-            mapa.put("usuarioId", fila[1]); 
+            mapa.put("mesa", fila[0]);      // Column 0: InfoService (Table Number)
+            mapa.put("usuarioId", fila[1]); // Column 1: User ID
+            
+            // Check if status column exists (index 2)
+            if (fila.length > 2) {
+                mapa.put("estado", fila[2]); // Column 2: Status
+            } else {
+                mapa.put("estado", "PENDIENTE"); 
+            }
+            
             lista.add(mapa);
         }
         return lista;
     }
 
-// --- LÓGICA DE BÚSQUEDA AVANZADA ---
-   public List<Pedido> buscarPedidosAvanzado(LocalDate fechaDesde, LocalDate fechaHasta, Long clienteId, String rucEmpresa, String mesa, String deliveryCode) {
-        
-        // 1. Ajustar Fechas (Inicio del día 00:00 -> Fin del día 23:59)
+    // --- ADVANCED SEARCH ---
+    public List<Pedido> buscarPedidosAvanzado(LocalDate fechaDesde, LocalDate fechaHasta, Long clienteId, String rucEmpresa, String mesa, String deliveryCode) {
         LocalDateTime inicio = (fechaDesde != null) ? fechaDesde.atStartOfDay() : null;
         LocalDateTime fin = (fechaHasta != null) ? fechaHasta.atTime(23, 59, 59) : null;
 
-        // 2. Limpiar Strings vacíos (Convertir "" a null)
         if (rucEmpresa != null && rucEmpresa.trim().isEmpty()) rucEmpresa = null;
         if (mesa != null && mesa.trim().isEmpty()) mesa = null;
         if (deliveryCode != null && deliveryCode.trim().isEmpty()) deliveryCode = null;
 
-        // 3. Unificar info de servicio
         String infoServicio = null;
         if (mesa != null) {
-            // Si viene "mesa1", guardamos "1"
             infoServicio = mesa.replace("mesa", "").trim(); 
         } else if (deliveryCode != null) {
             infoServicio = deliveryCode.trim();
         }
 
-        // 4. Ejecutar consulta
         return pedidoRepository.buscarPedidosConFiltros(inicio, fin, clienteId, rucEmpresa, infoServicio);
     }
 }

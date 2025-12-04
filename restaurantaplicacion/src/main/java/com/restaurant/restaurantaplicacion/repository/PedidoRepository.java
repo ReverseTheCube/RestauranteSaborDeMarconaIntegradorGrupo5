@@ -17,23 +17,28 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
     // Para Reportes (Ya existente)
     List<Pedido> findAllByFechaHoraBetween(LocalDateTime fechaInicio, LocalDateTime fechaFin);
 
-    // Para Mesas (Ya existente)
-    @Query("SELECT p.infoServicio, p.usuario.id FROM Pedido p WHERE p.estado = 'PENDIENTE' AND p.tipoServicio = 'LOCAL'")
+    // --- CORRECCIÓN AQUÍ (Línea clave) ---
+    // Antes: p.estado = 'PENDIENTE'
+    // Ahora: p.estado IN ('PENDIENTE', 'POR_PAGAR')
+    @Query("SELECT p.infoServicio, p.usuario.id, p.estado FROM Pedido p WHERE p.tipoServicio = 'LOCAL' AND p.estado IN ('PENDIENTE', 'POR_PAGAR')")
     List<Object[]> findMesasOcupadasConUsuario();
+    // -------------------------------------
 
+    // Este método busca por un estado específico, sirve para "Iniciar Pedido" (buscar si ya existe uno abierto)
+    // Si quieres que el mesero pueda agregar platos a un pedido que ya envió a caja, 
+    // tendrías que cambiar esto también, pero para visualizar mesas ocupadas, con la corrección de arriba basta.
     Optional<Pedido> findByInfoServicioAndEstadoAndTipoServicio(String infoServicio, EstadoPedido estado, String tipoServicio);
 
-    // --- NUEVA CONSULTA MAESTRA PARA BÚSQUEDA ---
-    // Usa LEFT JOIN para no perder pedidos sin cliente/empresa
+    // --- CONSULTA MAESTRA PARA BÚSQUEDA ---
     @Query("SELECT p FROM Pedido p " +
-           "LEFT JOIN p.cliente c " +
-           "LEFT JOIN p.empresa e " +
-           "WHERE " +
-           "(:fechaInicio IS NULL OR p.fechaHora >= :fechaInicio) AND " +
-           "(:fechaFin IS NULL OR p.fechaHora <= :fechaFin) AND " +
-           "(:clienteId IS NULL OR (c.id IS NOT NULL AND c.id = :clienteId)) AND " +
-           "(:rucEmpresa IS NULL OR (e.ruc IS NOT NULL AND e.ruc = :rucEmpresa)) AND " +
-           "(:infoServicio IS NULL OR p.infoServicio = :infoServicio)")
+            "LEFT JOIN p.cliente c " +
+            "LEFT JOIN p.empresa e " +
+            "WHERE " +
+            "(:fechaInicio IS NULL OR p.fechaHora >= :fechaInicio) AND " +
+            "(:fechaFin IS NULL OR p.fechaHora <= :fechaFin) AND " +
+            "(:clienteId IS NULL OR (c.id IS NOT NULL AND c.id = :clienteId)) AND " +
+            "(:rucEmpresa IS NULL OR (e.ruc IS NOT NULL AND e.ruc = :rucEmpresa)) AND " +
+            "(:infoServicio IS NULL OR p.infoServicio = :infoServicio)")
     List<Pedido> buscarPedidosConFiltros(
             @Param("fechaInicio") LocalDateTime fechaInicio,
             @Param("fechaFin") LocalDateTime fechaFin,

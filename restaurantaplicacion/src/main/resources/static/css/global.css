@@ -286,3 +286,58 @@ tr:hover td {
         width: 100%; /* Botones ancho completo en móvil */
     }
 }
+/* =========================================
+   8. ESTILOS ESPECÍFICOS: PEDIDOS REGISTRADOS
+   ========================================= */
+
+/* Contenedor del buscador: Input a la izquierda, botón a la derecha */
+.search-container {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 25px;
+    background: rgba(0,0,0,0.2); /* Un fondo sutil */
+    padding: 20px;
+    border-radius: var(--radius);
+    border: 1px dashed var(--secondary);
+}
+
+/* Etiquetas de Estado (Badges) */
+.badge {
+    padding: 5px 12px;
+    border-radius: var(--radius-pill);
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    display: inline-block;
+}
+
+.badge-local {
+    background-color: var(--primary); /* Naranja */
+    color: var(--text-dark);
+}
+
+.badge-delivery {
+    background-color: var(--role-mesero); /* Azul */
+    color: white;
+}
+
+.badge-pagado {
+    background-color: var(--secondary); /* Gris azulado */
+    color: var(--text-muted);
+}
+
+.badge-pendiente {
+    background-color: var(--warning); /* Amarillo */
+    color: var(--text-dark);
+}
+
+/* Ajuste para móviles en el buscador */
+@media (max-width: 600px) {
+    .search-container {
+        flex-direction: column;
+    }
+    .search-container button {
+        width: 100%;
+        margin-top: 10px;
+    }
+}

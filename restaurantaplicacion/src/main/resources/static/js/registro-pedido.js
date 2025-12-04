@@ -67,3 +67,32 @@ async function iniciarPedido(tipoServicio) {
         }
     }
 }
+    function volverAlMenu() {
+    // 1. Obtenemos el rol guardado
+    const rolRaw = localStorage.getItem('usuarioRol');
+    const rol = rolRaw ? rolRaw.trim().toUpperCase() : null;
+
+    console.log("Volviendo al menú. Rol detectado:", rol);
+
+    // 2. Redirigimos según quién sea
+    switch (rol) {
+        case 'MESERO':
+            window.location.href = 'mesero.html';
+            break;
+        case 'CAJERO':
+            window.location.href = 'cajero.html';
+            break;
+        case 'ADMINISTRADOR':
+        case 'ADMIN':
+            window.location.href = 'admin.html';
+            break;
+        case 'COCINERO':
+            window.location.href = 'cocinero.html';
+            break;
+        default:
+            // Si no hay rol o hubo error, mandar al Login
+            console.warn("Rol no identificado, volviendo al inicio.");
+            window.location.href = 'index.html'; 
+            break;
+    }
+}

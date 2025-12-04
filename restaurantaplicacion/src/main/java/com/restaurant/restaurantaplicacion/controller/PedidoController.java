@@ -6,13 +6,13 @@ import com.restaurant.restaurantaplicacion.dto.PedidoInicioResponseDTO;
 import com.restaurant.restaurantaplicacion.model.Pedido;
 import com.restaurant.restaurantaplicacion.service.PedidoService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat; // <--- IMPORTANTE
+import org.springframework.format.annotation.DateTimeFormat; 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.Collections;
 
-import java.time.LocalDate; // <--- IMPORTANTE
+import java.time.LocalDate; 
 import java.util.List;
 import java.util.Map;
 
@@ -95,4 +95,11 @@ public ResponseEntity<?> finalizarPedido(@RequestBody FinalizarPedidoRequest req
         List<Pedido> resultados = pedidoService.buscarPedidosAvanzado(fechaDesde, fechaHasta, clienteId, rucEmpresa, mesa, delivery);
         return ResponseEntity.ok(resultados);
     }
+    @GetMapping("/{id}")
+    public ResponseEntity<?> obtenerPedidoPorId(@PathVariable Long id) {
+        return pedidoService.findById(id) // Necesitamos crear este método en el servicio o llamar al repo
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 }
+

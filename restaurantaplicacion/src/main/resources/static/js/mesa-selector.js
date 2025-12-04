@@ -1,6 +1,6 @@
 /**
  * mesa-selector.js
- * Versión Final: Asegura que el usuarioId se envíe al iniciar el pedido.
+ * Versión Final: Implementa lógica de 3 estados (En Caja, Tu Pedido, Ocupado Ajeno)
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -25,41 +25,75 @@ async function verificarMesasOcupadas() {
             botonesMesas.forEach(boton => {
                 const numeroMesa = boton.getAttribute('data-mesa');
                 
-                // Limpiamos clases previas
-                boton.classList.remove('ocupada-ajena', 'mi-mesa');
+                // 1. LIMPIEZA: Quitamos todas las clases posibles
+                boton.classList.remove('ocupada-ajena', 'mi-mesa', 'en-caja');
                 
+                // Resetear texto del badge
+                const badge = boton.querySelector('.badge');
+                if(badge) {
+                    badge.textContent = "LIBRE"; 
+                    badge.style.backgroundColor = "var(--secondary)"; // Color por defecto
+                }
+                
+                // 2. BUSCAR ESTADO
                 const ocupacion = listaOcupadas.find(o => String(o.mesa) === String(numeroMesa));
 
                 if (ocupacion) {
                     const idDuenoMesa = String(ocupacion.usuarioId);
+                    const estadoPedido = ocupacion.estado; // "PENDIENTE" o "POR_PAGAR"
+
+                    // --- CASO 1: EN CAJA (Estado POR_PAGAR) ---
+                    // Esto aplica para TODOS, sea tuya o ajena.
+                    if (estadoPedido === 'POR_PAGAR') {
+                        boton.classList.add('en-caja');
+                        if(badge) {
+                            badge.textContent = "EN CAJA";
+                            badge.style.backgroundColor = "#7f8c8d"; // Gris Plomo
+                        }
+                        // Opcional: Bloquear clic
+                        // boton.onclick = () => alert("Mesa en proceso de cobro.");
+                    }
                     
-                    // Comparamos String vs String para evitar errores de tipo
-                    if (idDuenoMesa === miId) {
+                    // --- CASO 2: TU PEDIDO (PENDIENTE + Es tu ID) ---
+                    else if (estadoPedido === 'PENDIENTE' && idDuenoMesa === miId) {
                         boton.classList.add('mi-mesa'); 
-                        const badge = boton.querySelector('.badge');
-                        if(badge) badge.textContent = "TU PEDIDO";
-                    } else {
+                        if(badge) {
+                            badge.textContent = "TU PEDIDO";
+                            badge.style.backgroundColor = "var(--success)"; // Verde
+                        }
+                    } 
+                    
+                    // --- CASO 3: OCUPADO AJENO (PENDIENTE + No es tu ID) ---
+                    else {
                         boton.classList.add('ocupada-ajena');
-                        const badge = boton.querySelector('.badge');
-                        if(badge) badge.textContent = "OCUPADO";
+                        if(badge) {
+                            badge.textContent = "OCUPADO";
+                            badge.style.backgroundColor = "var(--danger)"; // Rojo
+                        }
                     }
                 }
             });
         }
     } catch (error) {
-        console.error("Error al verificar mesas (cierre el servidor si hay errores):", error);
+        console.error("Error al verificar mesas:", error);
     }
 }
 
 function selectMesa(button) {
     
-    // 1. Bloqueo estricto
+    // 1. Bloqueo estricto si es ajena (Rojo)
     if (button.classList.contains('ocupada-ajena')) {
         alert("⛔ Esta mesa está atendida por otro mesero.");
-        return;
+        return; // Detiene la ejecución
+    }
+
+    // 2. Bloqueo estricto si está EN CAJA (Plomo)
+    if (button.classList.contains('en-caja')) {
+        alert("ℹ️ Esta mesa ya envió su pedido a caja. No se pueden hacer más cambios.");
+        return; // <--- ESTO ES LO QUE FALTABA PARA QUE NO TE DEJE ENTRAR
     }
     
-    // OBTENEMOS EL ID DEL USUARIO A ENVIAR (CRUCIAL)
+    // OBTENEMOS EL ID DEL USUARIO A ENVIAR
     const miId = localStorage.getItem('usuarioId');
     if (!miId) {
         alert("Error de sesión: Por favor, cierre sesión y vuelva a iniciar.");
@@ -71,8 +105,8 @@ function selectMesa(button) {
 
     const tipoServicio = 'LOCAL';
     
-    // 2. CONSTRUCCIÓN DE URL CORRECTA (INCLUYENDO usuarioId)
-    const url = `/api/pedidos/registrar-inicio?tipoServicio=${tipoServicio}&numeroMesa=${mesaNumero}&usuarioId=${miId}`; // <--- ¡AQUÍ VA EL ID!
+    // CONSTRUCCIÓN DE URL
+    const url = `/api/pedidos/registrar-inicio?tipoServicio=${tipoServicio}&numeroMesa=${mesaNumero}&usuarioId=${miId}`; 
 
     fetch(url, {
         method: 'POST',
@@ -80,18 +114,24 @@ function selectMesa(button) {
     })
     .then(response => {
         if (!response.ok) {
-            // Si la respuesta no es OK, el error está en el backend (ej. 404/500)
             throw new Error(`Fallo en el servidor: Status ${response.status}`);
         }
         return response.json();
     })
     .then(pedidoDTO => {
-        console.log("Pedido iniciado ID:", pedidoDTO.id);
+        // Guardamos info
+        const infoPedido = {
+            pedidoId: pedidoDTO.id,
+            mesa: mesaNumero,
+            tipo: tipoServicio
+        };
+        localStorage.setItem('infoPedido', JSON.stringify(infoPedido));
+        
         window.location.href = `/seleccionar_menu.html?pedidoId=${pedidoDTO.id}&mesa=${mesaNumero}`;
     })
     .catch(error => {
         console.error("Fallo al iniciar el pedido:", error);
-        alert('Error al acceder a la mesa. Intente nuevamente.'); // La alerta que usted vio
+        alert('Error al acceder a la mesa. Intente nuevamente.');
         button.classList.remove('selected');
     });
 }

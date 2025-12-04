@@ -566,4 +566,9 @@ font-size: 13px;
     justify-content: center;
     align-items: center;
 }
+/* En tu archivo CSS */
+.table-card.en-caja {
+    border: 2px dashed #95a5a6; /* Borde gris punteado */
+    opacity: 0.8;
+}
 }

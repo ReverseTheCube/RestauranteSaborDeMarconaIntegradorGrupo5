@@ -68,22 +68,21 @@
         </div>
     </div>
 
-    <div id="modal-exito" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); align-items:center; justify-content:center; z-index:1000;">
-        <div class="card-container" style="max-width: 400px; text-align: center; border: 2px solid var(--success);">
-            <div style="font-size: 4rem; margin-bottom: 10px;">🎉</div>
-            <h2 class="page-title" style="color: var(--success);">¡Venta Exitosa!</h2>
-            <p style="margin-bottom: 20px; color: var(--text-main);">El pedido se ha guardado correctamente.</p>
+<div id="modal-exito" class="modal-overlay" style="display: none;">
+    <div class="modal-content" style="text-align: center;">
+        <div style="font-size: 3rem;">✅</div>
+        
+        <h2 id="titulo-modal-exito">Venta Exitosa</h2> 
+        
+        <p>La operación se procesó correctamente.</p>
+        
+        <div class="d-flex justify-content-center gap-3 mt-4">
+            <button class="btn btn-secondary" id="btnSalirModal" onclick="cerrarModalYSalir()">Cerrar</button>
             
-            <div class="actions-container" style="flex-direction: column; gap: 15px;">
-                <button id="btnImprimir" class="btn btn-primary" style="font-size: 1.1rem; padding: 15px;">
-                    🖨️ Imprimir / Descargar Boleta
-                </button>
-                <button class="btn btn-secondary" onclick="cerrarModalYSalir()">
-                    Finalizar y Salir
-                </button>
-            </div>
+            <button class="btn btn-primary" id="btnImprimir">🖨️ Imprimir Boleta</button>
         </div>
     </div>
+</div>
 <div id="modal-editar-cantidad" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); align-items:center; justify-content:center; z-index:1001;">
         <div class="card-container" style="max-width: 350px; text-align: center; border: 2px solid var(--primary);">
             <h3 class="page-title" style="font-size: 1.5rem;">Editar Cantidad</h3>

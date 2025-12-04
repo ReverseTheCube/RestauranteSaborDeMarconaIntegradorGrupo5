@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Pedidos Registrados</title>
+    <link rel="stylesheet" href="css/global.css"> 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <div class="card-container">
+        
+        <h2 class="page-title">Pedidos Registrados</h2>
+        <p class="page-subtitle">Busque pedidos anteriores para liberar mesas o reimprimir.</p>
+
+        <div class="search-container">
+            <div style="flex-grow: 1;">
+                <label for="inputBusqueda">Buscar Pedido:</label>
+                <input type="text" id="inputBusqueda" placeholder="Ingrese ID de pedido o N° de Mesa...">
+            </div>
+            <div style="display: flex; align-items: flex-end;">
+                <button class="btn btn-primary" onclick="buscarPedidos()">
+                    <i class="fas fa-search"></i> Buscar
+                </button>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table id="tablaPedidos">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Fecha</th>
+                        <th>Tipo</th>
+                        <th>Detalle</th>
+                        <th>Estado</th>
+                        <th>Total</th>
+                        <th style="text-align: center;">Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    </tbody>
+            </table>
+        </div>
+
+        <div class="actions-container">
+            <button class="btn btn-secondary" onclick="window.location.href='cajero.html'">
+                <i class="fas fa-arrow-left"></i> Volver
+            </button>
+        </div>
+
+    </div>
+
+    <script src="/js/pedidos_registrados.js"></script>
+</body>
+</html>
