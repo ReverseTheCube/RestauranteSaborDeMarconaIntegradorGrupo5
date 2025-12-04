@@ -10,67 +10,82 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function buscarPedidos() {
-    // 1. Limpieza de lo que escribe el cajero
     let query = document.getElementById('inputBusqueda').value.trim();
-    
-    // TRUCO: Si escribe "Mesa 1", nos quedamos solo con "1" para comparar
-    let queryMesa = query.toLowerCase().replace("mesa", "").trim();
+    // Preparamos variables para búsquedas flexibles
+    let queryTexto = query.toLowerCase(); 
+    let queryMesa = queryTexto.replace("mesa", "").trim(); // "mesa 5" -> "5", "mesa" -> ""
 
     const tbody = document.querySelector('#tablaPedidos tbody');
     tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px;">Cargando pedidos...</td></tr>';
 
     try {
-        console.log(">>> Solicitando historial de pedidos...");
         const response = await fetch('/api/pedidos'); 
         
         if(!response.ok) throw new Error("Error al cargar pedidos");
         
         const pedidos = await response.json();
-        
-        console.log(">>> Pedidos recibidos del servidor:", pedidos); // <--- MIRA ESTO EN LA CONSOLA (F12)
 
-        // 2. FILTRADO INTELIGENTE
+        // --- ORDENAR: MÁS RECIENTE PRIMERO (ID Descendente) ---
+        pedidos.sort((a, b) => b.id - a.id);
+        
+        // --- FILTRADO INTELIGENTE (VERSIÓN ESTRICTA + TIPO + MESA GENERAL) ---
         const pedidosFiltrados = pedidos.filter(p => {
-            // Si no escribe nada, mostramos TODOS los pedidos activos (no anulados)
+            
+            // 1. REGLA DE ORO DELIVERY:
+            // Si es Delivery, SOLO mostrar si ya está PAGADO.
+            if (p.tipoServicio === 'DELIVERY' && p.estado !== 'PAGADO') {
+                return false; 
+            }
+
+            // 2. Filtros de Búsqueda
             if (!query) return true; 
             
-            // Búsqueda por ID (parcial)
+            // A) Búsqueda por ID (ej: "52")
             const idMatch = p.id.toString().includes(query);
             
-            // Búsqueda por Mesa (Si es LOCAL y coincide el número)
-            // Usamos '==' para que "1" (string) coincida con 1 (number)
-            const mesaMatch = (p.tipoServicio === 'LOCAL' && p.infoServicio == queryMesa);
+            // B) Búsqueda por Mesa
+            let mesaMatch = false;
+            if (p.tipoServicio === 'LOCAL') {
+                if (queryMesa !== "") {
+                    // Si el usuario escribió un número ("5" o "mesa 5"), buscamos esa mesa específica
+                    mesaMatch = (p.infoServicio == queryMesa);
+                } else if (queryTexto.includes("mesa")) {
+                    // Si escribió solo "mesa" (sin número), mostramos TODAS las mesas
+                    mesaMatch = true;
+                }
+            }
+
+            // C) Búsqueda por TIPO (ej: "Delivery")
+            const tipoMatch = p.tipoServicio.toLowerCase().includes(queryTexto);
             
-            return idMatch || mesaMatch;
+            return idMatch || mesaMatch || tipoMatch;
         });
 
         tbody.innerHTML = '';
         
         if (pedidosFiltrados.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px;">No se encontraron coincidencias.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px;">No se encontraron pedidos recientes.</td></tr>';
             return;
         }
 
-        // 3. DIBUJAR TABLA
+        // DIBUJAR TABLA
         pedidosFiltrados.forEach(p => {
             const fecha = new Date(p.fechaHora).toLocaleString();
             
             // Estilos de Badges
             const claseTipo = p.tipoServicio === 'LOCAL' ? 'badge-local' : 'badge-delivery';
             
-            let claseEstado = 'badge-pendiente'; // Amarillo por defecto
-            if (p.estado === 'PAGADO') claseEstado = 'badge-pagado'; // Gris
-            else if (p.estado === 'POR_PAGAR') claseEstado = 'badge-delivery'; // Azul (o crea estilo nuevo)
+            let claseEstado = 'badge-pendiente'; 
+            if (p.estado === 'PAGADO') claseEstado = 'badge-pagado';
+            else if (p.estado === 'POR_PAGAR') claseEstado = 'badge-delivery'; 
 
-            // Lógica del Botón
             let botonAccion = '';
             
-            // Si es LOCAL
+            // Lógica del Botón
             if (p.tipoServicio === 'LOCAL') {
                 if (p.estado === 'PAGADO') {
                     botonAccion = `<span style="color: var(--success); font-weight: bold;">✔ Listo</span>`;
                 } 
-                // AQUÍ ESTÁ LA CLAVE: Si es PENDIENTE o POR_PAGAR -> Botón COBRAR
                 else if (p.estado === 'POR_PAGAR' || p.estado === 'PENDIENTE') {
                     botonAccion = `
                         <button class="btn btn-success" style="padding: 5px 15px; font-size: 0.8rem;" onclick="irACaja(${p.id})">
@@ -78,16 +93,22 @@ async function buscarPedidos() {
                         </button>`;
                 }
             } 
-            // Si es DELIVERY
             else {
+                // DELIVERY
                 if (p.estado === 'PAGADO') {
                     botonAccion = `<span style="color: var(--success); font-weight: bold;">✔ Entregado</span>`;
-                } else {
-                    botonAccion = `<button class="btn btn-secondary" style="padding: 5px 15px; font-size: 0.8rem;">Ver</button>`;
+                } 
+                else {
+                    botonAccion = `
+                        <button class="btn btn-success" style="padding: 5px 15px; font-size: 0.8rem;" onclick="irACaja(${p.id})">
+                            <i class="fas fa-cash-register"></i> Cobrar
+                        </button>`;
                 }
             }
 
-            const infoDetalle = p.tipoServicio === 'LOCAL' ? `Mesa ${p.infoServicio}` : 'Delivery';
+            const infoDetalle = p.tipoServicio === 'LOCAL' 
+                ? `Mesa ${p.infoServicio}` 
+                : `Delivery Nº ${p.id}`;
 
             const fila = `
                 <tr>
@@ -115,29 +136,20 @@ async function irACaja(pedidoId) {
         if(response.ok) {
             const pedido = await response.json();
             
-            // --- NUEVO: Extraer datos del cliente si existen ---
-            let clienteData = null;
+            let datosCliente = null;
             if (pedido.cliente) {
-                clienteData = {
-                    nombre: pedido.cliente.nombresApellidos, // Asegúrate que tu Java devuelve este nombre
+                datosCliente = {
+                    nombre: pedido.cliente.nombresApellidos, 
                     doc: pedido.cliente.numeroDocumento,
                     tipoDoc: pedido.cliente.tipoDocumento
                 };
-            }else if (pedido.rucEmpresa) {
-                // Caso especial si solo tiene RUC de empresa asignado
-                datosCliente = {
-                    nombre: pedido.empresa ? pedido.empresa.razonSocial : "",
-                    doc: pedido.rucEmpresa,
-                    tipoDoc: 'RUC'
-                };
             }
-            // ---------------------------------------------------
 
             const infoPedido = {
                 pedidoId: pedido.id,
                 mesa: pedido.infoServicio, 
                 tipo: pedido.tipoServicio,
-                cliente: clienteData 
+                cliente: datosCliente
             };
             
             const detallePedido = pedido.detallePlatos.map(d => ({

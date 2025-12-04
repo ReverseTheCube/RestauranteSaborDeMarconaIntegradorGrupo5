@@ -111,7 +111,7 @@
             </div>
             
             <!-- Botón Volver (Estilo global) -->
-            <button class="btn btn-secondary" onclick="window.location.href = 'Local_mesa.html';" aria-label="Volver">
+            <button class="btn btn-secondary" onclick="volverAtras()" aria-label="Volver">
                 <i class="fas fa-arrow-left"></i>
             </button>
         </div>
@@ -136,6 +136,24 @@
 
     <!-- TU SCRIPT ORIGINAL (No cambiamos nada aquí) -->
     <script src="/js/seleccionar-menu.js"></script>
-
+<script>
+        function volverAtras() {
+            try {
+                // Leemos qué tipo de pedido es desde el localStorage
+                const info = JSON.parse(localStorage.getItem('infoPedido'));
+                
+                if (info && info.tipo === 'DELIVERY') {
+                    // Si es Delivery -> Volver a donde piden el teléfono
+                    window.location.href = 'registrarpedido.html';
+                } else {
+                    // Si es Local (o cualquier otro) -> Volver al mapa de mesas
+                    window.location.href = 'Local_mesa.html';
+                }
+            } catch (e) {
+                // Si falla algo, por seguridad vamos a las mesas
+                window.location.href = 'Local_mesa.html';
+            }
+        }
+    </script>
 </body>
 </html>
