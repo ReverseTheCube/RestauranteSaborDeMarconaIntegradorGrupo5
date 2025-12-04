@@ -29,8 +29,8 @@ import java.util.Optional;
 @Service
 public class UsuarioService {
 
-    private static final int MAX_INTENTOS_FALLIDOS = 5;
-    private static final int MINUTOS_BLOQUEO = 1;
+    private static final int MAX_INTENTOS_FALLIDOS = 3;
+    private static final int MINUTOS_BLOQUEO = 5;
 
     @Autowired
     private UsuarioRepository usuarioRepository;

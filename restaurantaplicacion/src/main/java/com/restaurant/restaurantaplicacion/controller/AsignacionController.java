@@ -30,15 +30,15 @@ public class AsignacionController {
         }
     }
     
-    // --- ENDPOINT GET (Buscar por RUC) ---
+    // --- ENDPOINT GET (Buscar por DNI) ---
     @GetMapping("/buscar")
-    public ResponseEntity<List<AsignacionPension>> buscarPorRuc(@RequestParam String ruc) {
-        List<AsignacionPension> asignaciones = asignacionService.buscarAsignacionesPorRuc(ruc);
+    public ResponseEntity<List<AsignacionPension>> buscarPorDni(@RequestParam String dni) {
+        List<AsignacionPension> asignaciones = asignacionService.buscarAsignacionPorDni(dni);
         return ResponseEntity.ok(asignaciones);
     }
     
     // --- ENDPOINT PUT (Ajustar Saldo: Suma/Resta de Delta) ---
-    // Usado por el botón (-)
+    // Se mantiene para compatibilidad con la resta, pero su uso es opcional.
     @PutMapping("/{id}/saldo")
     public ResponseEntity<AsignacionPension> actualizarSaldo(@PathVariable Long id, @RequestBody AjusteSaldoRequest request) {
         try {
@@ -49,8 +49,7 @@ public class AsignacionController {
         }
     }
 
-    // --- NUEVO ENDPOINT: ESTABLECER SALDO TOTAL (EDICIÓN DIRECTA) ---
-    // Usado por el botón (+)
+    // --- ENDPOINT: ESTABLECER SALDO TOTAL (EDICIÓN DIRECTA) ---
     @PutMapping("/{id}/saldo-total")
     public ResponseEntity<AsignacionPension> establecerSaldoTotal(@PathVariable Long id, @RequestBody AjusteSaldoRequest request) {
         try {

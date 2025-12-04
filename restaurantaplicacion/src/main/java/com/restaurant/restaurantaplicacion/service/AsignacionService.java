@@ -51,9 +51,19 @@ asignacion.setSaldo(request.getSaldo());
 
 return asignacionPensionRepository.save(asignacion);
 }
-public List<AsignacionPension> buscarAsignacionesPorRuc(String ruc) {
-return asignacionPensionRepository.findByEmpresaRuc(ruc);
+
+// NUEVO: Busca una asignación por DNI del cliente y la envuelve en una lista (0 o 1 elemento)
+@Transactional(readOnly = true)
+public List<AsignacionPension> buscarAsignacionPorDni(String dni) {
+    Optional<AsignacionPension> optionalAsignacion = asignacionPensionRepository.findByClienteNumeroDocumento(dni);
+    
+    if (optionalAsignacion.isPresent()) {
+        return List.of(optionalAsignacion.get()); // Envuelve el resultado único en una lista
+    } else {
+        return List.of();
+    }
 }
+
 
 @Transactional
 public AsignacionPension establecerNuevoSaldo(Long asignacionId, Double nuevoSaldoTotal) {
@@ -63,7 +73,7 @@ if (nuevoSaldoTotal == null || nuevoSaldoTotal < 0) {
 throw new RuntimeException("El saldo total no puede ser nulo o negativo.");
  }
 
-// 3. Establecer el nuevo saldo directamente (reemplazando el valor anterior)
+// Establecer el nuevo saldo directamente (reemplazando el valor anterior)
 asignacion.setSaldo(nuevoSaldoTotal);
 return asignacionPensionRepository.save(asignacion);
  }
