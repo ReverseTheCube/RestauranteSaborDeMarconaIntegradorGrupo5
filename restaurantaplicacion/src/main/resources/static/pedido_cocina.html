@@ -1,66 +1,126 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Ordenes de Pedidos</title>
-  <link rel="stylesheet" href="/css/pedidos.css"> 
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor de Cocina</title>
+    
+    <!-- 1. ESTILOS GLOBALES -->
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
+    <style>
+        /* --- ESTILOS DE TICKET/COMANDA --- */
+        .orders-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+            padding-bottom: 20px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .order-card {
+            background-color: var(--bg-input);
+            border: 2px solid var(--secondary);
+            border-radius: var(--radius);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Cabecera */
+        .order-header {
+            background-color: #0b1a24;
+            padding: 15px;
+            border-bottom: 2px dashed rgba(255,255,255,0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .order-title {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin: 0;
+            text-transform: uppercase;
+        }
+
+        .order-meta {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-align: right;
+        }
+
+        /* Lista de Platos */
+        .order-body {
+            padding: 15px;
+            flex-grow: 1;
+        }
+
+        .order-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 1.1rem;
+        }
+
+        .item-qty {
+            background-color: var(--primary);
+            color: #000;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-right: 10px;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .order-footer {
+            padding: 15px;
+            border-top: 1px solid var(--secondary);
+            background-color: rgba(0,0,0,0.2);
+        }
+    </style>
 </head>
 <body>
-  <main class="stage stage-flex" role="main">
-    <div class="topbar">
-      <h1 class="title-mesa">Ordenes de Pedidos:</h1>
-        <button class="back back-top-right" onclick="window.location.href = 'cocinero.html';" aria-label="Volver">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
-      </button>
-    </div>
-    <div class="scroll-container">
-            <table class="ordenes-tabla">
-        <thead>
-          <tr>
-            <th>Descripcion</th>
-            <th>Tipo</th>
-            <th>Cantidad</th>
-            <th>N° de Mesa</th>
-            <th>Acción</th>
-          </tr>
-        </thead>
-        <tbody id="ordenes-tbody">
-          <tr>
-            <td>Arroz con Pollo</td>
-            <td>Plato</td>
-            <td>2</td>
-            <td>2</td>
-            <td><button class="btn-pedido-listo" onclick="pedidoListo(this)">Pedido Listo</button></td>
-          </tr>
-          <tr>
-            <td>Lomo Saltado</td>
-            <td>Plato</td>
-            <td>1</td>
-            <td>1</td>
-            <td><button class="btn-pedido-listo" onclick="pedidoListo(this)">Pedido Listo</button></td>
-          </tr>
-          <tr>
-            <td>Limonada</td>
-            <td>Bebida</td>
-            <td>3</td>
-            <td>7</td>
-            <td><button class="btn-pedido-listo" onclick="pedidoListo(this)">Pedido Listo</button></td>
-          </tr>
-          <tr>
-            <td>Ceviche</td>
-            <td>Entrada</td>
-            <td>2</td>
-            <td>9</td>
-            <td><button class="btn-pedido-listo" onclick="pedidoListo(this)">Pedido Listo</button></td>
-          </tr>
-        </tbody>
-      </table>
+
+    <div class="card-container" style="max-width: 95%; height: 95vh; display: flex; flex-direction: column;">
+        
+        <!-- CABECERA -->
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--secondary); padding-bottom: 15px;">
+            <div>
+                <h1 class="page-title" style="text-align: left; margin: 0;">
+                    <i class="fas fa-fire-alt" style="color: var(--primary);"></i> Monitor de Cocina
+                </h1>
+            </div>
+            <div style="display: flex; gap: 15px;">
+                <button class="btn btn-secondary" onclick="cargarPedidosCocina()">
+                    <i class="fas fa-sync-alt"></i> Actualizar
+                </button>
+                <button class="btn btn-danger" onclick="window.location.href='cocinero.html'">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </button>
+            </div>
+        </div>
+
+        <!-- GRID DE TARJETAS -->
+        <div id="grid-cocina" class="orders-grid">
+            <p style="text-align: center; color: var(--text-muted); grid-column: 1/-1;">Cargando sistema...</p>
+        </div>
+
     </div>
 
-  </main>
-  <script src="/js/ordenes-pedidos.js"></script>
+    <!-- SCRIPT -->
+    <script src="/js/ordenes-pedidos.js"></script>
+
 </body>
 </html>
-
