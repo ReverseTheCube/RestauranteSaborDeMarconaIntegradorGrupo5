@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Incidencias</title>
+    <link rel="stylesheet" href="/css/global.css">
+</head>
+<body>
+
+    <div class="card-container" style="max-width: 1100px;">
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px;">
+            <h2 class="page-title" style="margin:0;">Panel de Incidencias</h2>
+            <button class="btn btn-secondary" style="width: auto;" onclick="window.location.href='/admin.html'">⬅ Volver</button>
+        </div>
+
+        <div class="table-wrapper">
+            <table id="tabla-incidencias" class="data-table">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Usuario</th>
+                        <th>Prioridad</th>
+                        <th>Descripción</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td colspan="6" style="text-align:center; padding: 20px;">Cargando incidencias...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <script src="/js/gestion-incidencias.js"></script>
+</body>
+</html>

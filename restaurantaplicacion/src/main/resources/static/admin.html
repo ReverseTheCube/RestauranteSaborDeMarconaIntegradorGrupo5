@@ -12,7 +12,6 @@
             <h2 class="page-title" style="margin: 0; font-size: 1.5rem;">Panel Administrador</h2>
             <a href="/logout" class="btn btn-danger" style="padding: 8px 16px; font-size: 0.9rem;">Cerrar Sesión</a>
         </div>
-        
         <div class="page-subtitle">Seleccione una opción de gestión</div>
 
         <div class="grid-menu">
@@ -28,7 +27,36 @@
             <a href="ventaehistorial.html" class="btn btn-role-admin" style="padding: 30px;">
                 📊 Historial y Ventas
             </a>
+            <a href="/gestion-incidencias.html" class="btn btn-role-admin">
+                Gestión de Incidencias <span>&rarr;</span>
+            </a>
+        </div>
+        <div style="text-align: center; border-top: 1px solid var(--border-color); margin-top: 30px; padding-top: 20px;">
+            <button id="btn-reportar-incidencia" class="btn-reportar-flotante">
+                ⚠ Reportar un Problema
+            </button>
         </div>
     </div>
+
+    <div id="modal-reportar-incidencia" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" id="close-modal-reporte">&times;</span>
+            <h3 style="color: var(--brand-primary);">Reportar Incidencia</h3>
+            <form id="form-reportar-incidencia">
+                <label style="text-align: left; display:block;">Prioridad:</label>
+                <select id="incidencia-prio" required style="width: 100%; padding: 10px; margin-bottom: 10px;">
+                    <option value="BAJA">Baja</option>
+                    <option value="MEDIA" selected>Media</option>
+                    <option value="ALTA">Alta (Urgente)</option>
+                </select>
+
+                <label style="text-align: left; display:block;">Descripción del problema:</label>
+                <textarea id="incidencia-desc" rows="4" required style="width: 100%; padding: 10px;"></textarea>
+
+                <button type="submit" class="btn btn-primary" style="margin-top: 15px;">Enviar Reporte</button>
+            </form>
+        </div>
+    </div>
+    <script src="/js/incidencias-reportar.js"></script>
 </body>
 </html>

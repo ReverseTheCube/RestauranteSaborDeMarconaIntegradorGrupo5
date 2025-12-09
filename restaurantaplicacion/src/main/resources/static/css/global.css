@@ -342,3 +342,96 @@ tr:hover td {
     }
 }
 
+/* =========================================
+   9. ESTILOS DE INCIDENCIAS (NUEVO)
+   ========================================= */
+
+/* Botón flotante para reportar (se ve bien en cualquier menú) */
+.btn-reportar-flotante {
+    margin-top: 20px;
+    background-color: #e74c3c; /* Rojo alerta */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    width: auto; /* No ocupa todo el ancho */
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: transform 0.2s, background 0.2s;
+}
+
+.btn-reportar-flotante:hover {
+    background-color: #c0392b;
+    transform: translateY(-2px);
+}
+
+/* Modal Estilo Dark Mode (Corrige el fondo blanco) */
+.modal {
+    display: none; /* OCULTO POR DEFECTO */
+    position: fixed;
+    z-index: 10000; /* Muy alto para tapar todo */
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.85); /* Fondo negro semitransparente */
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+}
+
+/* El cuadro del modal */
+.modal-content {
+    background-color: var(--bg-panel); /* Azul oscuro */
+    color: var(--text-main);
+    border: 1px solid var(--brand-primary); /* Borde naranja */
+    padding: 30px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+    text-align: left;
+}
+
+.modal-content h3 {
+    margin-top: 0;
+    color: var(--brand-primary);
+    text-align: center;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+/* Inputs oscuros dentro del modal */
+.modal-content textarea, 
+.modal-content select {
+    width: 100%;
+    background-color: #091620;
+    color: white;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 12px;
+    font-size: 1rem;
+    margin-bottom: 15px;
+}
+
+.modal-content label {
+    font-weight: 600;
+    margin-bottom: 5px;
+    display: block;
+    color: var(--text-main);
+}
+
+/* Botón cerrar (X) */
+.close-modal {
+    position: absolute;
+    top: 15px; right: 20px;
+    color: var(--text-muted);
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+.close-modal:hover { color: #e74c3c; }
+
