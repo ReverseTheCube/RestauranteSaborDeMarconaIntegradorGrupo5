@@ -19,7 +19,31 @@
             <a href="pedido_cocina.html" class="btn btn-role-cocinero" style="padding: 40px; font-size: 1.2rem;">
                 👨‍🍳 Visualizar Pedidos Pendientes
             </a>
+        <button id="btn-reportar-incidencia" class="btn btn-danger" style="margin-top: 20px;">
+                ⚠ Reportar Problema
+            </button>
         </div>
     </div>
+
+    <div id="modal-reportar-incidencia" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" id="close-modal-reporte">&times;</span>
+            <h3 style="color: var(--brand-primary);">Reportar Incidencia</h3>
+            <form id="form-reportar-incidencia">
+                <label style="text-align: left; display:block;">Prioridad:</label>
+                <select id="incidencia-prio" required style="width: 100%; padding: 10px; margin-bottom: 10px;">
+                    <option value="BAJA">Baja</option>
+                    <option value="MEDIA" selected>Media</option>
+                    <option value="ALTA">Alta (Urgente)</option>
+                </select>
+
+                <label style="text-align: left; display:block;">Descripción del problema:</label>
+                <textarea id="incidencia-desc" rows="4" required style="width: 100%; padding: 10px;"></textarea>
+
+                <button type="submit" class="btn btn-primary" style="margin-top: 15px;">Enviar Reporte</button>
+            </form>
+        </div>
+    </div>
+    <script src="/js/incidencias-reportar.js"></script>
 </body>
 </html>

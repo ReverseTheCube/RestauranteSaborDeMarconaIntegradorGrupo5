@@ -43,6 +43,13 @@ public class SecurityConfig {
                 
                 // C. Páginas HTML públicas (Login, Cambio de Pass)
                 .requestMatchers("/", "/index.html", "/cambiar-password.html").permitAll()
+
+                // 1. CREAR Incidencias (POST): Permitido para TODOS los empleados logueados
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/incidencias").authenticated()
+                
+                // 2. VER/GESTIONAR Incidencias (GET, PUT, DELETE): Solo ADMINISTRADOR
+                .requestMatchers("/api/incidencias/**").hasAuthority("ADMINISTRADOR")
+                .requestMatchers("/gestion-incidencias.html").hasAuthority("ADMINISTRADOR") // Pantalla de gestión
                 
                 // D. Scripts específicos públicos
                 .requestMatchers("/js/login.js", "/js/cambiar-password.js").permitAll()
